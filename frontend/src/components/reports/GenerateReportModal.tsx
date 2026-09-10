@@ -70,7 +70,7 @@ export const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
       title="Generate Statutory Compliance Certificate"
       subtitle="Issued pursuant to Legal Metrology (Packaged Commodities) Rules, 2011"
       maxWidth="lg"
-      icon={<Certificate size={22} weight="fill" className="text-navy-800" />}
+      icon={<img src="/logo.png" alt="PackDrashiti Emblem" className="w-6 h-6 rounded-md object-contain shrink-0 shadow-2xs" />}
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose} disabled={isGenerating}>

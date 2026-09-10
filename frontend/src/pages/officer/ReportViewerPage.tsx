@@ -274,7 +274,15 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
                   <span>Court-Admissible</span>
                 </div>
 
-                <div className="pt-2 space-y-1">
+                <div className="pt-2 flex justify-center mb-1">
+                  <img
+                    src="/logo.png"
+                    alt="Legal Metrology Division Official Emblem"
+                    className="w-12 h-12 rounded-xl object-contain shadow-xs border border-slate-200"
+                  />
+                </div>
+
+                <div className="space-y-1">
                   <div className="text-xs font-bold uppercase tracking-widest text-slate-950 font-heading">
                     Government of India
                   </div>

@@ -12,9 +12,11 @@ export const Footer: React.FC = () => {
           {/* Column 1: Statutory Framework & Legal Metrology Seal */}
           <div className="space-y-4">
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 text-slate-100 flex items-center justify-center shrink-0 shadow-2xs">
-                <ShieldCheck size={22} weight="bold" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="PackDrashiti Official Logo"
+                className="w-10 h-10 rounded-lg object-contain shrink-0 shadow-2xs border border-slate-800"
+              />
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-heading font-bold text-white text-base tracking-tight">

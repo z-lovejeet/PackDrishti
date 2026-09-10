@@ -7,6 +7,7 @@ with Bharatiya Sakshya Adhiniyam, 2023 (BSA 2023) Section 63(4) digital evidence
 """
 
 import io
+import os
 import hashlib
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
@@ -23,6 +24,7 @@ from reportlab.platypus import (
     TableStyle,
     KeepTogether,
     HRFlowable,
+    Image as RLImage,
 )
 from reportlab.graphics.shapes import Drawing, Rect, String as DString
 from reportlab.graphics.barcode.qr import QrCodeWidget
@@ -60,6 +62,17 @@ class StatutoryPDFGenerator:
             spaceAfter=2,
         )
 
+        custom["GovtHeaderLeft"] = ParagraphStyle(
+            "GovtHeaderLeft",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=11,
+            leading=13,
+            alignment=0,  # Left
+            textColor=cls.NAVY,
+            spaceAfter=2,
+        )
+
         custom["GovtSubHeader"] = ParagraphStyle(
             "GovtSubHeader",
             parent=base_styles["Normal"],
@@ -69,6 +82,17 @@ class StatutoryPDFGenerator:
             alignment=1,
             textColor=cls.SLATE,
             spaceAfter=3,
+        )
+
+        custom["GovtSubHeaderLeft"] = ParagraphStyle(
+            "GovtSubHeaderLeft",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=8.5,
+            leading=10.5,
+            alignment=0,  # Left
+            textColor=cls.SLATE,
+            spaceAfter=2,
         )
 
         custom["FormTitle"] = ParagraphStyle(
@@ -188,11 +212,33 @@ class StatutoryPDFGenerator:
         styles = cls._create_styles()
         elements = []
 
-        # 1. Official National Header
-        elements.append(Paragraph("GOVERNMENT OF INDIA", styles["GovtHeader"]))
-        elements.append(Paragraph("MINISTRY OF CONSUMER AFFAIRS, FOOD & PUBLIC DISTRIBUTION", styles["GovtSubHeader"]))
-        elements.append(Paragraph("DEPARTMENT OF CONSUMER AFFAIRS - LEGAL METROLOGY DIVISION", styles["GovtSubHeader"]))
-        elements.append(HRFlowable(width="100%", thickness=1.5, color=cls.NAVY, spaceBefore=2, spaceAfter=4))
+        # 1. Official National Header with Statutory Emblem
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "logo.png")
+        if os.path.exists(logo_path):
+            logo_img = RLImage(logo_path, width=16 * mm, height=16 * mm)
+            header_text = [
+                Paragraph("GOVERNMENT OF INDIA", styles["GovtHeaderLeft"]),
+                Paragraph("MINISTRY OF CONSUMER AFFAIRS, FOOD & PUBLIC DISTRIBUTION", styles["GovtSubHeaderLeft"]),
+                Paragraph("DEPARTMENT OF CONSUMER AFFAIRS - LEGAL METROLOGY DIVISION", styles["GovtSubHeaderLeft"]),
+            ]
+            header_table = Table([[logo_img, header_text]], colWidths=[20 * mm, 165 * mm])
+            header_table.setStyle(
+                TableStyle([
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("ALIGN", (0, 0), (0, 0), "CENTER"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                    ("TOPPADDING", (0, 0), (-1, -1), 0),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+                ])
+            )
+            elements.append(header_table)
+        else:
+            elements.append(Paragraph("GOVERNMENT OF INDIA", styles["GovtHeader"]))
+            elements.append(Paragraph("MINISTRY OF CONSUMER AFFAIRS, FOOD & PUBLIC DISTRIBUTION", styles["GovtSubHeader"]))
+            elements.append(Paragraph("DEPARTMENT OF CONSUMER AFFAIRS - LEGAL METROLOGY DIVISION", styles["GovtSubHeader"]))
+
+        elements.append(HRFlowable(width="100%", thickness=1.5, color=cls.NAVY, spaceBefore=3, spaceAfter=4))
 
         # 2. Statutory Form Title
         elements.append(Paragraph("FORM LM-INSP-2011", styles["FormTitle"]))

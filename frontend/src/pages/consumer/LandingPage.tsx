@@ -19,10 +19,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Hero Section */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-20">
         
-        {/* Government Authority Masthead Tag */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 text-slate-600 text-2xs font-mono font-medium tracking-wide mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
-          <span>Department of Consumer Affairs • Legal Metrology Division</span>
+        {/* Government Authority Masthead Tag with Official Emblem */}
+        <div className="flex items-center gap-3.5 mb-8">
+          <img
+            src="/logo.png"
+            alt="PackDrashiti Official Logo"
+            className="w-11 h-11 rounded-xl object-contain shadow-xs border border-slate-200 shrink-0"
+          />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 text-2xs font-mono font-medium tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
+            <span>Department of Consumer Affairs • Legal Metrology Division</span>
+          </div>
         </div>
 
         {/* Primary Title */}

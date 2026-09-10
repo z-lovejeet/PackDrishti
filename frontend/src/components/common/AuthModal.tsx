@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   X,
-  ShieldCheck,
   User,
   IdentificationCard,
   LockKey,
@@ -188,9 +187,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4 bg-neutral-50/80 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-navy-800 text-white shadow-xs shrink-0">
-              <ShieldCheck size={22} weight="bold" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="PackDrashiti Emblem"
+              className="h-10 w-10 rounded-md object-contain shadow-xs shrink-0"
+            />
             <div>
               <h2
                 id="auth-modal-title"

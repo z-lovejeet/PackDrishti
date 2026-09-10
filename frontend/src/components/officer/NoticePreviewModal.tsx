@@ -120,11 +120,13 @@ export const NoticePreviewModal: React.FC<NoticePreviewModalProps> = ({
           
           {/* Official Government of India Masthead */}
           <div className="text-center border-b-2 border-navy-800 pb-4 space-y-1">
-            {/* Government Emblem Representation (National Crest) */}
+            {/* Government Emblem Representation (National Crest & Statutory Emblem) */}
             <div className="flex justify-center mb-2">
-              <div className="w-12 h-12 rounded-full border-2 border-navy-800 flex items-center justify-center bg-navy-50 text-navy-800">
-                <Building size={24} weight="bold" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Legal Metrology Emblem"
+                className="w-12 h-12 rounded-xl object-contain shadow-xs border border-navy-200"
+              />
             </div>
 
             <div className="text-2xs font-bold text-neutral-600 tracking-widest uppercase">

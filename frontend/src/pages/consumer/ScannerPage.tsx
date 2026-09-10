@@ -16,7 +16,6 @@ import {
   TextT,
   HourglassHigh,
   XCircle,
-  ShieldCheck,
   CheckCircle,
   Cpu,
   Database

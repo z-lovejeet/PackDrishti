@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ShieldCheck, List, X } from "@phosphor-icons/react";
+import { List, X } from "@phosphor-icons/react";
 import { Button } from "../common/Button";
 import { UserRole } from "../../types";
 import { useAuthStore } from "../../store/authStore";
@@ -95,9 +95,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           }}
           aria-label="PackDrashiti Home"
         >
-          <div className="w-9 h-9 rounded-lg bg-slate-950 flex items-center justify-center text-white shrink-0 shadow-2xs transition-transform group-hover:scale-105">
-            <ShieldCheck size={20} weight="bold" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="PackDrashiti Official Logo"
+            className="w-9 h-9 rounded-lg object-contain shrink-0 shadow-2xs transition-transform group-hover:scale-105"
+          />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-base font-bold text-slate-950 tracking-tight font-heading leading-tight">

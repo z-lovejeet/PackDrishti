@@ -9,7 +9,10 @@ const CACHE_NAME = 'packdrashiti-v1.0.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/logo.png',
   '/favicon.svg',
+  '/favicon.png',
+  '/favicon-32x32.png',
 ];
 
 // Install Event: Cache Core Application Shell

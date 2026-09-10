@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ShieldCheck,
   Scan,
   Scales,
   FileText,
@@ -145,21 +144,28 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
       <section className="border-b border-slate-200/80 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-6 sm:py-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
-            <div>
-              <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
-                {officer.division} • {officer.zone}
-              </p>
-              <div className="flex items-center gap-3 mt-1 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 tracking-tight">
-                  {officer.name}
-                </h1>
-                <span className="font-mono text-2xs px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 font-semibold">
-                  {officer.badgeNumber}
-                </span>
+            <div className="flex items-start gap-4">
+              <img
+                src="/logo.png"
+                alt="PackDrashiti Emblem"
+                className="w-12 h-12 rounded-xl object-contain shadow-xs border border-slate-200 shrink-0 hidden sm:block"
+              />
+              <div>
+                <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
+                  {officer.division} • {officer.zone}
+                </p>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 tracking-tight">
+                    {officer.name}
+                  </h1>
+                  <span className="font-mono text-2xs px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 font-semibold">
+                    {officer.badgeNumber}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1.5 max-w-xl leading-relaxed">
+                  {officer.designation} • Jurisdiction: {officer.jurisdiction}. Enforcement workstation for statutory inspections and compounding proceedings.
+                </p>
               </div>
-              <p className="text-xs text-slate-600 mt-1.5 max-w-xl leading-relaxed">
-                {officer.designation} • Jurisdiction: {officer.jurisdiction}. Enforcement workstation for statutory inspections and compounding proceedings.
-              </p>
             </div>
 
             {/* Quick Actions */}
