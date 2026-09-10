@@ -1,0 +1,111 @@
+/*
+PackDrashiti - Statutory Print Stylesheet for Courtroom & Inspection Dockets
+Adheres to Government of India Legal Metrology Form Standards & BSA 2023 Specifications.
+*/
+
+@media print {
+  /* Page Setup & Margins */
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 12mm 12mm;
+  }
+
+  /* Global Body Reset */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide Non-Printable Elements */
+  nav,
+  header,
+  aside,
+  footer,
+  .no-print,
+  button:not(.print-keep),
+  .toast-container,
+  input,
+  select,
+  .filter-bar,
+  .action-buttons {
+    display: none !important;
+  }
+
+  /* Container Overrides */
+  main, .page-container, .max-w-6xl, .max-w-7xl {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Typography & Headings */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+    color: #1b365d !important;
+  }
+
+  /* Tables & Borders */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  th {
+    background-color: #1b365d !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    border: 0.5pt solid #cbd5e1 !important;
+    padding: 4pt 6pt !important;
+    font-size: 8pt !important;
+  }
+
+  td {
+    border: 0.5pt solid #cbd5e1 !important;
+    padding: 4pt 6pt !important;
+    font-size: 8pt !important;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f8fafc !important;
+  }
+
+  /* Card & Docket Containers */
+  .card, .docket-container, .statutory-panel {
+    box-shadow: none !important;
+    border: 0.5pt solid #94a3b8 !important;
+    border-radius: 4px !important;
+    margin-bottom: 12pt !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Page Break Utilities */
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Digital Evidence Seal */
+  .bsa-cert-block {
+    background-color: #f8fafc !important;
+    border: 0.5pt solid #64748b !important;
+    padding: 6pt !important;
+    font-size: 7pt !important;
+    font-family: monospace !important;
+  }
+}

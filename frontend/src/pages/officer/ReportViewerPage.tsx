@@ -40,8 +40,34 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
     return matchesSearch && matchesType;
   });
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPdf = async (scanId?: string, reportNumber?: string) => {
+    setIsDownloading(true);
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+      const effectiveScanId = scanId || '00000000-0000-0000-0000-000000000001';
+      const targetUrl = `${baseUrl}/reports/pdf/${effectiveScanId}`;
+      const res = await fetch(targetUrl);
+      if (!res.ok) throw new Error('PDF download failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `FORM_LM_INSP_2011_${reportNumber || 'DOCKET'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Error generating PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -280,10 +306,11 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={handlePrint}
+                  onClick={() => handleDownloadPdf(activeReport.id, activeReport.reportNumber)}
+                  loading={isDownloading}
                   icon={<DownloadSimple size={15} />}
                 >
-                  Download Certified PDF
+                  Download Certified PDF (FORM LM-INSP-2011)
                 </Button>
               </div>
 

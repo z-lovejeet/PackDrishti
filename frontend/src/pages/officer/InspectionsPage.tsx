@@ -3,16 +3,23 @@ import {
   DownloadSimple, 
   MagnifyingGlass, 
   CaretDown, 
-  CaretUp 
+  CaretUp,
+  Scales,
+  FileText 
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
+import { CompoundingCalculator } from '../../components/officer/CompoundingCalculator';
+import { NoticePreviewModal } from '../../components/officer/NoticePreviewModal';
 import { MOCK_VIOLATIONS } from '../../data/mockViolations';
 
 export const InspectionsPage: React.FC = () => {
   const [activeStatus, setActiveStatus] = useState<string>('All');
   const [expandedId, setExpandedId] = useState<string | null>('viol-rec-101');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCompoundingOpen, setIsCompoundingOpen] = useState(false);
+  const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+  const [activeViolationData, setActiveViolationData] = useState<any>(null);
 
   const filteredRecords = MOCK_VIOLATIONS.filter((v) => {
     const matchesStatus = activeStatus === 'All' || v.status === activeStatus;
@@ -184,7 +191,40 @@ export const InspectionsPage: React.FC = () => {
                     ))}
                   </div>
 
-                  <div className="pt-2 flex justify-end">
+                  <div className="pt-2 flex items-center justify-end gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setActiveViolationData({
+                          rule_reference: viol.ruleReference,
+                          title: viol.violationType,
+                          severity: viol.severity,
+                          act_section: 'Section 36(1)',
+                        });
+                        setIsCompoundingOpen(true);
+                      }}
+                      icon={<Scales size={15} />}
+                    >
+                      Calculate Compounding
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setActiveViolationData({
+                          docketNumber: viol.violationCode,
+                          productName: viol.productName,
+                          brand: viol.brand,
+                          assignedOfficer: viol.assignedOfficer,
+                          inspectionDate: viol.dateDetected,
+                        });
+                        setIsNoticeOpen(true);
+                      }}
+                      icon={<FileText size={15} />}
+                    >
+                      View Notice (FORM LM-INSP-2011)
+                    </Button>
                     <Button
                       variant="primary"
                       size="sm"
@@ -199,6 +239,34 @@ export const InspectionsPage: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Compounding Fee Calculator Modal */}
+      <CompoundingCalculator
+        isOpen={isCompoundingOpen}
+        onClose={() => setIsCompoundingOpen(false)}
+        initialViolations={
+          activeViolationData
+            ? [
+                {
+                  rule_reference: activeViolationData.rule_reference || 'Rule 6(1)(e)',
+                  title: activeViolationData.title || 'Packaging Non-Compliance',
+                  severity: activeViolationData.severity || 'high',
+                },
+              ]
+            : undefined
+        }
+      />
+
+      {/* FORM LM-INSP-2011 Notice Preview Modal */}
+      <NoticePreviewModal
+        isOpen={isNoticeOpen}
+        onClose={() => setIsNoticeOpen(false)}
+        docketNumber={activeViolationData?.docketNumber}
+        productName={activeViolationData?.productName}
+        brand={activeViolationData?.brand}
+        assignedOfficer={activeViolationData?.assignedOfficer}
+        inspectionDate={activeViolationData?.inspectionDate}
+      />
 
     </div>
   );

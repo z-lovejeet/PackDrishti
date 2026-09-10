@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { 
   ShieldCheck, 
   Warning, 
@@ -15,6 +15,9 @@ import { Button } from "../../components/common/Button";
 import { StatCard } from "../../components/dashboard/StatCard";
 import { ComplianceChart } from "../../components/dashboard/ComplianceChart";
 import { ActivityFeed } from "../../components/dashboard/ActivityFeed";
+import { CompoundingCalculator } from "../../components/officer/CompoundingCalculator";
+import { NoticePreviewModal } from "../../components/officer/NoticePreviewModal";
+import { api } from "../../utils/apiClient";
 import { 
   MOCK_OFFICER_PROFILE, 
   MOCK_DASHBOARD_METRICS, 
@@ -31,6 +34,41 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
   onNavigate,
   onOpenReportModal,
 }) => {
+  const [isCompoundingOpen, setIsCompoundingOpen] = useState(false);
+  const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+  const [metrics, setMetrics] = useState(MOCK_DASHBOARD_METRICS);
+
+  useEffect(() => {
+    const fetchLiveMetrics = async () => {
+      try {
+        const live = await api.get<{
+          total_inspections: number;
+          compliant_count: number;
+          violations_recorded: number;
+          compounded_closed: number;
+          total_compounding_assessed_inr: number;
+          monthly_scans_delta: number;
+        }>("/dashboard/metrics");
+
+        if (live && live.total_inspections) {
+          setMetrics(prev => ({
+            ...prev,
+            totalInspections: live.total_inspections,
+            compliantCount: live.compliant_count,
+            violationCount: live.violations_recorded,
+            compoundedCount: live.compounded_closed,
+            totalFinesLeviedInr: live.total_compounding_assessed_inr,
+            monthlyScansDelta: live.monthly_scans_delta,
+          }));
+        }
+      } catch {
+        // Graceful fallback to mock dashboard metrics
+      }
+    };
+
+    fetchLiveMetrics();
+  }, []);
+
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       
@@ -79,10 +117,18 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={onOpenReportModal}
-            icon={<DownloadSimple size={16} />}
+            onClick={() => setIsCompoundingOpen(true)}
+            icon={<Scales size={16} />}
           >
-            Generate Statutory Certificate
+            Compounding Calculator
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsNoticeOpen(true)}
+            icon={<FileText size={16} />}
+          >
+            Preview FORM LM-INSP-2011
           </Button>
         </div>
       </div>
@@ -91,30 +137,30 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Inspected"
-          value={MOCK_DASHBOARD_METRICS.totalInspections.toLocaleString("en-IN")}
+          value={metrics.totalInspections.toLocaleString("en-IN")}
           subtext="Packaged commodities audited"
-          trendDelta={"+" + MOCK_DASHBOARD_METRICS.monthlyScansDelta + "% this month"}
+          trendDelta={"+ " + metrics.monthlyScansDelta + "% this month"}
           variant="primary"
           icon={<Scan size={20} />}
         />
         <StatCard
           label="Compliant Items"
-          value={MOCK_DASHBOARD_METRICS.compliantCount.toLocaleString("en-IN")}
+          value={metrics.compliantCount.toLocaleString("en-IN")}
           subtext="Conforming to LMPC Rules, 2011"
           variant="success"
           icon={<ShieldCheck size={20} />}
         />
         <StatCard
           label="Infractions Detected"
-          value={MOCK_DASHBOARD_METRICS.violationCount.toLocaleString("en-IN")}
+          value={metrics.violationCount.toLocaleString("en-IN")}
           subtext="Actionable defaults under Sec 36(1)"
           variant="violation"
           icon={<Warning size={20} />}
         />
         <StatCard
-          label="Compounding Fines"
-          value={"₹ " + (MOCK_DASHBOARD_METRICS.totalFinesLeviedInr / 100000).toFixed(1) + " L"}
-          subtext={MOCK_DASHBOARD_METRICS.compoundedCount + " compounding orders settled"}
+          label="Compounding Assessed"
+          value={"₹ " + (metrics.totalFinesLeviedInr / 100000).toFixed(1) + " L"}
+          subtext={metrics.compoundedCount + " compounding orders settled"}
           variant="warning"
           icon={<Scales size={20} />}
         />
@@ -124,9 +170,9 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 space-y-6">
           <ComplianceChart
-            compliantCount={MOCK_DASHBOARD_METRICS.compliantCount}
-            violationCount={MOCK_DASHBOARD_METRICS.violationCount}
-            pendingCount={MOCK_DASHBOARD_METRICS.pendingNoticesCount}
+            compliantCount={metrics.compliantCount}
+            violationCount={metrics.violationCount}
+            pendingCount={metrics.pendingNoticesCount}
           />
 
           {/* Quick Navigation Cards */}
@@ -234,6 +280,18 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Compounding Fee Calculator Modal */}
+      <CompoundingCalculator
+        isOpen={isCompoundingOpen}
+        onClose={() => setIsCompoundingOpen(false)}
+      />
+
+      {/* Statutory FORM LM-INSP-2011 Notice Preview Modal */}
+      <NoticePreviewModal
+        isOpen={isNoticeOpen}
+        onClose={() => setIsNoticeOpen(false)}
+      />
 
     </div>
   );
