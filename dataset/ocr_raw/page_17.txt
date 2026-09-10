@@ -1,0 +1,53 @@
+THE GAZETTE OF INDIA : EXTRAORDINARY [Part tl—Sec. 3(ii)]
+
+Note 1: This unit is also called ‘per metre’ or ‘dioptre’.
+
+Note 2: The metre raised to the Power minus one symbol m” is the unit of wave
+number as well as that of vergency of optical system. The context in which the
+said unit is used will indicate whether the unit relates to the wave number or
+
+vergency of optical system.
+PART II
+Derived Units in Relation of Mechanics
+
+A Unit of density and mass density — The unit of density and mass
+density shall be the kilogram per cubic metre. (Symbol: kg/m? or Kgm*)
+The kilogram per cubic metre is the density or mass density of a
+homogenous body having a mass of one kilogram and a volume of one
+cubic metre.
+
+2. Unit of concentration - The unit of concentration shall be the kilogram
+per cubic metre (Symbol: kg/m® or Kgm’*)
+The kilogram per cubic metre is the concentration of a homogenous
+solution having a total volume of one cubic metre and containing a ,
+mass of one kilogram of the given substance.
+
+3. Unit of force — The unit of force shall be the newton (Symbol: N)
+The newton is the force which gives to a mass of one kilogram an
+acceleration of one metre per second squared.
+1N=1kg. 1m/s?
+
+4. Unit of moment of force — The unit of moment of force shall be the
+newton metre.
+(Symbol: Nm)
+The newton metre is the moment of force produced in a body by a
+force of one newton acting at a perpendicular distance of one metre
+from the fixed axis around which the body turns
+1N.m = m?kg.s@
+Note: The unit of moment of force shall not be written as joule (3)
+because it is Nm.
+
+5: Unit of Pressure — The unit of pressure shall be the Pascal (Symbol
+Pa)
+The Pascal is the pressure which, acting on plane surface of one
+Square metre exerts on that area a total force of one newton
+1Pa=1N/m*or1N.m?
+
+6. Unit of tensile strength - The unit of tensile strength shall be Mega
+Pascal. (Symbol: MPa or M Nim?)
+The tensile strength is the highest force, when applied normal to the
+cross-section of a test piece which it can withstand, divided by the
+original area of the cross section
+
+4. Unit of dynamic viscosity - The unit of dynamic viscosity shall be the
+Pascal second. (Symbol: Pa.S)

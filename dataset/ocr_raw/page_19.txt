@@ -1,0 +1,63 @@
+THE GAZETTE OF INDIA : EXTRAORDINARY [Part I
+
+Ste. 3ii)|
+
+PART Ill
+Derived Units in Relation to Heat
+
+Unit of entropy — The unit of entropy shall be the joule per kelvin.
+(Symbol: J/K)
+
+The joule per kelvin is the increase of entropy of a system receiving a
+quantity of heat equal to one joule at the constant thermodynamic
+temperature of one kelvin, provided that no irreversible change takes
+place in the system.
+
+Unit of specific entropy — The unit of specific entropy shall be the joule
+per kilogram kelvin. [Symbol: J/ (kg.K)].
+
+The joule per kilogram kelvin is the specific entropy of a system of
+homogenous mass of one kilogram receiving a quantity of-heat equal
+to one joule at the constant thermodynamic temperature of one kelvin,
+provided that no irreversible change takes place in the system.
+
+Unit of heat capacity — The unit of heat capacity shall be the joule per
+kelvin. (Symbol: J/K)
+
+The joule per kelvin is the heat capacity of a homogenous body in
+which a quantity of heat equal to one joule produces an increase of one
+kelvin in the thermodynamic temperature.
+
+Unit of specific heat capacity — The unit of specific heat capacity shall
+be the joule per kilogram kelvin. [Symbol: J/ (kg.K)].
+
+The joule per kilogram kelvin is the specific heat capacity of a
+homogenous body having a mass of one kilogram in which quantity of
+heat equal to one joule produces an increase of one kelvin in the
+thermodynamic temperature.
+
+Unit of latent heat — The unit of latent heat shall be the joule per
+kilogram. (Symbol: J/kg)
+
+The joule per kilogram is the heat exchanged by one kg of substance
+to change from one phase to another at the temperature of its changing
+phase.
+
+Unit of specific energy — The unit of specific energy shall be the joule
+per kilogram. (Symbol: J/kg)
+
+The joule per kilogram is the specific energy of a system of
+homogenous mass of one kilogram having the internal energy of one
+joule.
+
+Unit of thermal conductivity ~ The unit of thermal conductivity shall be
+the watt per metre kelvin. [Symbol: W/ (m.K)]
+The watt per metre kelvin is the thermal conductivity of a homogenous
+body in which a difference of one kelvin in the thermodynamic
+temperature produces a radiant flux of one watt between two parallel
+planes, each having an area of one square metre, placed one metre
+apart.
+
+; 1. Wim.K = 1.Wim?
+
+1K/ 1m

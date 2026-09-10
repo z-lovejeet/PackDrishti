@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from "react";
 import {
   ShieldCheck,
-  Warning,
-  FileText,
-  Scales,
   Scan,
-  DownloadSimple,
-  IdentificationCard,
-  Building,
-  MapPin,
-  TrendUp,
+  Scales,
+  FileText,
   ArrowRight,
-  Briefcase,
-  Shield
+  User,
+  ArrowSquareOut
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
-import { StatCard } from "../../components/dashboard/StatCard";
-import { ComplianceChart } from "../../components/dashboard/ComplianceChart";
-import { ActivityFeed } from "../../components/dashboard/ActivityFeed";
 import { CompoundingCalculator } from "../../components/officer/CompoundingCalculator";
 import { NoticePreviewModal } from "../../components/officer/NoticePreviewModal";
 import { api } from "../../utils/apiClient";
@@ -139,416 +130,346 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
 }) => {
   const [isCompoundingOpen, setIsCompoundingOpen] = useState(false);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
-  const [officerProfile] = useState<OfficerProfile>(DEFAULT_OFFICER_PROFILE);
+  const [selectedNoticeItem, setSelectedNoticeItem] = useState<{
+    scanId: string;
+    productName: string;
+    brand: string;
+    mrp: string;
+    netQty: string;
+  } | null>(null);
+
   const [metrics, setMetrics] = useState<DashboardMetrics>(INITIAL_METRICS);
   const [actions, setActions] = useState<EnforcementActionItem[]>(DEFAULT_ACTIONS);
-  const [topViolations, setTopViolations] = useState<ViolationCategoryBreakdown[]>(DEFAULT_VIOLATIONS);
+  const [violations] = useState<ViolationCategoryBreakdown[]>(DEFAULT_VIOLATIONS);
+  const [officer] = useState<OfficerProfile>(DEFAULT_OFFICER_PROFILE);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchLiveMetrics = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const live = await api.get<{
-          total_inspections: number;
-          compliant_count: number;
-          violations_recorded: number;
-          compounded_closed: number;
-          total_compounding_assessed_inr: number;
-          monthly_scans_delta: number;
-          top_violating_rules?: Array<{
-            rule?: string;
-            title?: string;
-            count?: number;
-            severity?: string;
-          }>;
-        }>("/dashboard/metrics");
-
-        if (live && isMounted) {
-          setMetrics((prev) => ({
-            ...prev,
-            totalInspections: live.total_inspections || prev.totalInspections,
-            compliantCount: live.compliant_count || prev.compliantCount,
-            violationCount: live.violations_recorded || prev.violationCount,
-            compoundedCount: live.compounded_closed || prev.compoundedCount,
-            totalFinesLeviedInr: live.total_compounding_assessed_inr || prev.totalFinesLeviedInr,
-            monthlyScansDelta: live.monthly_scans_delta !== undefined ? live.monthly_scans_delta : prev.monthlyScansDelta,
-          }));
-
-          if (live.top_violating_rules && live.top_violating_rules.length > 0) {
-            const totalV = live.violations_recorded || 1;
-            const mappedViolations: ViolationCategoryBreakdown[] = live.top_violating_rules.map((r) => ({
-              ruleClause: r.rule || "Rule 6",
-              categoryTitle: r.title || "Statutory Non-Compliance",
-              count: r.count || 0,
-              percentage: Math.round(((r.count || 0) / totalV) * 1000) / 10,
-              actSection: "Section 36(1)",
-            }));
-            setTopViolations(mappedViolations);
-          }
-        }
+        const metricsRes = await api.get<DashboardMetrics>("/dashboard/metrics");
+        if (metricsRes) setMetrics(metricsRes);
       } catch {
-        // Retain default verified metrics baseline
+        // Keeps graceful defaults
       }
 
       try {
-        const actRes = await api.get<{ activities: any[] }>("/dashboard/activity");
-        if (actRes && actRes.activities && actRes.activities.length > 0 && isMounted) {
-          const mappedActions: EnforcementActionItem[] = actRes.activities.map((a: any) => ({
-            id: a.id || `act-${Math.random()}`,
-            caseRef: a.docket_number || a.id || "INSP-DEL-REC",
-            productName: `${a.brand || ""} ${a.product_name || ""}`.trim() || "Audited Package Specimen",
-            actionType:
-              a.action && a.action.includes("Notice")
-                ? "Show Cause Notice"
-                : a.action && a.action.includes("Compounding")
-                ? "Compounding Order"
-                : a.action && a.action.includes("Seizure")
-                ? "Seizure Memo"
-                : "Cured & Dismissed",
-            statutoryClause: "Rule 6(1) & Sec 36(1)",
-            timestamp: a.timestamp || "Recent",
-            targetEstablishment: a.location || "Market Premises",
-            status: a.status === "Resolved" || a.status === "Compliant" ? "Settled" : "Pending Hearing",
-          }));
-          setActions(mappedActions);
-        }
+        const actRes = await api.get<EnforcementActionItem[]>("/dashboard/activity");
+        if (actRes && actRes.length > 0) setActions(actRes);
       } catch {
-        // Retain default verified actions baseline
+        // Keeps graceful defaults
       }
     };
 
-    fetchLiveMetrics();
-
-    return () => {
-      isMounted = false;
-    };
+    fetchDashboardData();
   }, []);
 
+  const handleOpenNotice = (item?: EnforcementActionItem) => {
+    setSelectedNoticeItem({
+      scanId: item?.caseRef || "INSP-2026-DEL-049",
+      productName: item?.productName || "VitaHealth Malted Nutrition Drink 500g",
+      brand: "VitaHealth Nutrition",
+      mrp: "320.00",
+      netQty: "500 g",
+    });
+    setIsNoticeOpen(true);
+  };
+
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Officer Credential & Jurisdiction Card */}
-      <div className="bg-white rounded-card border border-neutral-200 shadow-card overflow-hidden border-t-4 border-t-navy-800">
-        <div className="p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          {/* Inspector Identification Block */}
-          <div className="flex items-start gap-4">
-            <div className="w-13 h-13 rounded-lg bg-navy-800 text-white flex items-center justify-center shrink-0 shadow-sm border border-navy-700">
-              <IdentificationCard size={32} weight="duotone" className="text-saffron-400" />
-            </div>
-            <div className="space-y-1.5">
+    <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
+      
+      {/* Officer Header Bar */}
+      <section className="border-b border-slate-200/80 bg-slate-50/40">
+        <div className="max-w-6xl mx-auto px-6 py-6 sm:py-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <div className="space-y-1">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-lg font-bold text-neutral-900 font-heading tracking-tight">
-                  {officerProfile.name}
+                <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-950">
+                  {officer.name}
                 </h1>
-                <span className="text-2xs font-mono font-bold px-2.5 py-0.5 rounded-badge bg-navy-50 text-navy-800 border border-navy-200">
-                  {officerProfile.badgeNumber}
-                </span>
-                <span className="inline-flex items-center gap-1 text-2xs font-semibold px-2 py-0.5 rounded-badge bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Active Enforcement Duty
+                <span className="font-mono text-2xs px-2.5 py-0.5 rounded border border-slate-300 bg-white text-slate-700 font-semibold">
+                  {officer.badgeNumber}
                 </span>
               </div>
-              <p className="text-xs text-neutral-700 font-semibold flex items-center gap-1.5">
-                <Briefcase size={14} className="text-navy-700" />
-                <span>{officerProfile.designation}</span>
-                <span className="text-neutral-400">•</span>
-                <span className="text-neutral-600 font-normal">{officerProfile.division}</span>
+              <p className="text-xs text-slate-500">
+                {officer.designation} • {officer.division} • {officer.zone}
               </p>
-              <div className="flex items-center gap-3 text-2xs text-neutral-500 pt-0.5 flex-wrap">
-                <span className="flex items-center gap-1 text-neutral-600 font-medium">
-                  <Building size={14} className="text-neutral-400" />
-                  {officerProfile.zone}
-                </span>
-                <span className="text-neutral-300">•</span>
-                <span className="flex items-center gap-1 text-neutral-600 font-medium">
-                  <MapPin size={14} className="text-neutral-400" />
-                  {officerProfile.jurisdiction}
-                </span>
-                <span className="text-neutral-300">•</span>
-                <span className="text-neutral-500">
-                  Legal Metrology Act, 2009 Authority
-                </span>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate("scanner")}
+                icon={<Scan size={14} weight="bold" />}
+                className="text-xs bg-white"
+              >
+                New Field Scan
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsCompoundingOpen(true)}
+                icon={<Scales size={14} weight="bold" />}
+                className="text-xs bg-white"
+              >
+                Compounding Desk
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenNotice()}
+                icon={<FileText size={14} weight="bold" />}
+                className="text-xs bg-white"
+              >
+                FORM LM-INSP-2011
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onOpenReportModal}
+                className="text-xs"
+              >
+                Generate Report
+              </Button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-6 py-10 space-y-12">
+
+        {/* 4 Metric Tiles (Minimal, Spacious, Single Theme) */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
+            <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Total Inspections</span>
+            <div className="text-3xl font-bold font-heading text-slate-950">
+              {metrics.totalInspections.toLocaleString("en-IN")}
+            </div>
+            <div className="text-xs text-slate-500">Field compliance sweeps</div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
+            <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Certified Compliant</span>
+            <div className="text-3xl font-bold font-heading text-slate-950">
+              {metrics.compliantCount.toLocaleString("en-IN")}
+            </div>
+            <div className="text-xs text-slate-500">{metrics.complianceRate}% adherence rate</div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
+            <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Infractions Flagged</span>
+            <div className="text-3xl font-bold font-heading text-slate-950">
+              {metrics.violationCount.toLocaleString("en-IN")}
+            </div>
+            <div className="text-xs text-slate-500">Actionable statutory defaults</div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
+            <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Compounding Assessed</span>
+            <div className="text-3xl font-bold font-heading text-slate-950">
+              ₹{(metrics.totalFinesLeviedInr / 100000).toFixed(2)} L
+            </div>
+            <div className="text-xs text-slate-500">{metrics.compoundedCount} cases compounded</div>
+          </div>
+
+        </section>
+
+        {/* Compliance Distribution & Live Activity Grid */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column: Compliance Distribution & Navigation */}
+          <div className="space-y-6">
+            
+            <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold font-heading text-slate-950">Compliance Distribution</h2>
+                <span className="text-xs font-mono text-slate-500">{metrics.complianceRate}%</span>
+              </div>
+              
+              {/* Clean Single-Themed Distribution Bar */}
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden flex">
+                <div 
+                  className="bg-slate-900 h-full transition-all duration-300"
+                  style={{ width: `${(metrics.compliantCount / metrics.totalInspections) * 100}%` }}
+                />
+                <div 
+                  className="bg-slate-400 h-full transition-all duration-300"
+                  style={{ width: `${(metrics.violationCount / metrics.totalInspections) * 100}%` }}
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-slate-900" />
+                  <span>Compliant ({metrics.compliantCount})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-slate-400" />
+                  <span>Infractions ({metrics.violationCount})</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Quick Action Buttons */}
-          <div className="flex items-center gap-2.5 flex-wrap shrink-0 border-t lg:border-t-0 pt-4 lg:pt-0 border-neutral-100">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => onNavigate("scanner")}
-              icon={<Scan size={16} />}
-            >
-              New Product Inspection
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsCompoundingOpen(true)}
-              icon={<Scales size={16} />}
-            >
-              Compounding Calculator
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsNoticeOpen(true)}
-              icon={<FileText size={16} />}
-            >
-              Preview FORM LM-INSP-2011
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onOpenReportModal}
-              icon={<FileText size={16} />}
-            >
-              File Report
-            </Button>
-          </div>
-        </div>
-
-        {/* Official Jurisdiction Metadata Ribbon */}
-        <div className="bg-neutral-50 px-5 py-2 border-t border-neutral-200 flex items-center justify-between text-2xs text-neutral-600 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <Shield size={14} className="text-navy-800" />
-            <span className="font-semibold text-neutral-800">
-              Department of Consumer Affairs • Legal Metrology Division
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-neutral-500 font-mono">
-            <span>STATION: CENTRAL-DEL-01</span>
-            <span>CYCLE: Q3-2026</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 4 Primary Metric Cards using redesigned StatCard */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Inspected"
-          value={metrics.totalInspections.toLocaleString("en-IN")}
-          subtext="Packaged commodities audited"
-          trendDelta={"+ " + metrics.monthlyScansDelta + "% this month"}
-          variant="primary"
-          icon={<Scan size={20} />}
-        />
-        <StatCard
-          label="Compliant Items"
-          value={metrics.compliantCount.toLocaleString("en-IN")}
-          subtext="Conforming to LMPC Rules, 2011"
-          trendDelta={metrics.complianceRate ? `${metrics.complianceRate}% compliance rate` : undefined}
-          variant="success"
-          icon={<ShieldCheck size={20} />}
-        />
-        <StatCard
-          label="Infractions Detected"
-          value={metrics.violationCount.toLocaleString("en-IN")}
-          subtext="Actionable defaults under Sec 36(1)"
-          trendDelta="- 4.8% vs last cycle"
-          variant="violation"
-          icon={<Warning size={20} />}
-        />
-        <StatCard
-          label="Compounding Assessed"
-          value={"INR " + (metrics.totalFinesLeviedInr / 100000).toFixed(1) + " L"}
-          subtext={metrics.compoundedCount + " compounding orders settled"}
-          trendDelta="Section 48 compounding"
-          variant="warning"
-          icon={<Scales size={20} />}
-        />
-      </div>
-
-      {/* Middle Grid: Compliance Chart & Live Activity Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Compliance Chart & Quick Modules */}
-        <div className="lg:col-span-5 space-y-6">
-          <ComplianceChart
-            compliantCount={metrics.compliantCount}
-            violationCount={metrics.violationCount}
-            pendingCount={metrics.pendingNoticesCount || 89}
-          />
-
-          {/* Enforcement Modules Quick Navigation */}
-          <div className="bg-white p-5 rounded-card border border-neutral-200 shadow-card space-y-3.5">
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-2.5">
-              <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wider font-heading flex items-center gap-1.5">
-                <Briefcase size={16} className="text-navy-800" />
-                <span>Enforcement Modules</span>
-              </h3>
-              <span className="text-2xs font-mono text-neutral-500 font-semibold">4 MODULES</span>
+            {/* Sub-Station Quick Links */}
+            <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+              <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Enforcement Stations</span>
+              
+              <div className="space-y-1 pt-1">
+                <button
+                  onClick={() => onNavigate("inspections")}
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 text-xs font-medium text-slate-800 transition-colors"
+                >
+                  <span>Field Inspection Ledger</span>
+                  <ArrowRight size={13} className="text-slate-400" />
+                </button>
+                <button
+                  onClick={() => onNavigate("reports")}
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 text-xs font-medium text-slate-800 transition-colors"
+                >
+                  <span>Statutory Report Archive</span>
+                  <ArrowRight size={13} className="text-slate-400" />
+                </button>
+                <button
+                  onClick={() => setIsCompoundingOpen(true)}
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 text-xs font-medium text-slate-800 transition-colors"
+                >
+                  <span>Section 48 Fee Calculator</span>
+                  <ArrowRight size={13} className="text-slate-400" />
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <button
+          </div>
+
+          {/* Right Column: Live Timeline of Enforcement Actions */}
+          <div className="lg:col-span-2 p-6 rounded-xl border border-slate-200 bg-white space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold font-heading text-slate-950">Recent Enforcement Actions</h2>
+              <button 
                 onClick={() => onNavigate("inspections")}
-                className="group p-3.5 rounded-md border border-neutral-200 hover:border-navy-700 hover:bg-navy-50/40 text-left transition-all duration-150 space-y-1 shadow-xs"
+                className="text-xs font-semibold text-slate-900 hover:text-slate-600 inline-flex items-center gap-1"
               >
-                <div className="text-xs font-bold text-neutral-900 font-heading flex items-center justify-between">
-                  <span>Inspection Ledger</span>
-                  <FileText size={15} className="text-navy-800 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-                <p className="text-2xs text-neutral-500 leading-relaxed">
-                  Manage active show-cause case files and docket chronology
-                </p>
-              </button>
-
-              <button
-                onClick={() => onNavigate("reports")}
-                className="group p-3.5 rounded-md border border-neutral-200 hover:border-navy-700 hover:bg-navy-50/40 text-left transition-all duration-150 space-y-1 shadow-xs"
-              >
-                <div className="text-xs font-bold text-neutral-900 font-heading flex items-center justify-between">
-                  <span>Report Archive</span>
-                  <DownloadSimple size={15} className="text-navy-800 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-                <p className="text-2xs text-neutral-500 leading-relaxed">
-                  Export FORM LM-INSP-2011 district PDF dockets
-                </p>
-              </button>
-
-              <button
-                onClick={() => onNavigate("scanner")}
-                className="group p-3.5 rounded-md border border-neutral-200 hover:border-saffron-500 hover:bg-saffron-50/40 text-left transition-all duration-150 space-y-1 shadow-xs"
-              >
-                <div className="text-xs font-bold text-neutral-900 font-heading flex items-center justify-between">
-                  <span>Optical Scanner</span>
-                  <Scan size={15} className="text-saffron-600 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-                <p className="text-2xs text-neutral-500 leading-relaxed">
-                  AI-assisted statutory font height & declaration audit
-                </p>
-              </button>
-
-              <button
-                onClick={() => setIsCompoundingOpen(true)}
-                className="group p-3.5 rounded-md border border-neutral-200 hover:border-saffron-500 hover:bg-saffron-50/40 text-left transition-all duration-150 space-y-1 shadow-xs"
-              >
-                <div className="text-xs font-bold text-neutral-900 font-heading flex items-center justify-between">
-                  <span>Compounding Desk</span>
-                  <Scales size={15} className="text-saffron-600 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-                <p className="text-2xs text-neutral-500 leading-relaxed">
-                  Section 48 multi-violation settlement fee calculator
-                </p>
+                View full ledger <ArrowRight size={12} weight="bold" />
               </button>
             </div>
-          </div>
-        </div>
 
-        {/* Right Column: Live Activity Feed */}
-        <div className="lg:col-span-7">
-          <ActivityFeed
-            actions={actions}
-            onViewCase={() => onNavigate("inspections")}
-          />
-        </div>
-      </div>
-
-      {/* Bottom Section: Predominant Regulatory Infractions Data Table */}
-      <div className="bg-white p-5 rounded-card border border-neutral-200 shadow-card space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3.5">
-          <div className="space-y-0.5">
-            <h3 className="text-sm font-bold text-neutral-900 font-heading flex items-center gap-2">
-              <TrendUp size={18} className="text-navy-800" />
-              <span>Predominant Regulatory Infractions (Current Inspection Cycle)</span>
-            </h3>
-            <p className="text-xs text-neutral-500">
-              Frequency distribution of non-compliance patterns flagged under the Legal Metrology Act, 2009 & LMPC Rules, 2011
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xs font-mono font-bold px-2.5 py-1 rounded bg-neutral-100 text-neutral-800 border border-neutral-300">
-              {metrics.violationCount} Total Infractions
-            </span>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-neutral-50 border-b border-neutral-200 text-neutral-700 font-semibold">
-                <th className="py-3 px-3.5">Statutory Rule Clause</th>
-                <th className="py-3 px-3.5">Infraction Category</th>
-                <th className="py-3 px-3.5">Governing Act Section</th>
-                <th className="py-3 px-3.5 text-right">Incidence Count</th>
-                <th className="py-3 px-3.5 text-right">Ledger Proportion</th>
-                <th className="py-3 px-3.5 text-center">Enforcement Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {topViolations.length > 0 ? (
-                topViolations.map((viol, idx) => (
-                  <tr key={idx} className="hover:bg-neutral-50/80 transition-colors">
-                    <td className="py-3 px-3.5">
-                      <span className="font-mono font-bold text-navy-800 bg-navy-50 px-2 py-0.5 rounded border border-navy-200 text-2xs">
-                        {viol.ruleClause}
+            <div className="divide-y divide-slate-100">
+              {actions.map((act) => (
+                <div key={act.id} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-2xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">
+                        {act.caseRef}
                       </span>
-                    </td>
-                    <td className="py-3 px-3.5 text-neutral-900 font-medium">
-                      {viol.categoryTitle}
-                    </td>
-                    <td className="py-3 px-3.5 text-neutral-600 font-mono text-2xs">
-                      {viol.actSection}
-                    </td>
-                    <td className="py-3 px-3.5 text-right font-mono font-bold text-neutral-900">
-                      {viol.count.toLocaleString("en-IN")}
-                    </td>
-                    <td className="py-3 px-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2.5">
-                        <div className="w-24 h-2 rounded-full bg-neutral-100 overflow-hidden border border-neutral-200">
-                          <div
-                            style={{ width: `${Math.min(100, viol.percentage)}%` }}
-                            className={`h-full ${
-                              viol.percentage > 25
-                                ? "bg-violation"
-                                : viol.percentage > 10
-                                ? "bg-saffron-500"
-                                : "bg-navy-600"
-                            }`}
-                          />
-                        </div>
-                        <span className="font-mono text-neutral-800 text-2xs font-semibold w-12 text-right">
-                          {viol.percentage}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3.5 text-center">
-                      <button
-                        onClick={() => {
-                          setIsNoticeOpen(true);
-                        }}
-                        className="text-2xs font-medium text-navy-800 hover:text-navy-900 hover:underline inline-flex items-center gap-1"
-                      >
-                        <span>Draft Notice</span>
-                        <ArrowRight size={12} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-neutral-500 text-xs">
-                    No statutory violations recorded in current inspection ledger.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                      <span className="text-xs font-medium text-slate-500">
+                        {act.actionType}
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold text-slate-900">
+                      {act.productName}
+                    </div>
+                    <div className="text-2xs text-slate-500">
+                      {act.targetEstablishment} • {act.statutoryClause}
+                    </div>
+                  </div>
 
-      {/* Compounding Fee Calculator Modal */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-2xs font-mono text-slate-400">{act.timestamp}</span>
+                    <button
+                      onClick={() => handleOpenNotice(act)}
+                      className="text-xs text-slate-700 hover:text-slate-950 p-1.5 rounded hover:bg-slate-100"
+                      title="Inspect Notice"
+                    >
+                      <ArrowSquareOut size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* Predominant Regulatory Infractions Table */}
+        <section className="space-y-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-base font-bold font-heading text-slate-950">
+              Predominant Regulatory Infractions
+            </h2>
+            <span className="text-xs text-slate-500">Central Enforcement Zone-1</span>
+          </div>
+
+          <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50/50 text-slate-500 font-mono text-2xs uppercase">
+                    <th className="py-3 px-5 font-semibold">Rule Clause</th>
+                    <th className="py-3 px-5 font-semibold">Infraction Description</th>
+                    <th className="py-3 px-5 font-semibold">Governing Act</th>
+                    <th className="py-3 px-5 font-semibold text-right">Incidents</th>
+                    <th className="py-3 px-5 font-semibold text-right">Proportion</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {violations.map((v) => (
+                    <tr key={v.ruleClause} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-4 px-5 font-mono font-bold text-slate-900">
+                        {v.ruleClause}
+                      </td>
+                      <td className="py-4 px-5 text-slate-700 font-medium">
+                        {v.categoryTitle}
+                      </td>
+                      <td className="py-4 px-5 font-mono text-slate-500">
+                        {v.actSection}
+                      </td>
+                      <td className="py-4 px-5 text-right font-mono font-bold text-slate-900">
+                        {v.count}
+                      </td>
+                      <td className="py-4 px-5 text-right font-mono text-slate-600">
+                        {v.percentage}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      {/* Compounding Desk Modal */}
       <CompoundingCalculator
         isOpen={isCompoundingOpen}
         onClose={() => setIsCompoundingOpen(false)}
+        initialViolations={[]}
       />
 
-      {/* Statutory FORM LM-INSP-2011 Notice Preview Modal */}
-      <NoticePreviewModal
-        isOpen={isNoticeOpen}
-        onClose={() => setIsNoticeOpen(false)}
-      />
+      {/* Statutory Notice Preview Modal */}
+      {selectedNoticeItem && (
+        <NoticePreviewModal
+          isOpen={isNoticeOpen}
+          onClose={() => setIsNoticeOpen(false)}
+          scanId={selectedNoticeItem.scanId}
+          docketNumber={selectedNoticeItem.scanId}
+          productName={selectedNoticeItem.productName}
+          brand={selectedNoticeItem.brand}
+          mrp={selectedNoticeItem.mrp}
+          netQty={selectedNoticeItem.netQty}
+          violationsCount={2}
+          compoundingFee={15000}
+          assignedOfficer={officer.name}
+          inspectionDate="10-Sep-2026"
+        />
+      )}
+
     </div>
   );
 };

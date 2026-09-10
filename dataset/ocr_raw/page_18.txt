@@ -1,0 +1,72 @@
+CAM [eos 3(ii)] Ue St USI: steer
+=———..
+
+10.
+
+5 i
+
+12:
+
+13.
+
+14.
+
+ol
+
+The Pascal Second is the dynamic viscosity of a homogenous liquid in
+which the straight and uniform movement of a plane surface of one
+
+1m/s
+
+Unit of kinematic viscosity — The unit of kinematic viscosity shall be the
+Square metre per second.(Symbol: m%/s or m?.s")
+
+The square metre per second is the kinematic viscosity of a liquid
+which has a dynamic viscosity of one Pascal second and a density of
+one kilogram per cubic metre.
+
+1m? =1Pa.t1s
+
+1s 1kg/m
+
+Unit of surface tension - The unit of surface tension shall be the
+newton per metre. (Symbol: N/m).
+
+The newton per metre is the surface tension produced when a force of
+one newton acts over a length of one metre on the surface of a liquid
+separating that liquid from the material surrounding it.
+
+Unit of work, energy and quantity of heat — The unit of energy, work
+and quantity of heat shall be the joule. (Symbol: J)
+
+The joule is the work done when the point of application of one newton
+moves a distance of one metre in the direction of the force.
+1J=1N1m.
+
+Unit of power, radiant flux and heat flux — The unit of power, radiant
+flux and heat flux shall be the watt. (Symbol: W)
+
+The watt is the power of an energy system in which one joule of energy
+is uniformly transferred in one second.
+
+1W=1J/1s.
+
+Unit of volume flow — The unit of volume flow shall be cubic metre per
+second. (Symbol: m%/s or m3.s*) ;
+
+The cubic metre per second is the volume delivered by the uniform
+discharge of one cubic metre traversing the given cross-section in one
+second.
+
+Unit of mass flow ~ The unit of mass flow shall be the kilogram per
+second. (Symbol: kg/s or kg.s)
+
+The kilogram per second is the mass delivered by the uniform
+discharge of a mass of one kilogram traversing the given cross-section
+in one second.
+
+Unit of specific volume — The unit of Specific volume shall be the cubic
+metre per kilogram. (Symbol: m*/kg)
+
+The cubic metre per kilogram is the specific volume of a homogenous
+body having a volume of one cubic metre and a mass of one kilogram

@@ -1,0 +1,52 @@
+4 THE GAZETTE OF INDIA : EXTRAORDINARY [Parr Il—Stc. (ii)
+
+THE NINTH SCHEDULE
+(See Rule 19)
+Important Physical Constants
+Quantity Symbol Value Units | Relative
+j Uncertainty
+(ppm)
+GENERAL CONSTANTS
+Universal Constants
+| Speed of light in vacuum Cc 299792458 ms” (exact)
+permeability of vacuum Ho 4m x 107 NA? (exact)
+| =12.566370614... | 107 NAZ
+| permittivity of vacuum > 8s, Sy hesd - + |107%Fm™ | (exact
+=8.854187817...
+Newtonian constant of G 6.67259(85) 10" 128
+| gravitation | | mikg's?
+| Planck constant ; h 6.6260755(40) 10™*Js 0.60
+in electron volts, h/ {e} 4.1356692(12) 10°°eVs 0.30
+h/ (2m) i 1.05457266(63) 10™Js 0.60
+in electron volts h / {e} 6.5821220(20) 10"'’eVs 0.30
+Planck mass, mp 2.17671(14) 10°kg 64
+(helG) "2 z
+Planck length lp 1.61605(10) 10m 64
+h/mpc = (hG/c*)'? |
+Planck time a 5.39056(34) 104s 64
+te = (hGic')"2
+ELECTROMAGNETIC CONSTANTS
+elementary charge € 1.60217733(49) 10:%C 0.30
+elh 2.41798836(72) 10 AJ 0.30 |
+| Magnetic flux quantum, ®o 2.06783461(61) | 10 "Wb 0.30
+Lh/2e
+Josephson frequency- | 2e/h 4.8359767(14) | 10H" 10.30
+|voltage ratio | |
+quantized Hall conductance | e7/h 3.87404614(17) | 10°35 0.045
+quantized Hall resistance, Ru 25812.8056(12) Q 0.045
+hle?=1/2u€/a
+Bohr magneton, HB 9.2740154(31) [oT 10.34
+eh/2me =
+in electron volts, 5.78838263(52) 10° eVT" [0.089
+| Be} sted
+[in hertz, yB/h 1.399624 18(42) 10 HzT [0.30
+in wavenumbers, uB/hc _| 46.686437(14) iene 0.30
+in kelvins, uB/k 0.6717099(57) Kr" 85 ey
+[Nuclear magneton, eh/2mp_| 5.0507866(17) [407JT" [0.34
+Lin electon volts, uN/{e} | _|10% evT™ [0.089
+in hertz, uN/h ___|7.6225914(23) MH2T" 0.30
+in wavenumbers, uN/he a] 2.54262281(77) 107m™T™ |0.30
+in kelvins, yN/k 3.658246(31) H4O7KTT [85
+
+L ATOMIC CONSTANTS
+

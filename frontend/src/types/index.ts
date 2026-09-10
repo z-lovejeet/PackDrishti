@@ -130,6 +130,7 @@ export interface NutrientAudit {
 export interface HealthBadge {
   label: string;
   type: 'danger' | 'warning' | 'good' | 'neutral';
+  description?: string;
 }
 
 export interface ProductHealthAudit {
@@ -153,6 +154,18 @@ export interface ProductHealthAudit {
   whoShouldAvoid: string[];
   healthierAlternatives: string[];
   dietarySummary: string;
+  shouldWeEatIt?: string;
+  howBadIsIt?: string;
+  notEatableForAge?: string[];
+  healthProblemsIfEatenMore?: string[];
+  hasPalmOil?: boolean;
+  palmOilDetails?: string;
+  hasAddedSugar?: boolean;
+  addedSugarDetails?: string;
+  hasHighSodium?: boolean;
+  hasArtificialAdditives?: boolean;
+  ingredientsList?: string[];
+  flaggedIngredients?: { name: string; reason: string }[];
 }
 
 export interface EnforcementActionItem {

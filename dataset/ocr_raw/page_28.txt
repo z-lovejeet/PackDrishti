@@ -1,0 +1,69 @@
+[rT [lee 3(ii)] UA Bl USA : ARNT
+
+1
+
+2;
+
+Special unit of atomic mass- The special unit of mass of an atom shall
+be unified atomic mass unit. (Symbol: u)
+
+The unified atomic mass unit is equal to the fraction 1/12 of the mass of
+an atom of the nucleus '*C
+
+1 u= 1.660 5402 x 107” kg
+
+Special units of stellar distance — (1) The first special unit of stellar
+distance shall be the astronomical unit. (Symbol: AU)
+
+The astronomical unit of distance is the length ofthe radius of the
+unperturbed circular orbit of a body of negligible mass moving round
+the Sun with a sidereal angular velocity of 0.017 202 098 950 radian
+per day of 86 400 ephemeris seconds.
+
+1 AU = 149 600 x 10°m
+
+Note: The symbol for stellar distance is not internationally uniform, for
+example the symbol used for stellar distance is UA in France, AU in
+England and AE in Germany.
+
+(2) The second special unit of stellar distance shall be parsec. (Symbol
+pc)
+
+The parsec is the distance at which one astronomical unit subtends an
+angle of one second of arc.
+
+1 pc = 206 265 AU = 30857 x 10"? m.
+
+THE SIXTH SCHEDULE ss
+(See Rule 17)
+Temporarily accepted Units
+
+Unit of nautical distance - The unit of distance for use in marine and
+aerial navigation shall be the nautical mile is equal to a distance of
+1852 metres.
+
+Unit of nautical velocity - The unit of nautical velocity for use in marine
+and aerial navigation shall be the knot. The knot is the velocity equal to
+one nautical mile per hour.
+
+1 kont = (1852 / 3600) mis, i.e. 0.514 444 m/s
+
+Unit of wavelength of light-(1)The unit of wavelength of light shall be
+the angstrom. (Symbol: A). The angstrom is equal to 0.1 nanometre.
+4A =0.1nm = 10m
+
+Unit of land measurement — (1) The first unit for measurement of land
+area shall be the ‘are’ (Symbol : a)
+
+The ‘are’ is the area of a square with sides of length 10 metres.
+
+1a = dam? = 10*m?
+
+(2) The second unit for measurement of land area shall be hectare
+(Symbol: ha) The hectare is the area of a square with sides of length
+100 metres.
+
+1 ha = 1hm? = 10% m?
+
+(3) The prefixes specified in the Third Schedule shall not be used with
+the ‘are’ or hectare.

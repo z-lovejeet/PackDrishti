@@ -1,0 +1,43 @@
+[9m 1—are 3(ii)] A BT WII : TATE
+
+5. Unit of angular acceleration: The unit of angular acceleration shall be the radian
+per second square. (Symbol: rad/s”)
+
+The radian per second squared is the angular acceleration of a body, rotating
+around the fixed axis, which when set in uniform varying rotation, changes angular
+
+velocity at the rate of one radian per second in one second.
+6. Unit of speed and velocity: The unit of speed and velocity shall be the metre per
+second, (Symbol: m/s or ms”)
+
+The metre per second is the velocity (speed) of a body, in motion which traverse a
+
+distance of one metre in one second when set in uniform motion.
+
+7. Unit of acceleration: The unit of acceleration shall be the metre per second
+squared. (Symbol: m/s? or ms“)
+
+The metre per second squared is the acceleration of a body in motion which, when
+set in uniformly varying motion, changes its velocity at the rate of one metre per
+
+second in one second.
+
+8. Unit of rotational frequency: The unit of rotational frequency shall be the
+second raised to the power minus one. (Symbol: s”)
+The second raised to the power minus one is the rotational frequency of a uniform
+
+rotatory movement which produces one complete revolution in one second.
+9. Unit of wave number: The unit of wave number shall be the metre raised to the
+
+power minus one. (Symbol: m’')
+
+The metre raised to the power minus one is the number of waves of a
+monochromatic radiation which can be accommodated, in the direction of its
+
+propagation, in a length equal to one metre.
+
+10. Unit of vergency of optical system: The unit of vergency of optical system shall
+be the metre raised to the power minus one. (Symbol: m')
+The metre raised to the power minus one is the vergency of an optical system,the
+
+focal distance of which is one metre in a medium having refractive index of unit.

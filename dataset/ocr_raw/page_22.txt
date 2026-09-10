@@ -1,0 +1,66 @@
+(4M lave 3(ii)] ARG FT UT: Tar
+
+13
+
+14.
+
+15.
+
+Unit of magnetic induction and magnetic flux density - The unit of
+magnetic induction and magnetic flux density shall be the tesla.
+(Symbol: T)
+
+The tesla is the uniform magnetic induction which, distributed evenly
+over a surface of one square metre, produces a total magnetic flux of
+one weber while passing over the surface.
+
+1T = 1Wb/1m?
+
+Unit of magnetic field strength - The unit of magnetic field strength
+shall be the ampere per metre. (Symbol: A/m or Am")
+
+The ampere per metre is the magnetic field strength produced in
+vacuum along the surface of a circular cylinder with a circumference of
+one metre, by a current of intensity of one ampere, maintained in a
+Straight conductor of infinite length, of negligiblé circular cross-section,
+which forms the axis of the said cylinder.
+
+Unit of current density — The unit of current density shall be the ampere
+per square metre. (Symbol: A/m?)
+
+The ampere per square metre is the current density in a linear
+conductor when a current of intensity one ampere flows uniformly
+through a cross-section of the conductor equal to one square metre,
+perpendicular to the direction of flow of the
+
+current
+
+PART V
+Derived Units in Relation to Electromagnetic Radiation and Light
+
+Unit of radiant intensity — The unit of radiant intensity shall be the watt
+per steradian. (Symbol: W/sr).
+
+The watt per steradian is the radiant intensity of a point source
+uniformly emitting a radiant flux of one watt within a solid angle of one
+steradian.
+
+Unit of irradiance — The unit of irradiance shall be the watt per square
+metre. (Symbol: W/m?)
+
+The watt per square metre is the irradiance produced by a radiant flux
+of one watt, distributed uniformly over an element having a surface of
+one square metre
+
+[See also (1) above]
+
+Unit of radiance — The unit of radiance shall be the watt per square
+metre steradian. (Symbol: W/m?.sr)
+
+The watt per square metre steradian is the radiance of a source
+radiating one watt per steradian per square metre of projected area.
+
+Unit of luminance — The unit of luminance shall be the candela per
+square metre. (Symbol: cd/m?)
+
+Buy Gxt -9-

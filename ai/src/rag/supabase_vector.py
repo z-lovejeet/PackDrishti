@@ -104,6 +104,27 @@ BENCHMARK_STATUTORY_KNOWLEDGE = [
     },
 ]
 
+# Dynamically augment with the 2026 statutory dataset from dataset/cleaned_rules_2026.json
+try:
+    import os, json
+    _dataset_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "dataset", "cleaned_rules_2026.json")
+    if os.path.exists(_dataset_path):
+        with open(_dataset_path, "r", encoding="utf-8") as _fp:
+            _rules_data = json.load(_fp)
+        for _r in _rules_data:
+            _ident = _r["rule_number"].replace(" ", "_").upper()
+            BENCHMARK_STATUTORY_KNOWLEDGE.append({
+                "rule_identifier": f"LM_{_ident}",
+                "title": f"{_r['rule_number']}: {_r['title']}",
+                "act_reference": f"{_r['statutory_act']} ({_r.get('gazette_reference', 'Gazette of India 2026')})",
+                "amendment_year": 2026,
+                "full_text": _r["summary"],
+                "penalty_summary": _r.get("enforcement_clause", "Statutory compliance required under Legal Metrology Act, 2009 Section 36(1)."),
+                "compounding_amount": 10000.0,
+            })
+except Exception as _e:
+    logger.debug(f"Dataset 2026 augmentation skipped: {_e}")
+
 
 class SupabaseVectorRAG:
     """

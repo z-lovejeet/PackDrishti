@@ -1,0 +1,67 @@
+B THE GAZETTE OF INDIA : EXTRAORDINARY [Parr Il-Sve. 3(ii)]
+
+= 101 325 Pa . |
+| Stefan-Boltzmann constant, | o 5.67051(19) | 10°Wm 7k | 34
+(17/60)k*/n%c? = I
+first radiation constant Cy 3.7417749(22) 10 wm 0.60
+2tthc?
+| Second radiation constant, | ¢ 0.01438769(12) mK 8.4
+he/k
+
+Wien displacement law b 2.897756(24) 10%mK 8.4 “2
+constant,
+
+D = AmaxT =
+C2/4.96511423...
+
+* The scalar Magnitude of the neutron moment is listed here. The neutron
+magnetic dipole is directed Oppositely to that of the proton, and corresponds
+to the dipole associated with a spinning negative charge distribution. The
+vector sum lg = Hp * Un, iS approximately satisfied.
+
+” The entropy of an ideal monoatomic gas of relative atomic weight A, is given
+by S=S, + 3/2 RhA, — Rin(p/p,) + 3/2 Rin (TK)
+
+THE TENTH SCHEDULE
+(See Rule 20)
+
+The following Co-efficients shall be used for the purpose of these rules: - ri
+1. Alcoholic strength — (a) The “alcoholic Strength by volume” of a mixture of
+
+water and alcohol is the ratio of the volume of alcohol, measured at 20°C,
+
+Contained in the mixture to the total volume of the mixture measured at the
+
+same temperature. The symbol is “%Vo]",
+
+(b) The “alcoholic Strength by mass” of a mixture of water and alcohol is the
+
+fatio of the mass of alcohol Contained in the mixture to the total mass of the
+
+mixture. The symbol is “Ymass’.
+
+For the purpose of the inter-relation between these two Strengths and
+between the density of the aqueous solution of alcohol, the International
+Recommendation No. 22 on Alcoholometry, together with the International
+Alcoholometric Tables, shall be used.
+
+2. Hardness numbers for materials — (a) Brinell Hardness Number ~ A
+number related to the size of the permanent impression made by a ball
+indenter of specified size, pressed into the Surface of the material under a
+specified load. The surface area of the impression is determined from the
+average measured diameter of the rim of the impression and from the ball
+diameter. In reporting Brinell hardness number, the International
+Recommendation No. 9, on Verification and Calibration of Brinell Hardness
+Standards Blocks, shall be used. :
+
+(b) Diamond Pyramid or Vickers Hardness Number - A number obtained by
+dividing the load in kilograms applied to a square-based Pyramidal diamond
+indenter having included face angles of 136° by the surface area of the
+impression calculated from the measured diagonal of the impression. In
+reporting: diamond Pyramid hardness, the International Recommendation No.
+10, on Verification and Calibration of Vickers Hardness Standards Blocks,
+shall be used.
+
+(c) Rockwell Hardness Number ~ A number derived from net increase in
+depth of impression as the load on an indenter is increased from a fixed
+minimum load to high load and then returned to the minimum load. In

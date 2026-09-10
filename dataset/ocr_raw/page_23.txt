@@ -1,0 +1,51 @@
+THE GAZETTE OF INDIA : EXTRAORDINARY [Part th Sie. 30]
+
+The candela per square metre is the luminance perpendicular to the
+plane surface of one square metre of a source, the luminous intensity
+of which perpendicular to this source is one candela.
+
+5. Unit of luminous flux — The unit of luminous flux shall be the lumen
+(Symbol: Im)
+The lumen is the luminous flux emitted in a solid angle of one steradian
+by a uniform point source having a luminous intensity of one candela.
+
+1 Im =1 cd. 1sr
+6. Unit of illuminance - The unit of illuminance shall be the lux. (Symbol:
+Ix)
+
+-The lux is the illuminance produced by a luminous flux of one lumen,
+uniformly distributed over a surface of area one square metre.
+1 Ix = 1 Im/ 1m?
+
+PART VI
+Derived Unit in Relation to ionizing Radiations
+
+1 Unit of activity (radioactivity) - The unit of activity (of a radioactive
+source) shall be the becqueral. (Symbol:Bq) z
+The becqueral is the activity of a radioactive source in which one
+transformation or one transition takes place in one second
+1 Bq =1/1.s
+
+2; Unit of absorbed dose — The unit of absorbed dose shall be gray which
+is equivalent to one joule per kilogram. (Symbol: Gy)
+The gray is the dose absorbed in an element of substance of mass one
+kilogram to which an energy of one joule is communicated by an
+ionizing radiation, having a constant density of radiant flux,
+
+1Gy=1J/1kg
+PART VII
+Derived Units in Relation to Physical Chemistry and Molecular
+: Physics
+1. Unit of concentration (of amount of substance) - The unit of
+
+concentration (of amount of substance) shall be the mole per cubic
+metre. (Symbol: mol/m*)
+
+The mole per cubic metre is the concentration of a homogenous
+solution having a total volume of one cubic metre and containing one
+mole of the given substance.
+
+2 Unit of molar energy — The unit of molar energy shall be the joule per
+mole. (Symbol: J/mol)
+The joule per mole is the molar energy of one mole of substance
+having the energy of one joule.

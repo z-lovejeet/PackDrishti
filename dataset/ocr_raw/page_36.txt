@@ -1,0 +1,57 @@
+(971 are 3(ii)) FRG FT UIGA : HATITTT
+
+yp
+
+reporting Rockwell hardness number on Rockwell B scale, the International
+Recommendation No. 11, on Verification and Calibration of Rockwell B
+Hardness Standardised Blocks, shall be used.
+
+Similarly, in reporting Rockwell hardness number on Rockwell C scale,
+the International Recommendation No. 12, on Verification and Calibration of
+Rockwell C Hardness Standardised Blocks, shall be used.
+
+3. For the purpose of determining the sugar content present in the sugar
+solutions either of the two following coefficients may be used. Degree Brix or
+sugar degree (°S):-
+
+(a) Degree Brix is the percentage of sucrose present by mass in the sugar
+solution. In reporting the degree Brix, Indian Standard specification for Brix
+hydrometers: (IS: 7324-1974) shall be used, till such time, the Director of
+Legal Metrology or the International Organisation of Legal Metrology prepares
+such document. Face
+
+(b) Sugar degree on the international sugar scale is defined as follows:-
+
+The 100° S point of the International Sugar Scale is fixed by the optical
+rotation ‘y’ undergone by the polarized light of the green line of the mercury
+isotope 198 (u-546.2271 mm in vacuum). When passing through a 200.000
+mm length of sucrose solution in pure water, kept at a temperature of
+20.00°C, and containing 26.0160 g, weighed in a vacuum of pure sucrose per
+100.000 cm of solution ‘normal’ sugar solution.
+
+A mass of 26.0160 g of sucrose corresponds to 26.000 g when this
+sucrose is weighed in air by means of weights with a density of 8000 kg/m? in
+air, at a standard pressure of 101325 Pascal, at a temperature of 20°C and a
+relative humidity of 50%, the density of this air therefore being 1.2 kg/m’.
+
+4. Relative Humidity — It is the ratio of the actual vapour pressure of water
+vapours present in air at the temperature of measurement of the saturation
+vapour pressure over a plane liquid water surface at the same temperature
+This is expressed as a pure number as percentage.
+
+5. ph is the logarithm to the base 10 of the inverse of*the hydrogen ion
+concentration in a dilute ionic solution.
+
+Explanation:
+
+A 0,04 molar hydrochloric acid solution will have hydrogen ion
+concentration of 10* mol and its ph value is 1.4 Similarly, 0.001 mol
+hydrochloric acid solution will have the hydrogen ion concentration of 10° mol
+and its ph value is 3
+
+[F. No. WM-9(6)/2010-Pt ]
+RAKESH KACKER, Addl. Secy.
+
+Printed by the Manager, Government of India Press, Ring Road. Mayapuri, New Delhi-l10004.
+
+and Published by the Controller of Publications, Delhi-1 10054

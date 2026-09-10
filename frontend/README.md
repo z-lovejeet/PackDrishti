@@ -5,7 +5,7 @@ A streamlined, humanized software system developed under the **Legal Metrology (
 
 ---
 
-## 🏛️ Regulatory Background & Government Dataset
+## Regulatory Background & Government Dataset
 - **Administering Authority**: Department of Consumer Affairs (DoCA), Government of India
 - **Statutory Rules**: Legal Metrology (Packaged Commodities) Rules, 2011 (LMPC Rules)
 - **Dataset Integration**: Direct integration with the official DoCA Legal Metrology repository:
@@ -24,7 +24,7 @@ A streamlined, humanized software system developed under the **Legal Metrology (
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
 ```bash
@@ -44,7 +44,7 @@ npm run build
 
 ---
 
-## 🖥️ Streamlined 4-View Architecture
+## Streamlined 4-View Architecture
 
 | # | Page / Feature | Key Capabilities & Highlights |
 |---|---|---|
@@ -55,7 +55,7 @@ npm run build
 
 ---
 
-## 🎨 Humanized Design System
+## Humanized Design System
 - **Restrained Civic Palette**: Flat Deep Teal (`#1B5E7B`), Warm Amber (`#E67E22`), Forest Green (`#27AE60`), Brick Red (`#C0392B`), and crisp neutral grays (`#F9FAFB`, `#374151`).
 - **Anti-AI-Slop Guarantee**: Zero gradient card backgrounds, zero neon glows, zero glassmorphism, no marketing buzzwords.
 - **Genuine Indian Context**: Realistic Indian packaged commodities (*Parle-G Gold, Tata Salt Iodised, Amul Butter, Fortune Sunflower Oil, Catch Black Pepper, Haldiram's Bhujia*), valid postal addresses with 6-digit PIN codes, and Indian currency formatting (`₹ 55.00`).

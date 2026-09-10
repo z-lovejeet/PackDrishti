@@ -1,0 +1,55 @@
+(FT Hee 3(ii)}
+
+THE SEVENTH SCHEDULE
+(See rule 18)
+C.G.S units with special names
+
+Name of Unit | Symbol | Value in terms of base, supplementary or derived |
+unit
+
+(1) erg erg 1erg=107J
+
+(2) dyne dyn Tdyn= 10°N
+
+(3) poise iy 1 P-1dyns/cm? = 0.1 Pa.s
+| (4) stokes st 1st=1cm%/s= 107 ms
+
+(5) gauss Gs 1Gs=107T
+
+(6) oersted Oe 1 Oe = 1000 A/m
+
+40
+~ F(7) maxwell Mx 1Mx=10%Wb > eA
+| (8) stilb sb 1 sb = 1 cd/om? = 10° cd/m?
+L(9) phot _ph 1 ph = 10 Ix act
+THE EIGHT SCHEDULE
+
+(See rule 18)
+
+Units outside the International System
+
+Name of Unit
+
+Value in terms of base, Supplementary or
+derived units
+
+* is value is that of the ‘IT’ calorie (5'"
+
+(1) fermi 1fermi= 1 fm = 10m _
+(2) ai torr
+(3) kilogram-force(kgf) T
+(4) calorie (cal)
+(5) micron
+|_(6) X unit
+A?) |___stere (st)"" |
+(8) _gamma (y) as
+(9) a Say _1y = tpg = 10%kg
+| (10) iN _1A= Apl= 10%
+
+International Conference on
+
+Properties of Steam, London, 1956)
+“ This special unit was employed to express wavelengths of X-rays
+“* This special unit was used to measure firewood
+
+S44 arn 10

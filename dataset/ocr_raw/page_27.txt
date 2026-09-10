@@ -1,0 +1,46 @@
+7 THE GAZETTE OF INDIA : EXTRAORDINARY [Parr [Six 3(ii)|
+11 Expression of Numbers -
+
+(1) To express numbers in connection with units of weights and
+measures, the dot shall be used to Separate the integral part of
+numbers from the decimal Part.
+(2) Numbers shall be divided in groups of three Starting from the
+decimal point in order to facilitate regarding and neither dots nor
+commas shall be inserted in the space between Such group of
+numbers.
+ILLUSTRATION
+Write 3211 468.022 82
+Not 3.211.468.022 82
+Or 3,211,468.022 82
+
+THE FOURTH SCHEDULE -
+
+(See rule 15)
+
+if. Permitted units of time ~ (1) The permitted units in relation to time shall
+be as follows, namely: -
+
+2; Permitted units Of plane angle — The Permitted units in relation to plane
+angle shall be as follows, namely: -
+(i) The degree, equal to 11/180 radian (Symbol: Ph:
+(ii) The minute, equal to 77/10800 radian or (1/60) ° (Symbol: ), and
+(iii) The second €qual to 1/648000 radian or (1/60) (Symbol: ).
+
+litre (Symbol: !). The litre shall be equal to one thousand part of the
+cubic metre.
+
+11= 1 dm* = 103 m3
+(2) The litre shall not be used for work involving precise
+measurements
+
+4. Permitted unit of mass — (1) The permitted unit of Mass shall be the
+tonne. (Symbol: t). The tonne shall be equal to 1000 kilograms
+(2) Only the Prefixes “kilo”, “mega”, “giga” and “tera” specified in the
+Third Schedule May be used with the tonne
+
+THE FIFTH SCHEDULE
+(See Rule 16)
+Special Units and their Symbols
+
+AD Special unit of energy -The special unit of energy acquired by an
+electron shall be the electron volt. (Symbol: eV)

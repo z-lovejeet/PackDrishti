@@ -1,0 +1,67 @@
+THE GAZETTE OF INDIA : EXTRAORDINARY [Parr II
+
+See. 3(ii)]
+
+Kg/cm* = kg/ 10° m? = 198 kg/m?
+Similarly g/cm? = 1000 kgim®
+
+Symbol how to be combined with units — (a) The symbol of the prefix
+shall be placed before the unit symbol without any intermediary space
+or dot.
+
+(b) The combination Shall form the symbol of the multiple and sub-
+multiple of the
+
+unit.
+
+(c) The symbol for the prefix shall be Considered to be Combined with
+the symbol of the unit to which it is directly linked together, forming a
+new unit symbol, which can be combined with other unit symbols to
+form composite unit symbols.
+
+Errors how to be avoided ~ To avoid errors in calculations, all
+quantities shall be expressed in SI units, and Powers of 10 shall be
+used.
+
+Exponents — An exponent affixed to a symbol containing a prefix
+indicates that the multiple or Sub-multiple of the unit is raised to the
+Power expressed by the exponent.
+
+ILLUSTRATION
+
+1m = 10? m gives 1 cm? = 10° m? and 1 cm = 10? m1
+
+Compound units how to be formed — Only one prefix shall be used in
+forming the multiples of a compound unit, and compound prefixes shall
+not be used.
+
+ILLUSTRATION
+
+Write nm (nano metre), instead of mum
+
+Use of prefixes with unit mass — Notwithstanding that the base unit of
+mass contains a prefix, names of decimal multiples or sub-multiples of
+the unit of mass shall be formed by attaching prefixes to the word
+gram.
+
+ILLUSTRATION
+
+Write milligram (mg) but not micro kilogram (ukg)
+
+Printing: (1) Symbols of units -
+
+(a) Shall be Printed in roman (upright) type irrespective of the type used
+in the rest of the text;
+
+(b) Shall remain unaltered in the plural;
+
+(c) Shall be written, without a final full stop (period) unless the context
+otherwise requires; and
+
+(d) shall be placed after the complete numerical value in the expression
+for a quantity, leaving a Space between the numerical value and the
+unit.
+
+(2) The symbol for Units of weight or measure shall be printed in lower
+Case letters €xcept that the first letter Shall be printed in Upper case
+when the name of the unit is derived from a Proper name

@@ -1,0 +1,51 @@
+[ APT ave 3(ii) | ART TUS; Ae 5
+| fine-structure constant, a 7.29735308(33) 110% 0.045
+Yopoce?/h cal
+| inverse — fine-structure CLS 137.0359895(61) 0.045
+constant
+| Rydberg constant, R. 10973731.534(13) | m7? 0.0012 |
+Yameca*/h iE
+| in hertz, Rac 3.2898419499(39) 10° Hz 0.0012 =
+in joules, R-he [ 2.1798741(13) 107 0.60
+Lin eV, Rehe/{e} 13.6056981(81) ev 0.36
+Bohr radius, a/4m7R. EM 0.529177249(24) 10m 0.045
+Hartree energy, e/41re,a, = En 4.3597482(26) 1074 0.60
+| 2R.he |
+win eV.EhIe) _| 27217396767 eV 0.30
+quantum of circulation __|h/2me___|'3.63694807(33) | 10%mZs 0.089
+L hime __| 7.27389614(65) {10%m?s* 0.089
+ELECTRON
+electron mass Me 9.1093897(54) 10°" kg 0.59
+ee Pia 5.48579903(13) 107u 0.023
+in electron volts, mec"/{e} 0.51099906(15) MeV 0.30
+_electron-muon mass ratio _ | melmy 4.83633218(71) 105. 0.15
+electron-proton mass ratio Me/Mp 5.44617013(11) 10 0.020
+_ @lectron-deuteron mass me/mg 2.72443707(6) 107 0.020
+| ratio
+' electron-a-particle mass | mele 1.37093354(3) 10* 0.021
+ratio
+electron specific charge -e/Me ~1.75881962(53) 10"Ckg™ | 0.30
+electron molar mass__ M(e),Me | 5.48579903(13) i 10” kg/mol 0.023
+Compton wavelength, Ac 2.42631058(22) | 10°*m 0.089
+OU ee eee oe eee ae
+Ad2T1=ap = a7/47R= Ac 3.86159323(35) 0m [0.089
+| classical electron radius, | re 2.81794092(38) 10%m 0.13
+Qa" ao |
+Thomson cross-section, | ds 0.665246 16(18) (10%m? [0.27
+(8m/3)P ee ure ieee bi
+_£lectron magnetic moment _| Ue 928.47701(31) | 107UT™ “+ 0.34
+in Bohar magnetons Lelup 1.001 159 652 | 1xi0®
+a 193(10) |
+_in nuclear magnetons Helin 1838.282000(37) 0.020
+electron magnetic moment | ae 1.159652193(10) 10° 0.0086
+anomaly; pelie-1 8 ar obit
+_Slectron g-factor, 2(1+a.) le _____| 2.002319304386(20) | _ TxXA0>
+electron-muon magnetic He/Ly 206.766967(30) | 0.15
+momentratio (tee tt |
+electron-proton magnetic He/Up 658.2106881 (66) 0.010
+=moment ratio _ ;
+ee pw) RA MUON ia sire oa |
+-Muon mass 1.8835327(11) —70"%g__—*( 061
+RPE 7 —_..._ | 0.113428913(17) tu 0.15
+in electron volts, myc"{e} 105.658389(34) _MeV _ 0.32
+

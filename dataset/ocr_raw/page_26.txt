@@ -1,0 +1,68 @@
+Carr [lee 3(ii)] SRG FT USA: Sta
+
+ILLUSTRATION
+m - metre
+
+s - second
+
+A- Ampere
+
+Wb - weber
+
+8 Multiplication of units — (1) When a compound unit is formed by
+Multiplication of two or more units, the multiplication may be indicated
+in one of the following ways:
+
+m, N, N.m, Nm
+
+(2) In using a symbol of a unit of weight or measure which coincides
+with the symbol for a prefix, special care shall be taken to avoid
+confusion.
+
+ILLUSTRATION
+
+The unit ‘newton metre’ shall be written Nm or m.N to avoid confusion
+with MN, the millinewton
+
+9. Division of Units - (1). When a compound is formed by dividing one
+unit by another the division shall be indicated in one of the following
+ways: -
+
+m/s or by writing the product of m and sas ms
+
+(2). The letter p shall not be used to denote division.
+ILLUSTRATION
+
+Do not write kmph, write km/h or km.h”
+
+(3). In no case shall more than one solidus (oblique stroke) on the
+same line be included in such a combination unless a parenthesis is
+inserted to avoid ambiguity:
+
+ILLUSTRATION
+
+Write m/s? or m.s? but not m/s/s/
+
+(4). In complicated cases, negative powers or parenthesis shall be
+used.
+
+ILLUSTRATION
+
+Write m.kg/(s*.A) or m.kg.s°A* but not m kg/s°A
+
+10. Expression of results — (1) The appropriate integral multiple and sub-
+multiple to which a unit is to be expressed shall be selected in such a
+manner that the numerical value to be expressed is between 0.1 and
+1000
+ILLUSTRATION
+1.2 x 10‘N may be written as 12 KN
+0.00 394 m may be written as 3.94 mm
+1 40 1 Pa may be written as 1.401 kPa
+3.1 x 10%s may be written as 31 ns
+(2) In a table of values for the same quantity or in a discussion of such
+values within a given context the same integral multiple or sub-multiple
+of a unit may be used for all items, even when some of the numerical
+values may be outside the range of 0.1 to 1000.
+
+(3) For the purpose of expression of dimensions in mechanical
+engineering drawings only the millimetre shall be used

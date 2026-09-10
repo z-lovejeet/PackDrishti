@@ -1,0 +1,55 @@
+[5M ere 3(ii)] ARG BT TTA; STeTETT
+
+3.
+
+Unit of molar entropy - The unit of molar entropy shall be the joule per
+mole kelvin. (Symbol: J/mol.K)
+
+The joule per mole kelvin is the molar entropy of a system of
+homogenous mass having a substance equal to one mole receiving a
+quantity of heat equal to one joule at the constant thermodynamic
+temperature of one kelvin provided that no irreversible change takes
+place in the system.
+
+Unit of molar heat capacity - The unit of molar heat Capacity shall be
+the joule per mole kelvin. (Symbol: J/mol.K)
+
+The joule per mole kelvin is the molar heat capacity of a homogenous
+body having an amount of substance equal to one mole, in which a
+quantity of heat equal to one joule produces an increase of one kelvin
+in the thermodynamic temperature.
+
+THE THIRD SCHEDULE
+(See rule 14)
+NAMES, MAGNITUDES AND SYMBOLS OF SI PREFIXES
+AND PRINCIPLES OF USE OF SI PREFIXES
+
+Names, Magnitudes and Symbols of SI Prefixes - The names of ‘
+prefixes, their magnitudes and symbols shall be as given in Table 1
+
+TABLE 1
+Names of Prefixes, their Magnitudes and Symbols
+
+Name of Prefix | Magnitude of Prefix | Symbol of Prefix
+exa 10" E
+peta 19 [ P
+tera 10” T
+L_giga iE 107 [ G
+mega 10% M Z|
+[ kilo | 10 at k
+hecta ‘iE 107 h
+deca [ 10" da
+deci 107% i d
+centi 1025 c
+milli 10% m
+| micro 10 L
+[nano | 10° [ n
+ico 10°
+2 lee 107° il f
+atto iE ea a
+
+Explanation: The unit of length is metre with symbol m: after adding a
+Prefix c’ for centi we get “cm” as new unit symbol. This can be raised to
+@ positive exponent 3 to give the unit of volume. Similarly this can be
+combined with another unit Say ‘kg’ and by giving it negative exponent
+3 to indicate density in kg per cm®.

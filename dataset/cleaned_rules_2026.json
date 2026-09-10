@@ -1,0 +1,212 @@
+[
+  {
+    "rule_number": "Rule 3",
+    "title": "Units of Weight or Measure to be based on Metric System",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii)",
+    "summary": "Mandates that every unit of weight or measure in India shall be strictly based on the metric system conforming to the International System of Units (SI) recommended by General Conference on Weights and Measures (CGPM) and International Organisation of Legal Metrology (OIML).",
+    "enforcement_clause": "Strict prohibition on non-metric or obsolete customary units in retail, trade, or commerce."
+  },
+  {
+    "rule_number": "Rule 4",
+    "title": "Base Unit of Length (Metre)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii), Rule 4",
+    "summary": "The base unit of length is the metre (symbol: m). The metre is defined as the length of path travelled by light in vacuum during a time interval of 1/299,792,458 of a second.",
+    "permitted_symbols": [
+      "m",
+      "cm",
+      "mm",
+      "km"
+    ],
+    "prohibited_symbols": [
+      "mtr",
+      "mtr.",
+      "mt",
+      "inch",
+      "in",
+      "ft",
+      "yard"
+    ]
+  },
+  {
+    "rule_number": "Rule 5",
+    "title": "Base Unit of Mass (Kilogram)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii), Rule 5",
+    "summary": "The base unit of mass is the kilogram (symbol: kg). Standard retail packaged net quantities must declare weight in kilogram (kg), gram (g), or milligram (mg).",
+    "permitted_symbols": [
+      "kg",
+      "g",
+      "mg"
+    ],
+    "prohibited_symbols": [
+      "gm",
+      "gms",
+      "gm.",
+      "kg.",
+      "kilo",
+      "kgs",
+      "oz",
+      "lbs",
+      "pound"
+    ]
+  },
+  {
+    "rule_number": "Rule 6",
+    "title": "Base Unit of Time (Second)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii), Rule 6",
+    "summary": "The base unit of time is the second (symbol: s). Expressed for duration, shelf-life, and manufacturing timestamps.",
+    "permitted_symbols": [
+      "s",
+      "min",
+      "h",
+      "d"
+    ],
+    "prohibited_symbols": [
+      "sec",
+      "sec.",
+      "secs",
+      "hr",
+      "hrs"
+    ]
+  },
+  {
+    "rule_number": "Rule 7",
+    "title": "Base Unit of Electric Current (Ampere)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii), Rule 7",
+    "summary": "The base unit of electric current is the ampere (symbol: A).",
+    "permitted_symbols": [
+      "A",
+      "mA",
+      "kA"
+    ]
+  },
+  {
+    "rule_number": "Rule 8",
+    "title": "Base Unit of Thermodynamic Temperature (Kelvin)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii), Rule 8",
+    "summary": "The base unit of thermodynamic temperature is the kelvin (symbol: K). Degree Celsius (symbol: \u00b0C) is permitted for practical temperature declarations including storage conditions.",
+    "permitted_symbols": [
+      "K",
+      "\u00b0C"
+    ]
+  },
+  {
+    "rule_number": "Rule 9",
+    "title": "Base Unit of Luminous Intensity (Candela)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii), Rule 9",
+    "summary": "The base unit of luminous intensity is the candela (symbol: cd).",
+    "permitted_symbols": [
+      "cd"
+    ]
+  },
+  {
+    "rule_number": "Rule 10",
+    "title": "Base Unit of Amount of Substance (Mole)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Gazette of India Extraordinary Part II Sec. 3(ii), Rule 10",
+    "summary": "The base unit of amount of substance is the mole (symbol: mol).",
+    "permitted_symbols": [
+      "mol",
+      "mmol"
+    ]
+  },
+  {
+    "rule_number": "Rule 12",
+    "title": "Supplementary Units (First Schedule)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "The First Schedule, Rule 12",
+    "summary": "Defines supplementary units: plane angle radian (rad) and solid angle steradian (sr).",
+    "permitted_symbols": [
+      "rad",
+      "sr"
+    ]
+  },
+  {
+    "rule_number": "Rule 13",
+    "title": "Derived Units and Standard Symbols (Second Schedule)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "The Second Schedule, Rule 13",
+    "summary": "Defines standard derived units in mechanics, thermodynamics, electromagnetism, and optics: square metre (m\u00b2), cubic metre (m\u00b3), litre (L, l), pascal (Pa), newton (N), joule (J), watt (W), hertz (Hz). Packaged liquid commodities must declare volume in litre (L, l) or millilitre (mL, ml).",
+    "permitted_volume_symbols": [
+      "L",
+      "l",
+      "mL",
+      "ml",
+      "kL",
+      "kl"
+    ],
+    "prohibited_volume_symbols": [
+      "ltr",
+      "ltrs",
+      "ml.",
+      "cc",
+      "cu.cm",
+      "fluid oz",
+      "gallon"
+    ]
+  },
+  {
+    "rule_number": "Rule 14",
+    "title": "Decimal Multiples and Sub-multiples (Third Schedule)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "The Third Schedule, Rule 14",
+    "summary": "Specifies official SI prefixes and multiplier factors from 10^24 to 10^-24: yotta (Y), zetta (Z), exa (E), peta (P), tera (T), giga (G), mega (M), kilo (k), hecto (h), deca (da), deci (d), centi (c), milli (m), micro (\u03bc), nano (n), pico (p), femto (f), atto (a), zepto (z), yocto (y). Strict case sensitivity enforced (e.g. k for kilo, not K; M for mega, m for milli).",
+    "prefix_rules": "Compound prefixes are prohibited. Prefix symbols must immediately precede unit symbol with zero space (e.g. kg, mL, mg)."
+  },
+  {
+    "rule_number": "Rule 15",
+    "title": "Permitted Non-SI Units of Mass, Area and Volume (Fourth Schedule)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "The Fourth Schedule, Rule 15",
+    "summary": "Authorizes specific practical units: Mass: tonne (t = 1000 kg), Area: are (a = 100 m\u00b2), hectare (ha = 10000 m\u00b2), Volume: litre (L, l = 1 dm\u00b3 = 0.001 m\u00b3).",
+    "permitted_symbols": [
+      "t",
+      "a",
+      "ha",
+      "L",
+      "l"
+    ]
+  },
+  {
+    "rule_number": "Rule 18",
+    "title": "Progressive Discontinuation of Obsolete & CGS Units (Seventh & Eighth Schedules)",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "The Seventh and Eighth Schedules, Rule 18",
+    "summary": "Orders complete discontinuation of non-metric CGS units and imperial units in commerce: dyne, erg, poise, stokes, gauss, oersted, maxwell, stilb, phot, ounce, pound, grain, dram, pint, gallon, cubic foot. Using these in retail packaging constitutes a statutory default under Section 36(1).",
+    "discontinued_cgs_units": [
+      "dyne",
+      "erg",
+      "poise",
+      "stokes",
+      "gauss",
+      "oersted",
+      "maxwell",
+      "phot",
+      "stilb"
+    ],
+    "discontinued_imperial_units": [
+      "inch",
+      "foot",
+      "yard",
+      "mile",
+      "ounce",
+      "pound",
+      "grain",
+      "gallon",
+      "fluid ounce"
+    ]
+  },
+  {
+    "rule_number": "Rule 22-25",
+    "title": "National Standards, Prototype Custody & Verification",
+    "statutory_act": "Legal Metrology Act, 2009",
+    "gazette_reference": "Chapter III & IV, Rules 22-25",
+    "summary": "Assigns national prototype standards custody and realization to the National Physical Laboratory (NPL), New Delhi. Establishes legal traceability of all secondary and working standards used by Legal Metrology inspectors across all Indian States and Union Territories."
+  }
+]

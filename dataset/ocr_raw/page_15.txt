@@ -1,0 +1,40 @@
+38 THE GAZETTE OF INDIA : EXTRAORDINARY [Part Il—Sec. 3(ii)|
+
+THE FIRST SCHEDULE
+(See rule 12)
+Supplementary Units and their symbols
+1. Unit of plane angle- The unit of plain angle shall be the radian. (symbol: rad)
+The radian is the plane angle between two radii of a circle which cutoff, on the
+
+circumference, an arc equal in length to the radius.
+2. Unit of solid-angle- The unit of solid angle shall be the steradian. (symbol: sr)
+
+The steradian is the solid angle which, having its vertex in the centre of a sphere,
+cuts off an area of the surface of the sphere equal to that of a square with sides of
+
+length equal to the radius of the sphere.
+THE SECOND SCHEDULE
+
+(See rule 13)
+Derived Units and Their Symbols
+PartI
+Derived Unit in relation to Space and Time
+1. Unit of Area: The unit of area shall be the square metre. (Symbol: m*)
+
+The square metre is the area of a square with sides of one metre each.
+2. Unit of Volume: The unit of volume shall be the cubic metre, (Symbol: m3)
+
+‘The cubic metre is the volume of a cube with sides of one metre each.
+3. Unit of frequency: The unit of frequency shall be the hertz. (Symbol: Hz)
+
+The hertz is the frequency of a periodic phenomenon, the period of which is one
+second.
+
+1Hz= 1/1s.
+4. Unit of angular velocity: The unit of angular velocity shall be the radian per
+
+second. (Symbol: rad/s)
+The radian per second is the angular velocity of a body, rotating around the fixed
+axis, which rotates through one radian in one second, when set in uniform
+
+rotation,

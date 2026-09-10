@@ -74,10 +74,9 @@ class VisualPerceptionExtractor:
         self.api_key = settings.GEMINI_API_KEY
         self.pixel_per_mm = settings.CALIBRATION_PIXEL_PER_MM
         self.model_hierarchy = [
-            "gemini-3.7-flash",
-            "gemini-3.5-flash",
             "gemini-3.5-flash-lite",
-            "gemini-3.1-flash-lite",
+            "gemini-3.5-flash",
+            "gemini-3.7-flash",
             "gemini-flash-lite-latest",
             "gemini-3.6-flash",
         ]

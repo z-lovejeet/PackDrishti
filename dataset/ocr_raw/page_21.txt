@@ -1,0 +1,55 @@
+10.
+
+14,
+
+12.
+
+4 THE GAZETTE OF INDIA : EXTRAORDINARY [Parr li—Sxc, 3(ii))
+6. Unit of electric resistance — The unit of electric resistance shall be the
+h
+
+ohm.
+(Symbol: Q)
+
+The ohm is the electric resistance between two Points of a conductor
+when a constant potential difference of one volt, applied to these
+Points, produces in the conductor a current of one ampere, the
+Conductor not being the seat of any electromotive force.
+
+TQ=1V/1A,
+
+across which there appears a potential difference of One volt when it is
+charged b b.
+TF=1C/1v
+
+Unit of. permittivity ~ The unit of permittivity shall be farad per metre.
+(Symbol: F/m).
+
+The farad per metre is the Permittivity of the medium which gives a
+Capacitance of one farad per Square metre of area of two parallel
+Plates separated by a distance Of one metre.
+
+Unit of inductance ~ The unit of inductance Shall be the henry,
+(Symbol: H)
+The henry is the inductance of a closed circuit in which an
+electromotive force Of one volt is Produced when the electric Current in
+the circuit varies uniformly at the rate of one ampere per second
+1H=1V1s
+1A
+
+Unit of permeability — The unit of Permeability shall be the henry per
+metre. (Symbol: H/m)
+
+The henry Per metre is the Permeability of a material surrounded bya
+Single turn of flat sheet Conductor including an area of one Square
+metre and length one metre which gives an inductance of one henry,
+
+Unit of Magnetic flux and flux of Magnetic induction — The unit of
+Magnetic flux and flux Of magnetic induction shall be the weber.
+(Symbol: Wb)
+
+The weber is the Magnetic flux which, linking a Circuit of one turn,
+would produce in it an electromotive force of one Volt if it were reduced
+to zero at a uniform rate in one second.
+
+1Wb=1V1s

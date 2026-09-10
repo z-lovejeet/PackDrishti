@@ -16,7 +16,11 @@ import {
   Info,
   ShieldCheck,
   UploadSimple,
-  FileText
+  FileText,
+  Drop,
+  WarningCircle,
+  UsersThree,
+  ShieldWarning
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
@@ -27,6 +31,142 @@ import { DietaryAdvisory } from '../../components/health/DietaryAdvisory';
 import { ProductHealthAudit } from '../../types';
 import { apiClient } from '../../utils/apiClient';
 import { downsampleImage, blobToFile } from '../../utils/imageProc';
+
+// Sample Benchmark Specimen for Instant Demo / Testing
+const SAMPLE_DEMO_AUDIT: ProductHealthAudit = {
+  id: 'DEMO-HEALTH-2026',
+  commodityName: 'Masala Instant Noodles with Tastemaker',
+  brandName: 'QuickBite Foods',
+  category: 'Ultra-Processed Packaged Food',
+  servingSize: '70 g (1 Single-Pack)',
+  netQuantity: '70 g',
+  mrp: 'Rs. 15.00',
+  pricePer100g: 'Rs. 21.43 per 100g',
+  priceRating: 'Fair Market Rate',
+  priceAnalysis: 'Statutory Unit Sale Price of Rs. 21.43/100g complies with Legal Metrology Rule 6(11). Budget market segment tier.',
+  overallRating: 'High Health Concern',
+  ratingScore: 24,
+  frontImageUrl: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=600&q=80',
+  backImageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80',
+  badges: [
+    { label: 'High Palm Oil', type: 'danger', description: 'Deep-fried in industrial refined palm olein' },
+    { label: 'High Sodium', type: 'danger', description: '1,640mg per 100g (82% of ICMR daily allowance)' },
+    { label: 'High Saturated Fat', type: 'danger', description: '12.8g saturated fat per 100g exceeds safe daily intake' },
+    { label: 'High Calories', type: 'warning', description: '468 kcal per 100g of empty carbohydrate calories' },
+    { label: 'Ultra-Processed (UPF)', type: 'danger', description: 'NOVA Group 4 industrial formulation' }
+  ],
+  nutrients: [
+    {
+      name: 'Energy / Calories',
+      valuePer100g: 468,
+      valuePerServe: 327.6,
+      unit: 'kcal',
+      icmrDailyLimit: '2000 kcal',
+      level: 'High',
+      assessment: 'High caloric density derived primarily from refined starch and palm oil.'
+    },
+    {
+      name: 'Added Sugars',
+      valuePer100g: 2.8,
+      valuePerServe: 1.96,
+      unit: 'g',
+      icmrDailyLimit: '25 g',
+      level: 'Low',
+      assessment: 'Within acceptable range, but tastemaker contains hidden maltodextrin.'
+    },
+    {
+      name: 'Total Sodium',
+      valuePer100g: 1640,
+      valuePerServe: 1148,
+      unit: 'mg',
+      icmrDailyLimit: '2000 mg',
+      level: 'Excessive',
+      assessment: '1148mg per single serve delivers 57.4% of total daily safe sodium limit.'
+    },
+    {
+      name: 'Saturated Fatty Acids',
+      valuePer100g: 12.8,
+      valuePerServe: 8.96,
+      unit: 'g',
+      icmrDailyLimit: '15 g',
+      level: 'Excessive',
+      assessment: 'Exceeds recommended per-meal threshold due to flash-frying in palm olein.'
+    },
+    {
+      name: 'Total Dietary Fiber',
+      valuePer100g: 1.8,
+      valuePerServe: 1.26,
+      unit: 'g',
+      icmrDailyLimit: '30 g',
+      level: 'Low',
+      assessment: 'Extremely deficient in dietary fiber due to refined wheat flour (maida).'
+    },
+    {
+      name: 'Protein',
+      valuePer100g: 7.2,
+      valuePerServe: 5.04,
+      unit: 'g',
+      icmrDailyLimit: '50 g',
+      level: 'Moderate',
+      assessment: 'Incomplete grain protein lacking essential amino acids (lysine).'
+    }
+  ],
+  shouldWeEatIt: 'Do NOT consume regularly. Strictly limit to rare occasional indulgence (maximum once a month) or avoid entirely if managing cardiovascular or metabolic conditions.',
+  howBadIsIt: 'This product is an ultra-processed food formulation (NOVA 4) dominated by refined wheat flour (Maida) deep-fried in 100% palm oil. A single 70g serving exposes the consumer to 57% of daily sodium and 60% of saturated fat thresholds with zero protective micronutrients or fiber.',
+  notEatableForAge: [
+    'Children under 5 years: Strictly contraindicated. Immature pediatric kidneys cannot process 1,148mg of sodium per serving, increasing risk of renal hyperfiltration and childhood blood pressure elevation.',
+    'Children & Adolescents (5-16 years): Strongly discouraged. High glycemic load combined with synthetic flavor enhancers promotes dopamine spikes, food addiction, and pediatric obesity.',
+    'Seniors over 60 years: Avoid. Rapid blood pressure elevation and arterial stiffness caused by high sodium and palmitic acid.'
+  ],
+  healthProblemsIfEatenMore: [
+    'Arterial Plaque & Hypertension: 1,640mg/100g sodium triggers vascular fluid retention, while high palmitic acid from palm oil accelerates LDL cholesterol oxidation and coronary plaque deposition.',
+    'Insulin Resistance & Type-2 Diabetes: Stripped refined carbohydrates induce steep postprandial glucose spikes followed by reactive hypoglycemia and chronic hyperinsulinemia.',
+    'Non-Alcoholic Fatty Liver Disease (NAFLD): Excess refined calories and saturated fats are shunted directly to the liver, driving hepatic de novo lipogenesis.',
+    'Gut Microbiome Disruption: Zero soluble fiber and chemical additives (stabilizers, MSG, artificial colorants) degrade protective intestinal mucosal barrier.'
+  ],
+  hasPalmOil: true,
+  palmOilDetails: 'Packaging ingredients list confirms Refined Palm Olein as the primary cooking medium. Palm olein contains 45-50% saturated palmitic acid, proven to trigger hepatic LDL synthesis and vascular endothelial dysfunction when heated repeatedly in industrial processing.',
+  hasAddedSugar: false,
+  addedSugarDetails: 'Low declared sucrose, but contains maltodextrin and hydrolysed vegetable protein.',
+  hasHighSodium: true,
+  hasArtificialAdditives: true,
+  ingredientsList: [
+    'Refined Wheat Flour (Maida)',
+    'Palm Oil (Palm Olein)',
+    'Iodised Salt',
+    'Wheat Gluten',
+    'Thickeners (INS 508, INS 412)',
+    'Acidity Regulators (INS 501(i), INS 500(i))',
+    'Humectant (INS 451(i))',
+    'Tastemaker: Hydrolysed Peanut Protein',
+    'Mixed Spices (Dehydrated Onion, Red Chilli Powder, Turmeric, Garlic Powder)',
+    'Noodle Powder',
+    'Sugar',
+    'Flavor Enhancer (INS 621 - Monosodium Glutamate)',
+    'Caramel Color (INS 150d)'
+  ],
+  flaggedIngredients: [
+    { name: 'Palm Oil (Palm Olein)', reason: 'Dense source of atherogenic saturated palmitic acid (45-50%).' },
+    { name: 'Monosodium Glutamate (INS 621)', reason: 'Excitotoxic flavor enhancer masking high sodium and poor nutritional density.' },
+    { name: 'Acidity Regulators (INS 501(i), 500(i))', reason: 'Synthetic alkaline carbonates used to texturize refined wheat gluten.' },
+    { name: 'Caramel Color (INS 150d)', reason: 'Class IV caramel manufactured with ammonia and sulfites.' }
+  ],
+  whoCanConsume: [
+    'Occasional consumption by active, healthy adults with normal blood pressure and no metabolic disorders.'
+  ],
+  whoShouldAvoid: [
+    'Hypertensive patients (extreme sodium causes immediate BP spikes).',
+    'Pre-diabetic and Type-2 diabetic individuals (acute glycemic index spike).',
+    'Patients with CAD, high LDL-C, or hypercholesterolemia (palm oil saturated fat).',
+    'Toddlers and young children under 10 years.'
+  ],
+  healthierAlternatives: [
+    'Whole Wheat or Foxtail Millet Khichdi with vegetables (rich in fiber, zero palm oil, balanced sodium).',
+    'Steamed Sprouted Moong Chaat with lemon and fresh herbs (high protein, zero saturated fat).',
+    'Oats or Ragi Upma cooked in cold-pressed mustard or groundnut oil.'
+  ],
+  dietarySummary: 'Audited against ICMR-NIN 2024 Dietary Guidelines. Classified as an Ultra-Processed Food (UPF) with excessive sodium and saturated fatty acids.'
+};
 
 export const HealthCheckPage: React.FC = () => {
   // Dual Image Upload States
@@ -58,7 +198,7 @@ export const HealthCheckPage: React.FC = () => {
   const backCamRef = useRef<HTMLInputElement>(null);
   const unifiedFileRef = useRef<HTMLInputElement>(null);
 
-  // Active Audit Data Resolution: strictly live audit result
+  // Active Audit Data Resolution: strictly live audit result or sample demo
   const currentAudit: ProductHealthAudit | null = liveAuditResult;
 
   const handleFrontFile = (file: File) => {
@@ -110,6 +250,15 @@ export const HealthCheckPage: React.FC = () => {
         handleBackFile(filesArray[0]);
       }
     }
+  };
+
+  const handleLoadDemo = () => {
+    handleResetUploads();
+    setLiveAuditResult(SAMPLE_DEMO_AUDIT);
+    setFrontImageSrc(SAMPLE_DEMO_AUDIT.frontImageUrl);
+    setBackImageSrc(SAMPLE_DEMO_AUDIT.backImageUrl);
+    setFrontFileName('instant_noodles_front.jpg');
+    setBackFileName('instant_noodles_back_nutrients.jpg');
   };
 
   const runDualScanAudit = async () => {
@@ -176,20 +325,21 @@ export const HealthCheckPage: React.FC = () => {
       if (response.data && response.data.data) {
         const apiData = response.data.data;
         const mappedAudit: ProductHealthAudit = {
-          id: apiData.audit_id,
-          commodityName: apiData.product_name || 'Verified Food Commodity',
-          brandName: apiData.brand || 'Packaged Foods',
-          category: 'Packaged Food Commodity',
+          id: apiData.audit_id || 'AUDIT-' + Date.now(),
+          commodityName: apiData.product_name || apiData.commodity_name || 'Verified Food Commodity',
+          brandName: apiData.brand || apiData.brand_name || 'Packaged Foods',
+          category: apiData.category || 'Packaged Food Commodity',
           servingSize: apiData.serving_size || '100 g',
-          netQuantity: 'Standard Package',
-          mrp: 'Declared on Back Panel',
-          pricePer100g: 'Standard Basis',
-          priceRating: 'Fair Market Rate',
+          netQuantity: apiData.net_quantity || 'Standard Package',
+          mrp: apiData.mrp || 'Declared on Back Panel',
+          pricePer100g: apiData.price_per_100g || 'Standard Basis',
+          priceRating: apiData.price_rating || 'Fair Market Rate',
           priceAnalysis:
+            apiData.price_analysis ||
             apiData.dietary_summary ||
             'Audited against ICMR-NIN 2024 Dietary Guidelines for Indians.',
-          overallRating: apiData.score_band as any,
-          ratingScore: Math.round(apiData.health_score),
+          overallRating: apiData.score_band || apiData.overall_rating || 'Consume in Moderation',
+          ratingScore: Math.round(apiData.health_score || apiData.rating_score || 50),
           frontImageUrl:
             frontImageSrc ||
             'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80',
@@ -197,32 +347,44 @@ export const HealthCheckPage: React.FC = () => {
             backImageSrc ||
             'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80',
           badges: (apiData.badges || []).map((b: any) => ({
-            label: b.badge,
+            label: b.badge || b.label || 'Health Marker',
             type:
-              b.severity === 'danger'
+              b.severity === 'danger' || b.type === 'danger'
                 ? 'danger'
-                : b.severity === 'good'
+                : b.severity === 'good' || b.type === 'good'
                 ? 'good'
                 : 'warning',
+            description: b.description || '',
           })),
           nutrients: (apiData.nutrients || []).map((n: any) => ({
             name: n.name,
-            valuePer100g: n.value,
-            valuePerServe: Math.round(n.value * 0.2 * 10) / 10,
-            unit: n.unit,
-            icmrDailyLimit: `${n.icmr_limit} ${n.unit}`,
-            level: n.threshold,
-            assessment: n.assessment,
+            valuePer100g: n.value ?? n.value_per_100g ?? n.valuePer100g ?? 0,
+            valuePerServe: n.value_per_serve ?? n.valuePerServe ?? Math.round((n.value ?? 0) * 0.2 * 10) / 10,
+            unit: n.unit || 'g',
+            icmrDailyLimit: n.icmr_daily_limit ?? `${n.icmr_limit ?? ''} ${n.unit ?? ''}`.trim(),
+            level: n.threshold ?? n.level ?? 'Moderate',
+            assessment: n.assessment ?? '',
           })),
-          whoCanConsume: apiData.dietary_advisory?.who_can_consume || [],
-          whoShouldAvoid: apiData.dietary_advisory?.who_should_avoid || [],
+          whoCanConsume: apiData.who_can_consume || apiData.dietary_advisory?.who_can_consume || [],
+          whoShouldAvoid: apiData.who_should_avoid || apiData.dietary_advisory?.who_should_avoid || [],
           healthierAlternatives: (
-            apiData.dietary_advisory?.healthier_alternatives || []
-          ).map(
-            (a: any) =>
-              `${a.alternative_name}: ${a.swap_advantage} (${a.calorie_difference})`
+            apiData.healthier_alternatives || apiData.dietary_advisory?.healthier_alternatives || []
+          ).map((a: any) =>
+            typeof a === 'string' ? a : `${a.alternative_name || a.name || 'Whole Food'}: ${a.swap_advantage || a.reason || ''}`
           ),
           dietarySummary: apiData.dietary_summary || '',
+          shouldWeEatIt: apiData.should_we_eat_it || apiData.dietary_advisory?.should_we_eat_it,
+          howBadIsIt: apiData.how_bad_is_it || apiData.dietary_advisory?.how_bad_is_it,
+          notEatableForAge: apiData.not_eatable_for_age || apiData.dietary_advisory?.not_eatable_for_age || [],
+          healthProblemsIfEatenMore: apiData.health_problems_if_eaten_more || apiData.dietary_advisory?.health_problems || [],
+          hasPalmOil: apiData.has_palm_oil ?? apiData.dietary_advisory?.has_palm_oil,
+          palmOilDetails: apiData.palm_oil_details || apiData.dietary_advisory?.palm_oil_details,
+          hasAddedSugar: apiData.has_added_sugar,
+          addedSugarDetails: apiData.added_sugar_details,
+          hasHighSodium: apiData.has_high_sodium,
+          hasArtificialAdditives: apiData.has_artificial_additives,
+          ingredientsList: apiData.ingredients_list || [],
+          flaggedIngredients: apiData.flagged_ingredients || apiData.dietary_advisory?.flagged_ingredients || [],
         };
         setLiveAuditResult(mappedAudit);
       }
@@ -299,18 +461,18 @@ export const HealthCheckPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="w-8 h-8 rounded-lg bg-navy-800 text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white flex items-center justify-center shadow-xs">
               <Heartbeat size={20} weight="bold" />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-heading tracking-tight">
               Consumer Health &amp; Nutrition Audit
             </h1>
-            <span className="text-2xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs font-mono">
-              ICMR-NIN &amp; WHO STANDARDS
+            <span className="text-2xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-800 border border-neutral-200 font-mono">
+              DIRECT VISION AGENT
             </span>
           </div>
           <p className="text-xs text-neutral-600 max-w-2xl leading-relaxed">
-            Scan both front packaging and back nutrition panels to audit sugar levels, sodium concentration, saturated fats, price fairness, and dietary contraindications against ICMR-NIN 2024 guidelines.
+            Direct multimodal visual analysis of ingredients, nutrition panels, palm oil content, age restrictions, and long-term health risks against ICMR-NIN 2024 and WHO dietary standards.
           </p>
         </div>
 
@@ -319,7 +481,7 @@ export const HealthCheckPage: React.FC = () => {
             {currentAudit && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-2xs font-mono border border-neutral-200 bg-neutral-50 text-neutral-700 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Live ICMR-NIN Analysis</span>
+                <span>Multimodal Health Analysis Active</span>
               </span>
             )}
             <Button
@@ -339,15 +501,24 @@ export const HealthCheckPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-100 pb-3">
           <div>
             <h2 className="text-sm font-bold text-neutral-900 font-heading uppercase tracking-wide flex items-center gap-2">
-              <UploadSimple size={16} className="text-navy-800" weight="bold" />
-              <span>Dual Packaging Evidence Ingestion</span>
+              <UploadSimple size={16} className="text-neutral-900" weight="bold" />
+              <span>Dual Packaging Ingestion</span>
             </h2>
             <p className="text-xs text-neutral-500 mt-0.5">
-              Both front brand display and back nutritional facts panel are required for 100% accurate health index scoring.
+              Submit front brand panel and back ingredients/nutrition table for comprehensive multimodal audit.
             </p>
           </div>
-          <div className="text-2xs font-mono font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded border border-neutral-200">
-            {frontImageSrc && backImageSrc ? '2/2 Panels Ready' : frontImageSrc || backImageSrc ? '1/2 Panels Ready' : '0/2 Panels Ready'}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleLoadDemo}
+              className="text-2xs font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 px-2.5 py-1 rounded border border-neutral-200 transition-colors"
+            >
+              Load Demo Benchmark
+            </button>
+            <div className="text-2xs font-mono font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded border border-neutral-200">
+              {frontImageSrc && backImageSrc ? '2/2 Panels Ready' : frontImageSrc || backImageSrc ? '1/2 Panels Ready' : '0/2 Panels Ready'}
+            </div>
           </div>
         </div>
 
@@ -382,18 +553,18 @@ export const HealthCheckPage: React.FC = () => {
               setIsDragOverFront(false);
               if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFrontFile(e.dataTransfer.files[0]);
             }}
-            className={`border-2 rounded-lg p-4 text-center transition-all flex flex-col justify-between ${
+            className={`border rounded-lg p-4 text-center transition-all flex flex-col justify-between ${
               isDragOverFront 
-                ? 'border-saffron-500 bg-saffron-50/40' 
+                ? 'border-neutral-900 bg-neutral-100/60' 
                 : frontImageSrc 
-                ? 'border-navy-800/40 bg-navy-50/20' 
+                ? 'border-neutral-400 bg-neutral-50/40' 
                 : 'border-dashed border-neutral-300 bg-neutral-50/60 hover:border-neutral-400'
             }`}
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <span className="text-xs font-bold text-neutral-900 uppercase tracking-wider font-heading flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-navy-800 text-white flex items-center justify-center text-2xs font-mono">1</span>
+                  <span className="w-5 h-5 rounded-full bg-neutral-900 text-white flex items-center justify-center text-2xs font-mono">1</span>
                   <span>Photo 1: Front Packaging</span>
                 </span>
                 {frontImageSrc ? (
@@ -417,7 +588,7 @@ export const HealthCheckPage: React.FC = () => {
                     <ImageIcon size={22} />
                   </div>
                   <p className="text-xs font-semibold text-neutral-800">Primary Packaging Face</p>
-                  <p className="text-2xs text-neutral-500">Brand Name, Flavor, Claims, and Net Weight</p>
+                  <p className="text-2xs text-neutral-500">Brand Name, Claims, and Net Weight</p>
                 </div>
               )}
             </div>
@@ -451,19 +622,19 @@ export const HealthCheckPage: React.FC = () => {
               setIsDragOverBack(false);
               if (e.dataTransfer.files && e.dataTransfer.files[0]) handleBackFile(e.dataTransfer.files[0]);
             }}
-            className={`border-2 rounded-lg p-4 text-center transition-all flex flex-col justify-between ${
+            className={`border rounded-lg p-4 text-center transition-all flex flex-col justify-between ${
               isDragOverBack 
-                ? 'border-saffron-500 bg-saffron-50/40' 
+                ? 'border-neutral-900 bg-neutral-100/60' 
                 : backImageSrc 
-                ? 'border-navy-800/40 bg-navy-50/20' 
+                ? 'border-neutral-400 bg-neutral-50/40' 
                 : 'border-dashed border-neutral-300 bg-neutral-50/60 hover:border-neutral-400'
             }`}
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <span className="text-xs font-bold text-neutral-900 uppercase tracking-wider font-heading flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-navy-800 text-white flex items-center justify-center text-2xs font-mono">2</span>
-                  <span>Photo 2: Nutrition Facts Panel</span>
+                  <span className="w-5 h-5 rounded-full bg-neutral-900 text-white flex items-center justify-center text-2xs font-mono">2</span>
+                  <span>Photo 2: Nutrition Facts &amp; Ingredients</span>
                 </span>
                 {backImageSrc ? (
                   <span className="text-2xs font-semibold bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
@@ -485,8 +656,8 @@ export const HealthCheckPage: React.FC = () => {
                   <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-neutral-500">
                     <FileText size={22} />
                   </div>
-                  <p className="text-xs font-semibold text-neutral-800">Nutritional Facts &amp; MRP</p>
-                  <p className="text-2xs text-neutral-500">Sugar, Sodium, Saturated Fats, Ingredients, and Price</p>
+                  <p className="text-xs font-semibold text-neutral-800">Nutritional Facts &amp; Ingredients</p>
+                  <p className="text-2xs text-neutral-500">Sugar, Sodium, Saturated Fats, Palm Oil, and Additives</p>
                 </div>
               )}
             </div>
@@ -519,41 +690,41 @@ export const HealthCheckPage: React.FC = () => {
           onDragLeave={() => setIsDragOverUnified(false)}
           onDrop={handleUnifiedDrop}
           className={`border border-dashed rounded-lg p-4 text-center transition-all ${
-            isDragOverUnified ? 'border-saffron-500 bg-saffron-50/40' : 'border-neutral-200 bg-neutral-50/40'
+            isDragOverUnified ? 'border-neutral-900 bg-neutral-100' : 'border-neutral-200 bg-neutral-50/40'
           }`}
         >
           <div className="flex items-center justify-center gap-2 text-2xs text-neutral-600">
-            <CloudArrowUp size={16} className="text-navy-800" />
-            <span>Drop both Front and Back images here simultaneously for instant loading</span>
+            <CloudArrowUp size={16} className="text-neutral-900" />
+            <span>Drop both Front and Back images here simultaneously for instant inspection</span>
           </div>
         </div>
 
         {/* Action Button & Status / Progress Bar */}
         <div className="pt-2">
           {isAnalyzing ? (
-            <div className="p-5 bg-navy-50/70 rounded-lg border border-navy-200/90 space-y-3 shadow-xs animate-fadeIn">
-              <div className="flex items-center justify-between text-xs font-bold text-navy-950 font-heading">
+            <div className="p-5 bg-neutral-50 rounded-lg border border-neutral-300 space-y-3 shadow-xs animate-fadeIn">
+              <div className="flex items-center justify-between text-xs font-bold text-neutral-950 font-heading">
                 <span className="flex items-center gap-2">
-                  <Sparkle size={16} className="text-saffron-600 animate-spin" weight="fill" />
+                  <Sparkle size={16} className="text-neutral-900 animate-spin" weight="fill" />
                   <span>
-                    {analysisStep === 1 && 'Step 1: Extracting nutritional table values & ingredients list...'}
-                    {analysisStep === 2 && 'Step 2: Auditing sugar, sodium & saturated fats against ICMR-NIN 2024 limits...'}
-                    {analysisStep === 3 && 'Step 3: Calculating price fairness & synthesizing clinical dietary advisories...'}
+                    {analysisStep === 1 && 'Step 1: Direct visual inspection of ingredients and nutrition panel...'}
+                    {analysisStep === 2 && 'Step 2: Detecting palm oil, added sugars, sodium & ultra-processed markers...'}
+                    {analysisStep === 3 && 'Step 3: Calculating age restrictions, health risks & clinical advisories...'}
                   </span>
                 </span>
-                <span className="font-mono text-navy-800 bg-white px-2.5 py-0.5 rounded border border-navy-200">
+                <span className="font-mono text-neutral-900 bg-white px-2.5 py-0.5 rounded border border-neutral-200">
                   {Math.round(analysisStep * 33.3)}%
                 </span>
               </div>
               <div className="w-full bg-neutral-200 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="bg-navy-800 h-full rounded-full transition-all duration-300" 
+                  className="bg-neutral-900 h-full rounded-full transition-all duration-300" 
                   style={{ width: `${analysisStep * 33.3}%` }} 
                 />
               </div>
               <div className="flex items-center justify-between text-2xs text-neutral-600 pt-1 font-mono">
-                <span>Deterministic ICMR-NIN Comparison Engine</span>
-                <span>Serving Unit Normalization: 100g Standard</span>
+                <span>Multimodal Vision Agent (Zero Brittle OCR)</span>
+                <span>ICMR-NIN 2024 &amp; WHO Dietary Guidelines</span>
               </div>
             </div>
           ) : isUploadComplete ? (
@@ -565,13 +736,13 @@ export const HealthCheckPage: React.FC = () => {
               icon={<ArrowRight size={16} weight="bold" />}
               iconPosition="right"
             >
-              Run Health &amp; Nutrition Check
+              Run Multimodal Health Check
             </Button>
           ) : (
             <div className="p-3.5 bg-neutral-50 rounded-lg border border-neutral-200 text-xs text-neutral-600 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <Info size={16} className="text-neutral-500 shrink-0" />
-                <span>Upload photographs of both Front and Back panels above to activate the health audit.</span>
+                <span>Upload photographs of both Front and Back panels above or load the demo benchmark.</span>
               </div>
               <span className="font-semibold text-neutral-700 font-mono text-2xs bg-white px-2 py-0.5 rounded border border-neutral-200">
                 {frontImageSrc ? '1/2 Uploaded' : backImageSrc ? '1/2 Uploaded' : '0/2 Uploaded'}
@@ -596,8 +767,8 @@ export const HealthCheckPage: React.FC = () => {
       {currentAudit ? (
         <div className="space-y-6 animate-fadeIn">
           
-          {/* Health Summary Banner */}
-          <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-5 border-l-4 border-l-navy-800">
+          {/* 1. Health Summary Banner */}
+          <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-5">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
               
               {/* Product Identity */}
@@ -611,7 +782,7 @@ export const HealthCheckPage: React.FC = () => {
                     {currentAudit.category}
                   </span>
                   <span className="text-neutral-300">•</span>
-                  <span className="font-mono font-semibold text-navy-800 bg-navy-50 px-2.5 py-0.5 rounded-md border border-navy-200">
+                  <span className="font-mono font-semibold text-neutral-800 bg-neutral-100 px-2.5 py-0.5 rounded-md border border-neutral-200">
                     REF: {currentAudit.id.substring(0, 8).toUpperCase()}
                   </span>
                 </div>
@@ -630,7 +801,7 @@ export const HealthCheckPage: React.FC = () => {
               </div>
 
               {/* Circular Score Gauge & Overall Verdict */}
-              <div className="flex items-center gap-4 shrink-0 bg-neutral-50 p-4 rounded-lg border border-neutral-200/90 shadow-2xs">
+              <div className="flex items-center gap-4 shrink-0 bg-neutral-50 p-4 rounded-lg border border-neutral-200 shadow-2xs">
                 
                 {/* Circular Score Ring */}
                 <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
@@ -692,8 +863,8 @@ export const HealthCheckPage: React.FC = () => {
             <div className="pt-3 border-t border-neutral-100 space-y-2">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <span className="text-xs font-bold text-neutral-800 font-heading uppercase tracking-wide flex items-center gap-1.5">
-                  <ShieldCheck size={16} className="text-navy-800" weight="bold" />
-                  <span>Identified Nutritional Health Markers:</span>
+                  <ShieldCheck size={16} className="text-neutral-900" weight="bold" />
+                  <span>Identified Nutritional Health Badges:</span>
                 </span>
                 <span className="text-2xs text-neutral-500 font-medium">
                   Audited per ICMR-NIN 2024 thresholds
@@ -703,20 +874,199 @@ export const HealthCheckPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Nutritional Breakdown Table vs ICMR Limits using NutrientRow */}
+          {/* 2. DIRECT CONSUMER VERDICT: "Should We Eat It?" & "How Bad Is It?" */}
+          {(currentAudit.shouldWeEatIt || currentAudit.howBadIsIt) && (
+            <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-md bg-neutral-900 text-white flex items-center justify-center">
+                    <Heartbeat size={18} weight="bold" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
+                      Direct Consumer Health Verdict
+                    </h3>
+                    <span className="text-2xs text-neutral-500 font-medium">
+                      Definitive recommendation synthesized by Multimodal Vision Agent
+                    </span>
+                  </div>
+                </div>
+                <span className="text-2xs font-mono font-semibold text-neutral-700 bg-neutral-100 px-2.5 py-1 rounded border border-neutral-200">
+                  Plain-Language Summary
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Should We Eat It */}
+                <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
+                    <ShieldWarning size={16} className={currentAudit.ratingScore < 50 ? 'text-rose-600' : 'text-emerald-600'} weight="fill" />
+                    <span>Should You Eat This?</span>
+                  </div>
+                  <p className="text-xs text-neutral-800 leading-relaxed font-medium">
+                    {currentAudit.shouldWeEatIt || 'Consume with discretion according to your personal health goals and dietary restrictions.'}
+                  </p>
+                </div>
+
+                {/* How Bad Is It */}
+                <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
+                    <WarningCircle size={16} className={currentAudit.ratingScore < 50 ? 'text-rose-600' : 'text-amber-600'} weight="fill" />
+                    <span>How Bad Is It? (Clinical Assessment)</span>
+                  </div>
+                  <p className="text-xs text-neutral-700 leading-relaxed">
+                    {currentAudit.howBadIsIt || 'Detailed nutritional evaluation indicates high carbohydrate and sodium concentration.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 3. AGE RESTRICTIONS & AGE SUITABILITY */}
+          {currentAudit.notEatableForAge && currentAudit.notEatableForAge.length > 0 && (
+            <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-md bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200">
+                    <UsersThree size={18} weight="bold" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
+                      Age Restrictions &amp; Pediatric / Vulnerable Group Suitability
+                    </h3>
+                    <span className="text-2xs text-neutral-500 font-medium">
+                      Age-stratified metabolic tolerance based on organ maturity and dietary upper limits
+                    </span>
+                  </div>
+                </div>
+                <span className="text-2xs font-semibold px-2.5 py-1 rounded bg-amber-50 text-amber-900 border border-amber-200">
+                  Strict Age Advisory
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {currentAudit.notEatableForAge.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3.5 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-800 leading-relaxed flex items-start gap-3"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <div>{item}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. HEALTH PROBLEMS FROM EXCESS CONSUMPTION */}
+          {currentAudit.healthProblemsIfEatenMore && currentAudit.healthProblemsIfEatenMore.length > 0 && (
+            <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-md bg-rose-50 text-rose-800 flex items-center justify-center border border-rose-200">
+                    <WarningCircle size={18} weight="bold" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
+                      Health Problems If Consumed Frequently or In Excess
+                    </h3>
+                    <span className="text-2xs text-neutral-500 font-medium">
+                      Clinical pathology risks identified from ingredient chemistry and nutrient density
+                    </span>
+                  </div>
+                </div>
+                <span className="text-2xs font-semibold px-2.5 py-1 rounded bg-rose-50 text-rose-900 border border-rose-200">
+                  Chronic Disease Risk
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {currentAudit.healthProblemsIfEatenMore.map((problem, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3.5 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-800 leading-relaxed flex items-start gap-2.5"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-2 shrink-0" />
+                    <span>{problem}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 5. PALM OIL & DECEPTIVE INGREDIENTS AUDIT */}
+          {(currentAudit.hasPalmOil || (currentAudit.flaggedIngredients && currentAudit.flaggedIngredients.length > 0)) && (
+            <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-md bg-neutral-900 text-white flex items-center justify-center">
+                    <Drop size={18} weight="fill" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
+                      Palm Oil &amp; Industrial Additives Inspection
+                    </h3>
+                    <span className="text-2xs text-neutral-500 font-medium">
+                      Direct detection of low-cost industrial fats, sweeteners, and chemical additives
+                    </span>
+                  </div>
+                </div>
+                {currentAudit.hasPalmOil ? (
+                  <span className="text-2xs font-bold px-2.5 py-1 rounded bg-rose-50 text-rose-800 border border-rose-200 font-mono">
+                    PALM OIL DETECTED
+                  </span>
+                ) : (
+                  <span className="text-2xs font-bold px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono">
+                    NO PALM OIL FLAGGED
+                  </span>
+                )}
+              </div>
+
+              {/* Palm Oil Details Callout */}
+              {currentAudit.hasPalmOil && currentAudit.palmOilDetails && (
+                <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200 space-y-1.5">
+                  <span className="text-xs font-bold text-neutral-900 font-heading block">
+                    Palm Olein &amp; Saturated Lipid Burden
+                  </span>
+                  <p className="text-xs text-neutral-700 leading-relaxed">
+                    {currentAudit.palmOilDetails}
+                  </p>
+                </div>
+              )}
+
+              {/* Flagged Ingredients Grid */}
+              {currentAudit.flaggedIngredients && currentAudit.flaggedIngredients.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <span className="text-2xs font-bold uppercase tracking-wider text-neutral-500 font-heading block">
+                    Flagged Problematic Ingredients ({currentAudit.flaggedIngredients.length})
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {currentAudit.flaggedIngredients.map((ing, idx) => (
+                      <div key={idx} className="p-3 rounded-md bg-neutral-50 border border-neutral-200 text-xs space-y-0.5">
+                        <span className="font-bold text-neutral-900 block">{ing.name}</span>
+                        <span className="text-2xs text-neutral-600 block">{ing.reason}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 6. Nutritional Breakdown Table vs ICMR Limits using NutrientRow */}
           <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
               <div>
                 <h3 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wider flex items-center gap-2">
-                  <Scales size={16} className="text-navy-800" weight="bold" />
-                  <span>Nutritional Parameter Breakdown vs ICMR-NIN 2024 Limits</span>
+                  <Scales size={16} className="text-neutral-900" weight="bold" />
+                  <span>Nutritional Breakdown vs ICMR-NIN 2024 Limits</span>
                 </h3>
                 <p className="text-2xs text-neutral-500 mt-0.5">
                   Evaluated per 100g baseline and per serving against National Institute of Nutrition daily upper limits.
                 </p>
               </div>
               <span className="text-2xs font-mono font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded border border-neutral-200">
-                Regulatory Reference: ICMR-NIN 2024
+                ICMR-NIN 2024 Standards
               </span>
             </div>
 
@@ -728,11 +1078,11 @@ export const HealthCheckPage: React.FC = () => {
             </div>
           </div>
 
-          {/* MRP & Price Fairness Analysis Card */}
+          {/* 7. MRP & Price Fairness Analysis Card */}
           <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-saffron-50 text-saffron-700 flex items-center justify-center border border-saffron-200">
+                <div className="w-7 h-7 rounded-md bg-neutral-100 text-neutral-800 flex items-center justify-center border border-neutral-200">
                   <CurrencyInr size={18} weight="bold" />
                 </div>
                 <div>
@@ -770,7 +1120,7 @@ export const HealthCheckPage: React.FC = () => {
                 <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wider block">
                   Calculated Unit Sale Price (USP)
                 </span>
-                <span className="text-lg font-bold text-navy-800 font-mono block">
+                <span className="text-lg font-bold text-neutral-900 font-mono block">
                   {currentAudit.pricePer100g}
                 </span>
                 <span className="text-2xs text-neutral-500 block">
@@ -789,11 +1139,11 @@ export const HealthCheckPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Two-Column Dietary Guidance & Healthier Alternatives using DietaryAdvisory */}
+          {/* 8. Two-Column Dietary Guidance & Healthier Alternatives using DietaryAdvisory */}
           <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+                <div className="w-7 h-7 rounded-md bg-neutral-100 text-neutral-800 flex items-center justify-center border border-neutral-200">
                   <Plant size={18} weight="bold" />
                 </div>
                 <div>
@@ -818,41 +1168,51 @@ export const HealthCheckPage: React.FC = () => {
       ) : !isAnalyzing && (
         /* Clean empty state when idle */
         <div className="bg-white border border-neutral-200 rounded-lg p-8 text-center space-y-5 shadow-xs">
-          <div className="w-12 h-12 rounded-full bg-navy-50 text-navy-800 flex items-center justify-center mx-auto border border-navy-200">
+          <div className="w-12 h-12 rounded-full bg-neutral-100 text-neutral-900 flex items-center justify-center mx-auto border border-neutral-200">
             <Heartbeat size={24} weight="bold" />
           </div>
           <div className="space-y-1.5">
             <h3 className="text-sm font-bold text-neutral-900 font-heading">
-              Ready for Health &amp; Nutrition Verification
+              Ready for Multimodal Health &amp; Nutrition Verification
             </h3>
             <p className="text-xs text-neutral-500 max-w-lg mx-auto leading-relaxed">
-              Upload photographs of both Front brand packaging and Rear nutrition facts table above, then click Run Health &amp; Nutrition Check to view an ICMR-NIN 2024 compliant health audit.
+              Upload photographs of both Front brand packaging and Rear nutrition facts table above, or click below to inspect a benchmark specimen.
             </p>
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoadDemo}
+                icon={<Sparkle size={14} weight="bold" />}
+              >
+                Inspect Sample Specimen (Instant Noodles with Palm Oil)
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-2 text-left">
             <div className="p-3.5 rounded-lg bg-neutral-50 border border-neutral-200 space-y-1">
-              <span className="text-xs font-bold text-navy-900 font-heading block">
-                ICMR-NIN 2024 Thresholds
+              <span className="text-xs font-bold text-neutral-900 font-heading block">
+                Direct Multimodal Vision
               </span>
               <p className="text-2xs text-neutral-600 leading-relaxed">
-                Audits added sugars (&lt; 25g/day), daily sodium upper limits (&lt; 2000mg/day), and saturated fats.
+                Direct visual extraction of packaging text, ingredients, nutrition numbers, and warnings without brittle OCR dependencies.
               </p>
             </div>
             <div className="p-3.5 rounded-lg bg-neutral-50 border border-neutral-200 space-y-1">
-              <span className="text-xs font-bold text-navy-900 font-heading block">
-                Dual-Photo Requirement
+              <span className="text-xs font-bold text-neutral-900 font-heading block">
+                ICMR-NIN &amp; Palm Oil Audit
               </span>
               <p className="text-2xs text-neutral-600 leading-relaxed">
-                Front panel captures brand identity &amp; net quantity; back panel extracts nutrition table &amp; ingredients.
+                Flags palm oil, added sugars (&lt; 25g/day), sodium (&lt; 2000mg/day), and saturated fats with clinical risk badges.
               </p>
             </div>
             <div className="p-3.5 rounded-lg bg-neutral-50 border border-neutral-200 space-y-1">
-              <span className="text-xs font-bold text-navy-900 font-heading block">
-                Clinical Dietary Synthesis
+              <span className="text-xs font-bold text-neutral-900 font-heading block">
+                Age &amp; Disease Restrictions
               </span>
               <p className="text-2xs text-neutral-600 leading-relaxed">
-                Automated risk identification for diabetics, hypertensives, and pediatric populations with whole-food swaps.
+                Identifies age contraindications (e.g. toddlers, pediatric limits) and chronic disease risks (hypertension, NAFLD, diabetes).
               </p>
             </div>
           </div>

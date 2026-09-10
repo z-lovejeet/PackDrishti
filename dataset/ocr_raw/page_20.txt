@@ -1,0 +1,52 @@
+[rr [ave 3(ii)} RG BUTT: ETE 6
+SSS
+
+8. Unit of energy density — The unit of energy density shall be the joule
+per cubic metre. (Symbol: J/m’)
+The joule per cubic metre is the energy density of a system of
+homogenous mass of volume one cubic metre and having the radiant
+energy of one joule.
+
+9. Unit of heat flux density — The unit of heat fiux density shall be the watt
+Per square metre. (Symbol: W/m?)
+The watt per square metre is heat flux density of a surface of one
+Square metre in area radiating out energy at the rate of one joule per
+second.
+
+PART IV
+Derived units in relation of Electricity and Magnetism
+
+5 Unit of quantity of electricity and electric charge — The unit of quantity
+of electricity and electric charge shall be the coulomb. (Symbol: C)
+The coulomb is the quantity of electricity carried in one second bya
+current of one ampere.
+1C=1A4s 7
+
+2. Unit of electric charge density — The unit of electric charge density shall
+be the coulomb per cubic metre. (Symbol: C/m’)
+The coulomb per cubic metre is the electric charge density of a
+homogenous mass or system of volume one cubic metre and having a
+charge of one coulomb.
+
+3. Unit of electric flux density — The unit of electric flux density shall be
+coulomb per square metre. (Symbol: C/m?
+The coulomb per square metre is the electric flux density when a
+condenser, having plates of infinite area/size, parallel to each other, is
+charged, in vacuum, with a quantity of electricity equal to one coulomb
+Per one square metre of area of the plates.
+
+4. Unit of electric tension, electric potential and electromotive force — The
+unit of electric tension, electric potential and electromotive force shall
+be the volt. (Symbol: Vv),
+The volt is the potential difference between two points of a conducting
+wire carrying a constant current’ of one ampere, when the power
+dissipated between these points is equal to one watt.
+1V=1W/1A.
+
+5. Unit of electric field strength — The unit of electric field strength shall be
+the volt per metre. (Symbol: V/m)
+The volt per metre is the electric field Strength of an electric field which
+produces a force equal to one newton in a body charge with a quantity
+of electricity equal to one coulomb.
+IV 4iN
+im 1¢

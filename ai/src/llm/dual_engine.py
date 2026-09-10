@@ -53,10 +53,9 @@ class ParallelDualLLMEngine:
         gemini-flash-latest -> gemini-3.8-flash -> gemini-3.7-flash -> gemini-3.6-flash
         """
         gemini_models = [
-            "gemini-3.7-flash",
-            "gemini-3.5-flash",
             "gemini-3.5-flash-lite",
-            "gemini-3.1-flash-lite",
+            "gemini-3.5-flash",
+            "gemini-3.7-flash",
             "gemini-flash-lite-latest",
             "gemini-3.6-flash",
         ]
@@ -244,7 +243,7 @@ class ParallelDualLLMEngine:
         return DualLLMConsensusOutput(
             primary_provider="google_gemini",
             secondary_provider="groq_api",
-            primary_model_used=gemini_res.get("model", "gemini-3.7-flash"),
+            primary_model_used=gemini_res.get("model", "gemini-3.5-flash-lite"),
             secondary_model_used=groq_res.get("model", "qwen/qwen3.8-27b"),
             consensus_confidence=0.96 if evaluation.is_compliant else 0.94,
             consumer_advisory_summary=consumer_text,

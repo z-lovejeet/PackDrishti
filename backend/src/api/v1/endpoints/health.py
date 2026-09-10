@@ -83,130 +83,61 @@ async def analyze_health_packaging(
             detail="Uploaded image payload is empty."
         )
 
-    # 2. Real OCR extraction from Front and Back image bytes
-    front_text = ""
-    back_text = ""
-    try:
-        if front_bytes:
-            front_img = Image.open(io.BytesIO(front_bytes))
-            front_text = pytesseract.image_to_string(front_img).strip()
-    except Exception as err:
-        logger.warning("Front image OCR extraction failed: %s", err)
-
-    try:
-        if back_bytes:
-            back_img = Image.open(io.BytesIO(back_bytes))
-            back_text = pytesseract.image_to_string(back_img).strip()
-    except Exception as err:
-        logger.warning("Back image OCR extraction failed: %s", err)
-
-    combined_text = f"FRONT PANEL:\n{front_text}\n\nBACK NUTRITIONAL PANEL:\n{back_text}".strip()
-
-    # 3. Structured parsing via Groq LLM
-    resolved_product = product_name or "Packaged Commodity"
-    resolved_brand = brand or "Unspecified Brand"
-    resolved_serving = serving_size_g if serving_size_g and serving_size_g > 0 else 100.0
-
-    parsed_nutrients = None
-    if combined_text and settings.GROQ_API_KEY and not settings.GROQ_API_KEY.startswith("placeholder"):
-        try:
-            from groq import Groq
-            groq_client = Groq(api_key=settings.GROQ_API_KEY)
-            prompt = (
-                "You are an expert food nutritionist. Extract nutrition facts per 100g from the provided packaging OCR text.\n"
-                "Return a JSON object with EXACTLY these fields:\n"
-                "product_name (str, variant name),\n"
-                "brand (str),\n"
-                "serving_size_g (float, default 30.0),\n"
-                "energy_kcal (float),\n"
-                "total_fat_g (float),\n"
-                "saturated_fat_g (float),\n"
-                "trans_fat_g (float),\n"
-                "sodium_mg (float),\n"
-                "total_carbohydrate_g (float),\n"
-                "total_sugars_g (float),\n"
-                "added_sugars_g (float),\n"
-                "dietary_fiber_g (float, default 0.0),\n"
-                "protein_g (float),\n"
-                "ingredients_text (str)\n\n"
-                f"Packaging OCR Text:\n{combined_text}\n\n"
-                "Return ONLY valid JSON."
-            )
-            groq_resp = groq_client.chat.completions.create(
-                model="qwen/qwen3.8-27b",
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"},
-                max_tokens=600,
-                temperature=0.1
-            )
-            parsed_nutrients = json.loads(groq_resp.choices[0].message.content)
-        except Exception as groq_err:
-            logger.warning("Groq nutrition parsing failed: %s", groq_err)
-
-    if product_name:
-        resolved_product = product_name
-    elif parsed_nutrients and parsed_nutrients.get("product_name") and parsed_nutrients.get("product_name").lower() not in ["unknown", "none", "null"]:
-        resolved_product = parsed_nutrients["product_name"]
-    else:
-        resolved_product = "Packaged Commodity"
-
-    if brand:
-        resolved_brand = brand
-    elif parsed_nutrients and parsed_nutrients.get("brand") and parsed_nutrients.get("brand").lower() not in ["unknown", "none", "null"]:
-        resolved_brand = parsed_nutrients["brand"]
-    else:
-        resolved_brand = "Unspecified Brand"
-
-    if parsed_nutrients and parsed_nutrients.get("serving_size_g"):
-        try:
-            resolved_serving = float(parsed_nutrients["serving_size_g"])
-        except (ValueError, TypeError):
-            pass
-
-    if parsed_nutrients and any(k in parsed_nutrients for k in ["energy_kcal", "total_fat_g", "sodium_mg"]):
-        nutrition_table_text = (
-            f"Energy {parsed_nutrients.get('energy_kcal', 0)} kcal\n"
-            f"Total Fat {parsed_nutrients.get('total_fat_g', 0)}g\n"
-            f"Saturated Fat {parsed_nutrients.get('saturated_fat_g', 0)}g\n"
-            f"Trans Fat {parsed_nutrients.get('trans_fat_g', 0)}g\n"
-            f"Sodium {parsed_nutrients.get('sodium_mg', 0)}mg\n"
-            f"Total Carbohydrate {parsed_nutrients.get('total_carbohydrate_g', 0)}g\n"
-            f"Total Sugars {parsed_nutrients.get('total_sugars_g', 0)}g\n"
-            f"Added Sugars {parsed_nutrients.get('added_sugars_g', 0)}g\n"
-            f"Dietary Fiber {parsed_nutrients.get('dietary_fiber_g', 0)}g\n"
-            f"Protein {parsed_nutrients.get('protein_g', 0)}g"
-        )
-        ingredients_text = parsed_nutrients.get("ingredients_text") or ""
-    else:
-        nutrition_table_text = combined_text
-        ingredients_text = ""
-
-    panel = NutritionFactsParser.parse_nutrition_text(
-        text=nutrition_table_text,
-        ingredients_text=ingredients_text,
-        product_name=resolved_product,
-        brand=resolved_brand,
-        category="Packaged Food Commodity",
-        serving_size_g=resolved_serving,
-        is_liquid=bool(is_liquid)
+    # 2. Direct Multimodal Health Agent Analysis (Direct vision image ingestion)
+    from ai.src.pipeline.health_agent import MultimodalHealthAgent
+    agent = MultimodalHealthAgent()
+    analysis = await agent.analyze_packaging(
+        front_bytes=front_bytes,
+        back_bytes=back_bytes,
+        product_name_hint=product_name,
+        brand_hint=brand,
     )
 
-    # 4. Execute ICMR-NIN 2024 profiling engine
-    audit_uuid = uuid.uuid4()
-    audit_payload = ICMRNutritionProfilingEngine.audit_product(panel, audit_id=f"h-{audit_uuid.hex[:8]}")
+    resolved_product = analysis.commodityName
+    resolved_brand = analysis.brandName
+    resolved_serving = 30.0
 
-    # 5. Persist to Supabase / Database
+    # 3. Format badges and dietary advisory for database persistence
+    db_badges = [{"label": b.label, "type": b.type, "description": b.description or ""} for b in analysis.badges]
+    db_nutrients = [
+        {
+            "name": n.name,
+            "value_per_100g": n.valuePer100g,
+            "value_per_serve": n.valuePerServe,
+            "unit": n.unit,
+            "level": n.level,
+            "assessment": n.assessment,
+            "icmr_daily_limit": n.icmrDailyLimit,
+        }
+        for n in analysis.nutrients
+    ]
+    db_advisory = {
+        "should_we_eat_it": analysis.shouldWeEatIt,
+        "how_bad_is_it": analysis.howBadIsIt,
+        "not_eatable_for_age": analysis.notEatableForAge,
+        "who_can_consume": analysis.whoCanConsume,
+        "who_should_avoid": analysis.whoShouldAvoid,
+        "health_problems": analysis.healthProblemsIfEatenMore,
+        "dietary_summary": analysis.dietarySummary,
+        "healthier_alternatives": analysis.healthierAlternatives,
+        "has_palm_oil": analysis.hasPalmOil,
+        "palm_oil_details": analysis.palmOilDetails,
+        "flagged_ingredients": analysis.flaggedIngredients,
+    }
+
+    # 4. Persist to Supabase / Database
+    audit_uuid = uuid.uuid4()
     audit_record = HealthAudit(
         id=audit_uuid,
         user_id=current_user.id if current_user else None,
-        product_name=audit_payload.product_name,
-        brand=audit_payload.brand,
+        product_name=resolved_product,
+        brand=resolved_brand,
         front_image_url=f"/uploads/{front_image.filename}",
         back_image_url=f"/uploads/{back_image.filename}",
-        health_score=Decimal(str(audit_payload.health_score)),
-        nutrients_json=audit_payload.nutrients,
-        badges_json=audit_payload.badges,
-        dietary_advisory_json=audit_payload.dietary_advisory,
+        health_score=Decimal(str(analysis.ratingScore)),
+        nutrients_json=db_nutrients,
+        badges_json=db_badges,
+        dietary_advisory_json=db_advisory,
     )
     db.add(audit_record)
 
@@ -226,21 +157,40 @@ async def analyze_health_packaging(
         "status": "success",
         "data": {
             "audit_id": str(audit_record.id),
-            "product_name": audit_payload.product_name,
-            "brand": audit_payload.brand,
-            "health_score": audit_payload.health_score,
-            "score_band": audit_payload.score_band,
-            "nutritional_density": audit_payload.nutritional_density,
-            "serving_size": audit_payload.serving_size,
-            "servings_per_container": audit_payload.servings_per_container,
-            "nova_classification": audit_payload.nova_classification,
-            "nutrients": audit_payload.nutrients,
-            "badges": audit_payload.badges,
-            "dietary_advisory": audit_payload.dietary_advisory,
-            "fssai_compliance": audit_payload.fssai_compliance,
-            "penalties": audit_payload.penalties,
-            "credits": audit_payload.credits,
-            "dietary_summary": audit_payload.dietary_summary,
+            "product_name": resolved_product,
+            "brand": resolved_brand,
+            "commodity_name": resolved_product,
+            "brand_name": resolved_brand,
+            "category": analysis.category,
+            "serving_size": analysis.servingSize,
+            "net_quantity": analysis.netQuantity,
+            "mrp": analysis.mrp,
+            "price_per_100g": analysis.pricePer100g,
+            "price_rating": analysis.priceRating,
+            "price_analysis": analysis.priceAnalysis,
+            "health_score": analysis.ratingScore,
+            "score_band": analysis.overallRating,
+            "overall_rating": analysis.overallRating,
+            "rating_score": analysis.ratingScore,
+            "should_we_eat_it": analysis.shouldWeEatIt,
+            "how_bad_is_it": analysis.howBadIsIt,
+            "not_eatable_for_age": analysis.notEatableForAge,
+            "who_can_consume": analysis.whoCanConsume,
+            "who_should_avoid": analysis.whoShouldAvoid,
+            "health_problems_if_eaten_more": analysis.healthProblemsIfEatenMore,
+            "dietary_summary": analysis.dietarySummary,
+            "badges": [b.dict() for b in analysis.badges],
+            "has_palm_oil": analysis.hasPalmOil,
+            "palm_oil_details": analysis.palmOilDetails,
+            "has_added_sugar": analysis.hasAddedSugar,
+            "added_sugar_details": analysis.addedSugarDetails,
+            "has_high_sodium": analysis.hasHighSodium,
+            "has_artificial_additives": analysis.hasArtificialAdditives,
+            "ingredients_list": analysis.ingredientsList,
+            "flagged_ingredients": analysis.flaggedIngredients,
+            "nutrients": [n.dict() for n in analysis.nutrients],
+            "healthier_alternatives": analysis.healthierAlternatives,
+            "dietary_advisory": db_advisory,
         }
     }
 
