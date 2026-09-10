@@ -103,9 +103,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="text-base font-bold text-slate-950 tracking-tight font-heading leading-tight">
                 PackDrashiti
               </span>
-              <span className="text-2xs font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                LMPC 2011
-              </span>
             </div>
             <p className="text-2xs text-slate-500 font-normal leading-none mt-0.5">
               Legal Metrology Division
@@ -284,7 +281,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             variant="primary"
             size="sm"
             onClick={() => handleNavClick("scanner")}
-            className="hidden md:inline-flex text-xs font-medium"
+            className={`hidden md:inline-flex text-xs font-semibold px-3 py-1.5 transition-all ${
+              activePage === "scanner"
+                ? "ring-2 ring-slate-900 ring-offset-2"
+                : ""
+            }`}
           >
             Scan Package
           </Button>
@@ -475,7 +476,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             variant="primary"
             size="md"
             onClick={() => handleNavClick("scanner")}
-            className="w-full text-xs font-medium"
+            className="w-full text-xs font-semibold"
           >
             Scan Package Now
           </Button>
