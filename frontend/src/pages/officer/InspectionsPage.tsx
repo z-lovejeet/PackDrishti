@@ -1,20 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  DownloadSimple,
   MagnifyingGlass,
   CaretDown,
   CaretUp,
-  Scales,
-  FileText,
-  ShieldCheck,
-  Warning,
-  Clock,
-  MapPin,
-  UserCheck,
-  Funnel,
-  ArrowSquareOut,
-  Buildings,
-  Shield
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
@@ -42,7 +30,7 @@ const DEFAULT_INSPECTION_RECORDS: ViolationRecord[] = [
         date: '10-Sep-2026 14:30 IST',
         action: 'Statutory Field Notice Issued (FORM LM-INSP-2011)',
         by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-        note: 'Physical inspection conducted at retail premises. Net quantity declaration verified (500g), but Unit Sale Price (per 100g / 1g) absent on PDP in contravention of Rule 6(1)(e).',
+        note: 'Physical inspection conducted at retail premises. Net quantity declaration verified (500g), but Unit Sale Price absent on PDP in contravention of Rule 6(1)(e).',
       },
       {
         date: '10-Sep-2026 11:15 IST',
@@ -198,14 +186,14 @@ export const InspectionsPage: React.FC = () => {
                   violationCode: `INSP-2026-DEL-${String(hIdx * 10 + vIdx + 50).padStart(3, '0')}`,
                   productName: h.product_name || 'Audited Packaging Specimen',
                   brand: h.brand || h.brand_name || 'Inspected Brand',
-                  category: 'Pre-Packaged Commodity',
-                  ruleReference: v.rule_code || v.rule_reference || 'Rule 6(1)',
-                  violationType: v.rule_name || v.description || v.title || 'Statutory Non-Compliance',
-                  severity: v.severity === 'high' ? 'high' : v.severity === 'low' ? 'low' : 'medium',
+                  category: 'Packaged Commodity',
+                  ruleReference: v.rule_clause || 'Rule 6(1)',
+                  violationType: v.description || 'Statutory Non-Compliance',
+                  severity: v.severity || 'high',
                   dateDetected: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
-                  status: h.compliance_status === 'compliant' ? 'Resolved' : 'Notice Issued',
+                  status: 'Notice Issued',
                   assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-                  location: h.location || 'Central Delhi Retail Market',
+                  location: 'Delhi Enforcement Division',
                   timeline: [
                     {
                       date: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleString() : '10-Sep-2026 14:00 IST',
@@ -331,8 +319,9 @@ export const InspectionsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
+    <div className="p-6 space-y-8 max-w-7xl mx-auto font-sans antialiased text-slate-900">
+      
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
         <div>
           <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
@@ -342,7 +331,7 @@ export const InspectionsPage: React.FC = () => {
             Field Inspection Ledger
           </h1>
           <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
-            Administrative register of market inspections, Section 36(1) notices, Rule 7 Table-I defaults, and compounding orders.
+            Administrative register of market inspections, Section 36(1) notices, Rule 7 Table-I defaults, and Section 48 compounding orders.
           </p>
         </div>
 
@@ -358,176 +347,139 @@ export const InspectionsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 4 Summary KPI Tiles */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-card border border-neutral-200 shadow-card border-t-[3px] border-t-navy-800 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold text-neutral-500 uppercase tracking-wider font-heading">
-              Total Field Inspections
-            </span>
-            <div className="w-8 h-8 rounded-md bg-navy-50 text-navy-800 flex items-center justify-center border border-navy-200">
-              <FileText size={18} />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-neutral-900 font-heading tracking-tight">1,247</div>
-          <p className="text-2xs text-neutral-500 font-medium">Across 86 retail and wholesale mandis</p>
+      {/* Clean, Minimal Metric Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 rounded-xl border border-slate-200 bg-white">
+        <div>
+          <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
+            Total Inspections
+          </span>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1">1,247</div>
+          <p className="text-2xs text-slate-500 mt-0.5">86 wholesale &amp; retail mandis</p>
         </div>
 
-        <div className="bg-white p-4 rounded-card border border-neutral-200 shadow-card border-t-[3px] border-t-success space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold text-neutral-500 uppercase tracking-wider font-heading">
-              Certified Compliant
-            </span>
-            <div className="w-8 h-8 rounded-md bg-success-light text-success flex items-center justify-center border border-success-border">
-              <ShieldCheck size={18} />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-success font-heading tracking-tight">834</div>
-          <p className="text-2xs text-neutral-500 font-medium">66.9% statutory compliance conformity</p>
+        <div>
+          <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
+            Certified Compliant
+          </span>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-emerald-700 mt-1">834</div>
+          <p className="text-2xs text-slate-500 mt-0.5">66.9% statutory conformity</p>
         </div>
 
-        <div className="bg-white p-4 rounded-card border border-neutral-200 shadow-card border-t-[3px] border-t-violation space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold text-neutral-500 uppercase tracking-wider font-heading">
-              Infractions Recorded
-            </span>
-            <div className="w-8 h-8 rounded-md bg-violation-light text-violation flex items-center justify-center border border-violation-border">
-              <Warning size={18} />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-violation font-heading tracking-tight">413</div>
-          <p className="text-2xs text-neutral-500 font-medium">Actionable defaults under Sec 36(1)</p>
+        <div>
+          <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
+            Infractions Flagged
+          </span>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-rose-700 mt-1">413</div>
+          <p className="text-2xs text-slate-500 mt-0.5">Section 36(1) show-cause slated</p>
         </div>
 
-        <div className="bg-white p-4 rounded-card border border-neutral-200 shadow-card border-t-[3px] border-t-warning space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold text-neutral-500 uppercase tracking-wider font-heading">
-              Compounded & Closed
-            </span>
-            <div className="w-8 h-8 rounded-md bg-warning-light text-saffron-700 flex items-center justify-center border border-warning-border">
-              <Scales size={18} />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-saffron-600 font-heading tracking-tight">290</div>
-          <p className="text-2xs text-neutral-500 font-medium">Section 48 compounding fees remitted</p>
+        <div>
+          <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
+            Compounded &amp; Closed
+          </span>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-amber-700 mt-1">290</div>
+          <p className="text-2xs text-slate-500 mt-0.5">Section 48 compounding orders</p>
         </div>
       </div>
 
-      {/* Search and Filter Toolbar */}
-      <div className="bg-white border border-neutral-200 rounded-card p-4 shadow-card flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      {/* Search and Status Filters */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <MagnifyingGlass size={16} className="text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <MagnifyingGlass size={16} className="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by docket reference, product, brand, or rule..."
-            className="w-full h-9 pl-9 pr-3 text-xs bg-neutral-50 border border-neutral-300 rounded-md focus:bg-white focus:outline-none focus:border-navy-700 focus:ring-1 focus:ring-navy-700 transition-colors"
+            placeholder="Search by docket number, commodity, brand, or rule..."
+            className="w-full h-9 pl-9 pr-3 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-colors"
           />
         </div>
 
-        {/* Status Filter Chips */}
+        {/* Minimal Filter Tabs */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-2xs font-semibold text-neutral-500 uppercase tracking-wider mr-1 flex items-center gap-1">
-            <Funnel size={13} />
-            <span>Status:</span>
-          </span>
           {['All', 'Notice Issued', 'Under Review', 'Resolved'].map((st) => (
             <button
               key={st}
               onClick={() => setActiveStatus(st)}
-              className={`px-3 py-1.5 rounded-md text-2xs font-semibold transition-all duration-150 ${
+              className={`px-3 py-1.5 rounded-md text-xs transition-colors ${
                 activeStatus === st
-                  ? 'bg-navy-800 text-white shadow-xs'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 border border-neutral-200'
+                  ? 'bg-slate-900 text-white font-medium shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               {st}
             </button>
           ))}
-          <span className="text-2xs text-neutral-500 font-mono ml-2 font-medium">
-            {filteredRecords.length} Dockets
+          <span className="text-2xs font-mono text-slate-400 ml-2">
+            {filteredRecords.length} records
           </span>
         </div>
       </div>
 
-      {/* Expandable Inspection Ledger List */}
-      <div className="bg-white border border-neutral-200 rounded-card shadow-card overflow-hidden divide-y divide-neutral-200">
+      {/* Inspection Ledger Table / List */}
+      <div className="border border-slate-200 rounded-xl overflow-hidden bg-white divide-y divide-slate-100">
         {filteredRecords.map((viol) => {
           const isExpanded = expandedId === viol.id;
           return (
             <div key={viol.id} className="transition-colors">
-              {/* Ledger Header Row */}
+              
+              {/* Row Summary */}
               <div
                 onClick={() => setExpandedId(isExpanded ? null : viol.id)}
-                className={`p-4 cursor-pointer hover:bg-neutral-50/90 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
-                  isExpanded ? 'bg-navy-50/20' : ''
+                className={`p-4 sm:p-5 cursor-pointer hover:bg-slate-50/70 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
+                  isExpanded ? 'bg-slate-50/50' : ''
                 }`}
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-navy-800 bg-navy-50 px-2 py-0.5 rounded border border-navy-200">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className="font-mono text-xs font-semibold text-slate-900">
                       {viol.violationCode}
                     </span>
-                    <Badge
-                      variant={viol.severity === 'high' ? 'violation' : viol.severity === 'medium' ? 'warning' : 'neutral'}
-                      size="sm"
-                    >
+                    <span className="font-mono text-2xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                       {viol.ruleReference}
-                    </Badge>
-                    <span className="text-2xs text-neutral-500 font-medium flex items-center gap-1">
-                      <Clock size={12} className="text-neutral-400" />
-                      <span>{viol.dateDetected}</span>
+                    </span>
+                    <span className="text-2xs text-slate-400 font-mono">
+                      {viol.dateDetected}
                     </span>
                   </div>
 
-                  <div className="space-y-0.5">
-                    <h3 className="text-sm font-bold text-neutral-900 font-heading leading-tight">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-950 leading-snug">
                       {viol.productName}
                     </h3>
-                    <div className="text-2xs text-neutral-600 flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-neutral-800 flex items-center gap-1">
-                        <Buildings size={12} className="text-neutral-400" />
-                        {viol.brand}
-                      </span>
-                      <span className="text-neutral-300">•</span>
-                      <span className="text-neutral-700">
-                        <strong className="font-semibold text-neutral-900">Infraction:</strong> {viol.violationType}
-                      </span>
-                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      <span className="text-slate-700 font-medium">{viol.brand}</span>
+                      <span className="mx-1.5 text-slate-300">•</span>
+                      <span>{viol.violationType}</span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0 self-end md:self-center">
+                <div className="flex items-center gap-4 shrink-0 self-end md:self-center">
                   <div className="text-right hidden sm:block">
-                    <div className="text-2xs font-semibold text-neutral-900 flex items-center justify-end gap-1">
-                      <UserCheck size={13} className="text-navy-700" />
-                      <span>{viol.assignedOfficer}</span>
+                    <div className="text-xs font-medium text-slate-800">
+                      {viol.assignedOfficer.split('(')[0].trim()}
                     </div>
-                    <div className="text-2xs text-neutral-500 flex items-center justify-end gap-1">
-                      <MapPin size={12} className="text-neutral-400" />
-                      <span>{viol.location}</span>
+                    <div className="text-2xs text-slate-500">
+                      {viol.location}
                     </div>
                   </div>
 
-                  <Badge
-                    variant={
-                      viol.status === 'Resolved'
-                        ? 'compliant'
-                        : viol.status === 'Notice Issued'
-                        ? 'violation'
-                        : 'warning'
-                    }
-                    size="md"
-                  >
+                  <span className={`text-2xs font-mono font-medium px-2.5 py-1 rounded-full border ${
+                    viol.status === 'Resolved'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : viol.status === 'Notice Issued'
+                      ? 'bg-rose-50 text-rose-800 border-rose-200'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                  }`}>
                     {viol.status}
-                  </Badge>
+                  </span>
 
-                  <div className="w-7 h-7 rounded flex items-center justify-center text-neutral-400 hover:text-neutral-700">
+                  <div className="text-slate-400 hover:text-slate-700 p-1">
                     {isExpanded ? (
-                      <CaretUp size={16} weight="bold" />
+                      <CaretUp size={16} />
                     ) : (
-                      <CaretDown size={16} weight="bold" />
+                      <CaretDown size={16} />
                     )}
                   </div>
                 </div>
@@ -535,40 +487,46 @@ export const InspectionsPage: React.FC = () => {
 
               {/* Expanded Inspection Detail Drawer */}
               {isExpanded && (
-                <div className="px-5 py-4 bg-neutral-50 border-t border-neutral-200 space-y-4 text-xs">
-                  {/* Statutory Reference Ribbon */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-white rounded-md border border-neutral-200 text-2xs">
+                <div className="px-5 sm:px-6 py-5 bg-slate-50/60 border-t border-slate-100 space-y-5 text-xs">
+                  
+                  {/* Case Particulars */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-white rounded-lg border border-slate-200/80">
                     <div>
-                      <span className="text-neutral-500 uppercase font-semibold block">Governing Statutory Authority</span>
-                      <span className="font-mono font-bold text-navy-800">Legal Metrology Act, 2009 (Sec 36(1))</span>
+                      <span className="text-2xs font-mono uppercase text-slate-400 block">Statutory Authority</span>
+                      <span className="font-mono text-xs font-semibold text-slate-900 mt-0.5 block">
+                        Legal Metrology Act, 2009 (Sec 36(1))
+                      </span>
                     </div>
                     <div>
-                      <span className="text-neutral-500 uppercase font-semibold block">Regulatory Rule Reference</span>
-                      <span className="font-mono font-bold text-neutral-900">{viol.ruleReference} • LMPC Rules, 2011</span>
+                      <span className="text-2xs font-mono uppercase text-slate-400 block">Rule Citation</span>
+                      <span className="font-mono text-xs font-semibold text-slate-900 mt-0.5 block">
+                        {viol.ruleReference} • LMPC Rules, 2011
+                      </span>
                     </div>
                     <div>
-                      <span className="text-neutral-500 uppercase font-semibold block">Inspection Location & Premises</span>
-                      <span className="font-medium text-neutral-800">{viol.location}</span>
+                      <span className="text-2xs font-mono uppercase text-slate-400 block">Inspection Site</span>
+                      <span className="text-xs font-medium text-slate-800 mt-0.5 block">
+                        {viol.location}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Case Chronology Timeline */}
+                  {/* Case Chronology */}
                   <div className="space-y-2">
-                    <div className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wider flex items-center gap-1.5">
-                      <Clock size={14} className="text-navy-800" />
-                      <span>Case Chronology & Enforcement Timeline</span>
-                    </div>
+                    <span className="text-2xs font-mono font-semibold uppercase tracking-wider text-slate-500 block">
+                      Case Chronology
+                    </span>
 
-                    <div className="space-y-3 border-l-2 border-navy-200 pl-4 ml-1 pt-1">
+                    <div className="space-y-3 pl-2 border-l border-slate-200 ml-1">
                       {viol.timeline.map((item, idx) => (
-                        <div key={idx} className="space-y-1 relative">
-                          <div className="w-2.5 h-2.5 rounded-full bg-navy-800 absolute -left-[21px] top-1 ring-4 ring-navy-50"></div>
-                          <div className="font-semibold text-neutral-900 text-xs">{item.action}</div>
-                          <div className="text-2xs text-neutral-500 font-mono">
-                            {item.date} • <span className="font-sans font-medium text-neutral-700">{item.by}</span>
+                        <div key={idx} className="space-y-1 relative pl-4">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-900 absolute -left-[4px] top-1.5"></div>
+                          <div className="font-medium text-slate-900 text-xs">{item.action}</div>
+                          <div className="text-2xs font-mono text-slate-400">
+                            {item.date} • <span className="font-sans text-slate-600">{item.by}</span>
                           </div>
                           {item.note && (
-                            <div className="text-2xs text-neutral-700 bg-white p-2.5 rounded border border-neutral-200 leading-relaxed font-sans shadow-xs">
+                            <div className="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 mt-1 leading-relaxed">
                               {item.note}
                             </div>
                           )}
@@ -577,8 +535,8 @@ export const InspectionsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons Row */}
-                  <div className="pt-2 border-t border-neutral-200 flex items-center justify-end gap-2.5 flex-wrap">
+                  {/* Actions Strip */}
+                  <div className="pt-3 border-t border-slate-200/70 flex items-center justify-end gap-2.5 flex-wrap">
                     <Button
                       variant="outline"
                       size="sm"
@@ -590,9 +548,9 @@ export const InspectionsPage: React.FC = () => {
                         });
                         setIsCompoundingOpen(true);
                       }}
-                      icon={<Scales size={15} />}
+                      className="text-xs font-medium"
                     >
-                      Calculate Compounding
+                      Compounding Desk
                     </Button>
 
                     <Button
@@ -608,16 +566,16 @@ export const InspectionsPage: React.FC = () => {
                         });
                         setIsNoticeOpen(true);
                       }}
-                      icon={<FileText size={15} />}
+                      className="text-xs font-medium"
                     >
-                      View Notice (FORM LM-INSP-2011)
+                      FORM LM-INSP-2011 Notice
                     </Button>
 
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleExportSingleDocket(viol)}
-                      icon={<DownloadSimple size={15} />}
+                      className="text-xs font-medium"
                     >
                       Export Docket
                     </Button>
@@ -635,31 +593,27 @@ export const InspectionsPage: React.FC = () => {
                         });
                         setIsNoticeOpen(true);
                       }}
-                      icon={<ArrowSquareOut size={15} />}
+                      className="text-xs font-medium"
                     >
-                      Open Case File
+                      Open Case
                     </Button>
                   </div>
                 </div>
               )}
+
             </div>
           );
         })}
 
         {/* Clean empty state */}
         {filteredRecords.length === 0 && !loading && (
-          <div className="bg-white p-12 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-neutral-100 text-neutral-500 mx-auto flex items-center justify-center">
-              <MagnifyingGlass size={24} />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-bold text-neutral-900 font-heading">
-                No Inspection Records Matching Criteria
-              </p>
-              <p className="text-xs text-neutral-500 max-w-md mx-auto">
-                No statutory non-compliance dockets found for &quot;{searchTerm}&quot; under status &quot;{activeStatus}&quot;.
-              </p>
-            </div>
+          <div className="p-12 text-center space-y-3">
+            <p className="text-sm font-semibold text-slate-900">
+              No inspection records found
+            </p>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              No dockets match &quot;{searchTerm}&quot; under status &quot;{activeStatus}&quot;.
+            </p>
             <Button
               variant="outline"
               size="sm"
@@ -667,8 +621,9 @@ export const InspectionsPage: React.FC = () => {
                 setSearchTerm('');
                 setActiveStatus('All');
               }}
+              className="text-xs"
             >
-              Reset Search Filters
+              Reset Filters
             </Button>
           </div>
         )}

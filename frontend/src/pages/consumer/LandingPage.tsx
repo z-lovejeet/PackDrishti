@@ -19,26 +19,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Hero Section */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-20">
         
-        {/* Subtle Government Authority Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 text-slate-600 text-2xs font-medium tracking-wide mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-900" />
+        {/* Government Authority Masthead Tag */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 text-slate-600 text-2xs font-mono font-medium tracking-wide mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
           <span>Department of Consumer Affairs • Legal Metrology Division</span>
         </div>
 
         {/* Primary Title */}
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 font-heading max-w-3xl leading-[1.12]">
-          Statutory packaging and health verification.
+          Statutory packaging compliance and nutritional verification.
         </h1>
 
         {/* Subtitle */}
         <p className="mt-6 text-lg text-slate-600 max-w-2xl font-normal leading-relaxed">
-          National compliance verification under the Legal Metrology (Packaged Commodities) Rules, 2011 and direct multimodal nutritional label analysis.
+          National regulatory verification platform operating under the Legal Metrology (Packaged Commodities) Rules, 2011 and direct multimodal nutritional intelligence.
         </p>
 
-        {/* Dual Operational Roles */}
+        {/* Dual Operational Portals */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           
-          {/* Consumer Action */}
+          {/* Citizen Consumer Portal */}
           <div 
             onClick={() => {
               onSetUserRole("consumer");
@@ -55,7 +55,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Consumer Verification</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Scan packaged food commodities to verify Maximum Retail Price, Unit Sale Price, hidden palm oil, added sugar content, and age-specific health warnings.
+                Scan packaged food commodities to verify Maximum Retail Price, Unit Sale Price (USP), hidden industrial palm oil, sodium density, and age-specific health warnings.
               </p>
             </div>
             
@@ -65,7 +65,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
 
-          {/* Officer Action */}
+          {/* Officer Enforcement Workstation */}
           <div 
             onClick={() => {
               onSetUserRole("officer");
@@ -82,7 +82,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Legal Metrology Officer</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Field workstation for Rule 7 Table-I font calibration, statutory show-cause notices (FORM LM-INSP-2011), and Section 48 compounding fee assessment.
+                Field workstation for Rule 7 Table-I font calibration, statutory show-cause notices (FORM LM-INSP-2011), and Section 48 compounding fee adjudication.
               </p>
             </div>
             
@@ -96,138 +96,186 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       </section>
 
-      {/* Minimal Stat Line */}
+      {/* Statutory Baseline Strip (2011 Rules & Schedules) */}
       <section className="border-y border-slate-100 bg-slate-50/50">
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <div className="text-3xl font-bold font-heading text-slate-950">11</div>
-              <div className="text-xs text-slate-500 mt-1">Mandatory Rule 6 declarations</div>
+              <div className="text-xs text-slate-500 mt-1">Rule 6 mandatory declarations</div>
             </div>
             <div>
               <div className="text-3xl font-bold font-heading text-slate-950">Table-I</div>
               <div className="text-xs text-slate-500 mt-1">Rule 7 font height standard</div>
             </div>
             <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">Sec 36(1)</div>
-              <div className="text-xs text-slate-500 mt-1">Statutory compounding schedule</div>
+              <div className="text-3xl font-bold font-heading text-slate-950">1.0% - 9%</div>
+              <div className="text-xs text-slate-500 mt-1">First Schedule MPE tolerances</div>
             </div>
             <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">2026</div>
-              <div className="text-xs text-slate-500 mt-1">Gazette standards reference</div>
+              <div className="text-3xl font-bold font-heading text-slate-950">ICMR 2024</div>
+              <div className="text-xs text-slate-500 mt-1">Nutritional threshold guidelines</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Key Capabilities */}
+      {/* 4-Tier Pipeline Architecture */}
       <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">Core Modules</div>
+        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">Pipeline Architecture</div>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-950 font-heading mb-12">
-          Purpose-built for statutory rigor and consumer clarity.
+          Multimodal vision, deterministic rule math, and statutory RAG.
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          <div className="space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">01 / Label Optical Audit</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Direct Vision Perception</h3>
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 01 / Perception</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Direct Multimodal Vision (VLM)</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Multimodal models inspect physical packaging images directly, extracting net quantity, MRP numerals, and principal display panel dimensions.
+              Eliminates brittle manual OCR workflows. Direct multimodal image perception extracts spatial text coordinates, principal display panel dimensions, and complete packaging typography.
             </p>
-            <button 
-              onClick={() => onNavigate("scanner")} 
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 pt-1"
-            >
-              Open label scanner <ArrowRight size={12} weight="bold" />
-            </button>
+            <div className="pt-2">
+              <button 
+                onClick={() => onNavigate("scanner")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+              >
+                Launch label scanner <ArrowRight size={12} weight="bold" />
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">02 / Health &amp; Nutrition</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Nutritional Health Agent</h3>
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 02 / Determinism</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Python Rule Engine</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Examines ingredients and nutrition facts to identify hidden palm oil, excess sodium, and specific age-group dietary contraindications.
+              100% mathematically auditable logic. Verifies Unit Sale Price arithmetic under Rule 6(1)(e), validates Rule 7 Table-I numeral step functions, and checks SI metric unit symbols under Rule 13.
             </p>
-            <button 
-              onClick={() => onNavigate("health")} 
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 pt-1"
-            >
-              Run health check <ArrowRight size={12} weight="bold" />
-            </button>
+            <div className="pt-2">
+              <button 
+                onClick={() => {
+                  onSetUserRole("officer");
+                  onNavigate("dashboard");
+                }} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+              >
+                Open compounding engine <ArrowRight size={12} weight="bold" />
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">03 / Statutory Precedents</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Statutory RAG Index</h3>
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 03 / Statutory RAG</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Statutory Vector Index</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Grounded in the Gazette of India Extraordinary standards, providing court-admissible legal sections and compounding fee calculations.
+              Indexed across all 34 rules, 7 schedules, and recent amendments of the 2011 Regulations. Automatically retrieves exact statutory sections and generates court-admissible FORM LM-INSP-2011 notices.
             </p>
-            <button 
-              onClick={() => {
-                onSetUserRole("officer");
-                onNavigate("inspections");
-              }} 
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 pt-1"
-            >
-              View inspection ledger <ArrowRight size={12} weight="bold" />
-            </button>
+            <div className="pt-2">
+              <button 
+                onClick={() => {
+                  onSetUserRole("officer");
+                  onNavigate("reports");
+                }} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+              >
+                View statutory dockets <ArrowRight size={12} weight="bold" />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 04 / Consumer Health</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Nutrition &amp; Dietary Agent</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Evaluates ingredient lists and nutrition facts against ICMR-NIN 2024 thresholds. Detects industrial palm olein, excessive sodium, ultra-processed formulation (UPF / NOVA 4), and age suitability.
+            </p>
+            <div className="pt-2">
+              <button 
+                onClick={() => onNavigate("health")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+              >
+                Run health check <ArrowRight size={12} weight="bold" />
+              </button>
+            </div>
           </div>
 
         </div>
       </section>
 
-      {/* Statutory Rules Matrix (Clean, Minimal Table) */}
-      <section className="border-t border-slate-100 bg-slate-50/30 py-16">
+      {/* Statutory Rules & Schedules Matrix (Complete 2011 Dataset Breakdown) */}
+      <section className="border-t border-slate-100 bg-slate-50/40 py-20">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-8 gap-2">
+          
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-10 gap-2">
             <div>
               <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Statutory Matrix</div>
-              <h3 className="text-xl font-bold text-slate-950 font-heading mt-1">Legal Metrology Framework</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-950 font-heading mt-1">
+                The Legal Metrology (Packaged Commodities) Rules, 2011
+              </h3>
             </div>
-            <span className="text-xs text-slate-500">Gazette Standards 2026</span>
+            <span className="text-xs text-slate-500 font-mono">G.S.R. 202(E) • 54 Regulatory Clauses</span>
           </div>
 
-          <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+          <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
             <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100">
               
-              <div className="p-5 space-y-2">
+              <div className="p-6 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-900">Rule 3 &amp; Rule 13</span>
-                  <span className="text-2xs text-slate-500">Metric System</span>
+                  <span className="text-xs font-mono font-bold text-slate-950">Rule 6(1) &amp; Rule 10</span>
+                  <span className="text-2xs font-mono text-slate-500">Mandatory Declarations</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Strict enforcement of International System of Units (SI). Non-standard units (gm, ltr, cc, oz) prohibited.
+                  Requires 11 statutory declarations on PDP: Manufacturer/packer identity with factory address and PIN, generic commodity name, net quantity, manufacturing month/year, MRP, and consumer grievance contact.
                 </p>
               </div>
 
-              <div className="p-5 space-y-2">
+              <div className="p-6 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-900">Rule 6(1)(e)</span>
-                  <span className="text-2xs text-slate-500">Unit Sale Price</span>
+                  <span className="text-xs font-mono font-bold text-slate-950">Rule 6(1)(e) Proviso</span>
+                  <span className="text-2xs font-mono text-slate-500">Unit Sale Price (USP)</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Mandatory declaration of Unit Sale Price (USP) per gram, millilitre, kilogram, or litre alongside total MRP.
+                  Mandates Unit Sale Price declaration per gram, millilitre, kilogram, or litre alongside total MRP. Prohibits obscure or missing unit pricing on retail packaging.
                 </p>
               </div>
 
-              <div className="p-5 space-y-2 border-t border-slate-100">
+              <div className="p-6 space-y-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-900">Rule 7 &amp; Table-I</span>
-                  <span className="text-2xs text-slate-500">Font Height</span>
+                  <span className="text-xs font-mono font-bold text-slate-950">Rule 7 &amp; Table-I</span>
+                  <span className="text-2xs font-mono text-slate-500">Numeral Cap-Heights</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Principal Display Panel area determines required numeral and letter cap-heights (1.0 mm to 6.0 mm).
+                  Prescribes minimum numeral heights for net quantity: &le; 200g/ml requires 2.0mm; 200g&ndash;500g/ml requires 4.0mm; &gt; 500g/ml requires 6.0mm. Letters must be &ge; 1.0mm normal or &ge; 2.0mm molded.
                 </p>
               </div>
 
-              <div className="p-5 space-y-2 border-t border-slate-100">
+              <div className="p-6 space-y-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-900">Section 36(1) &amp; 48</span>
-                  <span className="text-2xs text-slate-500">Enforcement</span>
+                  <span className="text-xs font-mono font-bold text-slate-950">Rule 8 &amp; Rule 9</span>
+                  <span className="text-2xs font-mono text-slate-500">Quiet Zone &amp; Contrast</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Compounding schedules for first and second offences with 20% prompt settlement reduction under Jan Vishwas Act.
+                  Enforces quiet margins around net quantity (&ge; 1x numeral height above/below, &ge; 2x left/right). Mandates high conspicuous color contrast for price and quantity declarations.
+                </p>
+              </div>
+
+              <div className="p-6 space-y-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-slate-950">Rule 13 &amp; Rule 18(2A)</span>
+                  <span className="text-2xs font-mono text-slate-500">SI Units &amp; Dual MRP</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Enforces standard SI metric unit symbols (kg, g, mg, l, ml, m, cm, mm) and strictly prohibits non-metric abbreviations (gm, gms, ltr, cc). Strictly prohibits Dual MRP on identical goods.
+                </p>
+              </div>
+
+              <div className="p-6 space-y-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-slate-950">Schedules I, II &amp; VII</span>
+                  <span className="text-2xs font-mono text-slate-500">MPE &amp; FORM LM-INSP-2011</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Defines Maximum Permissible Error (1.0% to 9.0%), Second Schedule standard pack sizes across 19 commodity classes, and Seventh Schedule statutory inspection datasheets for legal evidence.
                 </p>
               </div>
 

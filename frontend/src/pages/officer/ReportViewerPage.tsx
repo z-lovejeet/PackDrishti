@@ -1,21 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  FileText,
-  DownloadSimple,
-  Printer,
   MagnifyingGlass,
-  Funnel,
   CheckCircle,
-  Calendar,
-  SealCheck,
-  ShieldCheck,
   Warning,
-  Scales,
-  MapPin,
-  Fingerprint
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
-import { Badge } from "../../components/common/Badge";
 import { ComplianceReport } from "../../types";
 import { api } from "../../utils/apiClient";
 
@@ -184,7 +173,6 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
         a.remove();
         window.URL.revokeObjectURL(url);
       } else {
-        // Fallback: print view or text export
         window.print();
       }
     } catch {
@@ -195,8 +183,9 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
+    <div className="p-6 space-y-8 max-w-7xl mx-auto font-sans antialiased text-slate-900">
+      
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80 no-print">
         <div>
           <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
@@ -222,357 +211,332 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
         </div>
       </div>
 
-      {/* Filter and Search Toolbar */}
-      <div className="bg-white p-4 rounded-card border border-neutral-200 shadow-card flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 no-print">
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 no-print">
         <div className="relative flex-1 max-w-md">
-          <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+          <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search by report docket number, title, or district..."
+            placeholder="Search by docket reference, product title, or district..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs bg-neutral-50 rounded-md border border-neutral-300 focus:bg-white focus:outline-none focus:border-navy-700 focus:ring-1 focus:ring-navy-700 transition-colors"
+            className="w-full h-9 pl-9 pr-3 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-2xs font-semibold text-neutral-500 uppercase tracking-wider mr-1 flex items-center gap-1">
-            <Funnel size={13} />
-            <span>Type:</span>
-          </span>
           {["all", "Single Product Audit", "Marketplace Inspection", "Monthly District Summary"].map((type) => (
             <button
               key={type}
               onClick={() => setSelectedType(type)}
-              className={`px-3 py-1.5 rounded-md text-2xs font-semibold transition-all duration-150 ${
+              className={`px-3 py-1.5 rounded-md text-xs transition-colors ${
                 selectedType === type
-                  ? "bg-navy-800 text-white shadow-xs"
-                  : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 border border-neutral-200"
+                  ? "bg-slate-900 text-white font-medium shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               {type === "all" ? "All Formats" : type}
             </button>
           ))}
+          <span className="text-2xs font-mono text-slate-400 ml-2">
+            {filteredReports.length} dockets
+          </span>
         </div>
       </div>
 
-      {/* Two-Column Master-Detail Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Searchable List of Inspection Report Dockets */}
+      {/* Master-Detail Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Column: Clean Docket List */}
         <div className="lg:col-span-5 space-y-3 no-print">
-          <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold text-neutral-500 uppercase tracking-wider font-heading">
-              Archived Inspection Dockets ({filteredReports.length})
+          <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+            <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider">
+              Inspection Dockets ({filteredReports.length})
             </span>
-            <span className="text-2xs text-neutral-500 font-mono">LMPC RULE 29</span>
+            <span className="text-2xs font-mono text-slate-400">Rule 29 Register</span>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {filteredReports.map((rep) => {
               const isSelected = activeReport?.id === rep.id;
               return (
                 <div
                   key={rep.id}
                   onClick={() => setActiveReport(rep)}
-                  className={`p-3.5 rounded-card border transition-all duration-150 cursor-pointer shadow-xs ${
+                  className={`p-4 rounded-xl border transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-navy-50/30 border-navy-800 ring-2 ring-navy-800/10 shadow-sm"
-                      : "bg-white border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50/60"
+                      ? "bg-slate-50/80 border-slate-900 ring-1 ring-slate-900/10 shadow-2xs"
+                      : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/40"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1.5 min-w-0 flex-1">
+                    <div className="space-y-1 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-2xs font-mono font-bold text-navy-800 bg-navy-50 px-2 py-0.5 rounded border border-navy-200">
+                        <span className="text-2xs font-mono font-semibold text-slate-900">
                           {rep.reportNumber}
                         </span>
-                        <span className="text-2xs font-medium text-neutral-500 flex items-center gap-1">
-                          <Calendar size={12} className="text-neutral-400" />
-                          <span>{rep.generatedDate}</span>
+                        <span className="text-2xs text-slate-400 font-mono">
+                          {rep.generatedDate}
                         </span>
                       </div>
 
-                      <h3 className="text-xs font-bold text-neutral-900 font-heading leading-snug line-clamp-2">
+                      <h3 className="text-xs font-semibold text-slate-950 leading-snug line-clamp-2">
                         {rep.title}
                       </h3>
 
-                      <div className="text-2xs text-neutral-500 flex items-center gap-1">
-                        <MapPin size={12} className="text-neutral-400" />
-                        <span className="truncate">{rep.district}</span>
-                      </div>
+                      <p className="text-2xs text-slate-500 truncate">
+                        {rep.district}
+                      </p>
 
-                      {/* Three count indicators */}
                       <div className="flex items-center gap-2 pt-1">
-                        <span className="text-2xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
-                          {rep.totalProductsScanned} {rep.totalProductsScanned === 1 ? "Specimen" : "Specimens"}
+                        <span className="text-2xs font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                          {rep.totalProductsScanned} {rep.totalProductsScanned === 1 ? "specimen" : "specimens"}
                         </span>
-                        <span className="text-2xs font-semibold px-2 py-0.5 rounded bg-success-light text-success border border-success-border flex items-center gap-1">
-                          <CheckCircle size={11} weight="bold" />
-                          <span>{rep.compliantCount} Compliant</span>
-                        </span>
-                        {rep.violationCount > 0 && (
-                          <span className="text-2xs font-semibold px-2 py-0.5 rounded bg-violation-light text-violation border border-violation-border flex items-center gap-1">
-                            <Warning size={11} weight="bold" />
+                        {rep.violationCount === 0 ? (
+                          <span className="text-2xs font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 flex items-center gap-1">
+                            <CheckCircle size={12} weight="fill" />
+                            <span>Conforming</span>
+                          </span>
+                        ) : (
+                          <span className="text-2xs font-mono px-2 py-0.5 rounded bg-rose-50 text-rose-800 flex items-center gap-1">
+                            <Warning size={12} weight="fill" />
                             <span>{rep.violationCount} Infraction</span>
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <span className="text-2xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 font-mono border border-neutral-200">
-                        {rep.format}
-                      </span>
-                    </div>
+                    <span className="text-2xs font-mono text-slate-400 uppercase tracking-wider shrink-0">
+                      {rep.format}
+                    </span>
                   </div>
                 </div>
               );
             })}
 
             {filteredReports.length === 0 && !isLoading && (
-              <div className="bg-white border border-neutral-200 rounded-card p-8 text-center text-xs text-neutral-500 space-y-2">
-                <FileText size={28} className="mx-auto text-neutral-400" />
-                <p className="font-semibold text-neutral-800">No inspection reports match query.</p>
-                <p className="text-2xs">Adjust filters or search keywords to view archived dockets.</p>
+              <div className="p-8 border border-slate-200 rounded-xl text-center text-xs text-slate-500">
+                No inspection dockets match your search query.
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: High-Fidelity Statutory FORM LM-INSP-2011 Certificate Sheet */}
+        {/* Right Column: High-Dignity Formal Certificate Sheet */}
         <div className="lg:col-span-7">
           {activeReport ? (
-            <div className="bg-white p-6 sm:p-8 rounded-card border-2 border-neutral-300 shadow-sm space-y-6 print:border-0 print:p-0 print:shadow-none">
-              {/* Government of India Official Masthead */}
-              <div className="border-b-2 border-neutral-900 pb-5 space-y-3 text-center">
-                <div className="flex items-center justify-between text-2xs text-neutral-600 font-mono uppercase tracking-wider border-b border-neutral-200 pb-2">
-                  <span>CONFIDENTIAL • STATUTORY RECORD</span>
-                  <span className="font-bold text-navy-800">SCHEDULE IV • FORM LM-INSP-2011</span>
-                  <span>COURT-ADMISSIBLE DOCKET</span>
+            <div className="bg-white p-8 sm:p-10 rounded-xl border border-slate-200 shadow-sm space-y-6 print:border-0 print:p-0 print:shadow-none font-sans">
+              
+              {/* Official Masthead */}
+              <div className="border-b border-slate-200 pb-6 text-center space-y-2">
+                <div className="flex items-center justify-between text-2xs font-mono text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100">
+                  <span>Confidential • Official Record</span>
+                  <span className="font-semibold text-slate-900">Schedule IV • Form LM-INSP-2011</span>
+                  <span>Court-Admissible</span>
                 </div>
 
-                {/* Lion Capital Citation / Emblem Text */}
-                <div className="space-y-1 pt-1">
-                  <div className="w-9 h-9 rounded-full bg-navy-800 text-saffron-400 mx-auto flex items-center justify-center border border-navy-700 shadow-xs">
-                    <SealCheck size={22} weight="fill" />
+                <div className="pt-2 space-y-1">
+                  <div className="text-xs font-bold uppercase tracking-widest text-slate-950 font-heading">
+                    Government of India
                   </div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-neutral-900 font-heading">
-                    GOVERNMENT OF INDIA
+                  <div className="text-2xs font-medium uppercase tracking-wider text-slate-600">
+                    Ministry of Consumer Affairs, Food &amp; Public Distribution
                   </div>
-                  <div className="text-2xs font-semibold uppercase tracking-wider text-neutral-700">
-                    MINISTRY OF CONSUMER AFFAIRS, FOOD & PUBLIC DISTRIBUTION
+                  <div className="text-2xs font-semibold text-slate-900 uppercase tracking-wide">
+                    Department of Consumer Affairs • Legal Metrology Division
                   </div>
-                  <div className="text-2xs font-bold text-navy-800 uppercase tracking-wide">
-                    DEPARTMENT OF CONSUMER AFFAIRS • LEGAL METROLOGY DIVISION
-                  </div>
-                  <div className="text-2xs text-neutral-500 italic font-serif">
-                    सत्यमेव जयते • Satyameva Jayate (Truth Alone Triumphs)
+                  <div className="text-2xs text-slate-400 italic">
+                    सत्यमेव जयते • Satyameva Jayate
                   </div>
                 </div>
 
-                <div className="pt-2">
-                  <h2 className="text-base sm:text-lg font-bold text-neutral-900 font-heading uppercase tracking-wide">
-                    CERTIFICATE OF STATUTORY PACKAGING INSPECTION AUDIT
+                <div className="pt-3">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-950 font-heading uppercase tracking-wide">
+                    Certificate of Statutory Packaging Inspection
                   </h2>
-                  <p className="text-2xs text-neutral-600 max-w-xl mx-auto leading-relaxed mt-0.5">
-                    Issued pursuant to Rule 29 of the Legal Metrology (Packaged Commodities) Rules, 2011 read with Sections 15, 36 & 48 of the Legal Metrology Act, 2009 (Act No. 1 of 2010).
+                  <p className="text-2xs text-slate-500 max-w-lg mx-auto leading-relaxed mt-1">
+                    Issued pursuant to Rule 29 of the Legal Metrology (Packaged Commodities) Rules, 2011 read with Sections 15, 36 &amp; 48 of the Legal Metrology Act, 2009.
                   </p>
                 </div>
               </div>
 
-              {/* Docket Particulars Table */}
+              {/* Docket Particulars */}
               <div className="space-y-2">
-                <div className="text-2xs font-bold text-neutral-900 uppercase tracking-wider font-heading flex items-center gap-1.5">
-                  <FileText size={14} className="text-navy-800" />
-                  <span>I. Statutory Docket Particulars</span>
-                </div>
+                <span className="text-2xs font-mono font-semibold uppercase tracking-wider text-slate-500 block">
+                  I. Docket Particulars
+                </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3.5 rounded-md bg-neutral-50 border border-neutral-200 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-lg bg-slate-50/60 border border-slate-200/80 text-xs">
                   <div>
-                    <span className="text-2xs text-neutral-500 uppercase font-semibold block">Official Docket Reference</span>
-                    <span className="font-mono font-bold text-navy-800 text-xs">{activeReport.reportNumber}</span>
+                    <span className="text-2xs font-mono uppercase text-slate-400 block">Docket Reference</span>
+                    <span className="font-mono font-semibold text-slate-950 block mt-0.5">{activeReport.reportNumber}</span>
                   </div>
                   <div>
-                    <span className="text-2xs text-neutral-500 uppercase font-semibold block">Date & Timestamp of Inspection</span>
-                    <span className="font-medium text-neutral-900 text-xs">{activeReport.generatedDate} • 14:30 IST</span>
+                    <span className="text-2xs font-mono uppercase text-slate-400 block">Date &amp; Time of Inspection</span>
+                    <span className="font-medium text-slate-900 block mt-0.5">{activeReport.generatedDate} • 14:30 IST</span>
                   </div>
                   <div>
-                    <span className="text-2xs text-neutral-500 uppercase font-semibold block">Inspection Division & Station</span>
-                    <span className="font-medium text-neutral-900 text-xs">{activeReport.district}</span>
+                    <span className="text-2xs font-mono uppercase text-slate-400 block">Enforcement Division &amp; Zone</span>
+                    <span className="font-medium text-slate-900 block mt-0.5">{activeReport.district}</span>
                   </div>
                   <div>
-                    <span className="text-2xs text-neutral-500 uppercase font-semibold block">Inspecting Officer In-Charge</span>
-                    <span className="font-semibold text-neutral-900 text-xs">{activeReport.generatedBy}</span>
+                    <span className="text-2xs font-mono uppercase text-slate-400 block">Inspecting Officer In-Charge</span>
+                    <span className="font-semibold text-slate-950 block mt-0.5">{activeReport.generatedBy}</span>
                   </div>
                   <div className="sm:col-span-2">
-                    <span className="text-2xs text-neutral-500 uppercase font-semibold block">Designation & Enforcement Authority</span>
-                    <span className="font-medium text-neutral-700 text-xs">{activeReport.designation}</span>
+                    <span className="text-2xs font-mono uppercase text-slate-400 block">Designation</span>
+                    <span className="text-slate-600 block mt-0.5">{activeReport.designation}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Three-Pillar Compliance Summary */}
-              <div className="space-y-2.5">
-                <div className="text-2xs font-bold text-neutral-900 uppercase tracking-wider font-heading flex items-center gap-1.5">
-                  <ShieldCheck size={14} className="text-navy-800" />
-                  <span>II. Three-Pillar Statutory Compliance Summary</span>
-                </div>
+              {/* Three-Pillar Statutory Compliance Summary */}
+              <div className="space-y-3">
+                <span className="text-2xs font-mono font-semibold uppercase tracking-wider text-slate-500 block">
+                  II. Statutory Findings Summary
+                </span>
 
-                {/* 3 Metric Tiles */}
+                {/* 3 Metric Counts */}
                 <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="p-3 bg-neutral-50 rounded-md border border-neutral-200">
-                    <span className="text-xl font-bold text-neutral-900 font-heading block">
+                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span className="text-xl font-bold font-heading text-slate-950 block">
                       {activeReport.totalProductsScanned}
                     </span>
-                    <span className="text-2xs text-neutral-500 font-medium">Specimens Audited</span>
+                    <span className="text-2xs text-slate-500 font-mono">Specimens</span>
                   </div>
-                  <div className="p-3 bg-success-light/40 rounded-md border border-success-border">
-                    <span className="text-xl font-bold text-success font-heading block">
+                  <div className="p-3 bg-emerald-50/60 rounded-lg border border-emerald-200">
+                    <span className="text-xl font-bold font-heading text-emerald-800 block">
                       {activeReport.compliantCount}
                     </span>
-                    <span className="text-2xs text-success font-semibold">Compliant Declarations</span>
+                    <span className="text-2xs text-emerald-700 font-mono">Compliant</span>
                   </div>
-                  <div className="p-3 bg-violation-light/40 rounded-md border border-violation-border">
-                    <span className="text-xl font-bold text-violation font-heading block">
+                  <div className="p-3 bg-rose-50/60 rounded-lg border border-rose-200">
+                    <span className="text-xl font-bold font-heading text-rose-800 block">
                       {activeReport.violationCount}
                     </span>
-                    <span className="text-2xs text-violation font-semibold">Infractions Flagged</span>
+                    <span className="text-2xs text-rose-700 font-mono">Infractions</span>
                   </div>
                 </div>
 
-                {/* Pillar Breakdown Rows */}
-                <div className="space-y-2 pt-1 text-2xs">
-                  <div className="p-2.5 rounded bg-white border border-neutral-200 flex items-center justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <span className="font-bold text-neutral-900 block font-heading">
-                        Pillar 1: Mandatory Label Declarations (Rule 6)
+                {/* Statutory Check Rows */}
+                <div className="space-y-2 pt-1 text-xs">
+                  <div className="p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-3 bg-white">
+                    <div>
+                      <span className="font-semibold text-slate-900 block">
+                        Mandatory Declarations (Rule 6)
                       </span>
-                      <p className="text-neutral-500">
-                        Verification of MRP, Mfg Date, Packer Address, Net Qty, and Customer Care.
+                      <p className="text-2xs text-slate-500 mt-0.5">
+                        Verification of manufacturer identity, net quantity, month/year, MRP, and consumer care particulars.
                       </p>
                     </div>
-                    <Badge variant={activeReport.violationCount === 0 ? "compliant" : "violation"} size="sm">
+                    <span className={`text-2xs font-mono font-medium px-2.5 py-1 rounded-full border shrink-0 ${
+                      activeReport.violationCount === 0
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border-rose-200"
+                    }`}>
                       {activeReport.violationCount === 0 ? "Conforming" : "Infraction Flagged"}
-                    </Badge>
+                    </span>
                   </div>
 
-                  <div className="p-2.5 rounded bg-white border border-neutral-200 flex items-center justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <span className="font-bold text-neutral-900 block font-heading">
-                        Pillar 2: PDP Font Height & Metric Units (Rule 7 Table-I & Rule 13)
+                  <div className="p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-3 bg-white">
+                    <div>
+                      <span className="font-semibold text-slate-900 block">
+                        Numeral Cap-Height &amp; Units (Rule 7 Table-I &amp; Rule 13)
                       </span>
-                      <p className="text-neutral-500">
-                        Optical measurement of numeral height against package area; SI metric units check.
+                      <p className="text-2xs text-slate-500 mt-0.5">
+                        Optical measurement of numeral height against PDP area; standard SI metric unit symbols verification.
                       </p>
                     </div>
-                    <Badge variant="compliant" size="sm">
-                      Conforming (Min 4.0mm)
-                    </Badge>
+                    <span className="text-2xs font-mono font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                      Conforming (&ge; 4.0mm)
+                    </span>
                   </div>
 
-                  <div className="p-2.5 rounded bg-white border border-neutral-200 flex items-center justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <span className="font-bold text-neutral-900 block font-heading">
-                        Pillar 3: Fair Pricing & Commercial Governance (Sec 36(1) & Rule 6(1)(e))
+                  <div className="p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-3 bg-white">
+                    <div>
+                      <span className="font-semibold text-slate-900 block">
+                        Unit Sale Pricing &amp; Dual MRP (Rule 6(1)(e) &amp; Rule 18)
                       </span>
-                      <p className="text-neutral-500">
-                        Unit Sale Price computation, dual MRP prohibition, and barcoding integrity.
+                      <p className="text-2xs text-slate-500 mt-0.5">
+                        Mathematical audit of Unit Sale Price (per g/ml/kg/L) and verification of single price integrity.
                       </p>
                     </div>
-                    <Badge variant={activeReport.violationCount === 0 ? "compliant" : "warning"} size="sm">
+                    <span className={`text-2xs font-mono font-medium px-2.5 py-1 rounded-full border shrink-0 ${
+                      activeReport.violationCount === 0
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        : "bg-amber-50 text-amber-800 border-amber-200"
+                    }`}>
                       {activeReport.violationCount === 0 ? "Conforming" : "Notice Slated"}
-                    </Badge>
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Official Legal Attestation Clause */}
-              <div className="space-y-2 text-xs text-neutral-700 bg-neutral-50 p-4 rounded-md border border-neutral-200 leading-relaxed font-serif">
-                <div className="font-bold text-neutral-900 uppercase text-2xs font-sans flex items-center gap-1.5">
-                  <Scales size={14} className="text-navy-800" />
-                  <span>III. Official Legal Attestation under Section 36(1)</span>
-                </div>
-                <p className="text-2xs leading-relaxed text-neutral-800">
-                  &quot;I, <strong className="font-sans font-bold text-neutral-900">{activeReport.generatedBy}</strong>, Senior Legal Metrology Inspector, Central Enforcement Division, do hereby solemnly certify and attest that on {activeReport.generatedDate}, an authorized statutory inspection of the packaged commodity specimen referenced in Docket <strong className="font-mono text-neutral-900">{activeReport.reportNumber}</strong> was conducted pursuant to Section 15 of the Legal Metrology Act, 2009. The packaging declarations, optical numeral height measurements, metric unit usages, and Unit Sale Price disclosures have been examined against the mandatory requirements of the Legal Metrology (Packaged Commodities) Rules, 2011. This certificate and attached cryptographic evidence hashes constitute valid secondary electronic evidence under Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (formerly Section 65B of the Indian Evidence Act, 1872). Necessary statutory notices under Section 36(1) or Section 48 have been initiated accordingly.&quot;
+              {/* Legal Attestation */}
+              <div className="space-y-2 p-4 rounded-lg bg-slate-50/70 border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                <span className="text-2xs font-mono font-semibold uppercase tracking-wider text-slate-500 block">
+                  III. Legal Attestation under Section 36(1)
+                </span>
+                <p className="text-xs leading-relaxed text-slate-700">
+                  &quot;I, <strong className="font-semibold text-slate-950">{activeReport.generatedBy}</strong>, Senior Legal Metrology Inspector, do hereby certify that on {activeReport.generatedDate}, statutory inspection of the packaged commodity specimen referenced in Docket <strong className="font-mono text-slate-950">{activeReport.reportNumber}</strong> was conducted pursuant to Section 15 of the Legal Metrology Act, 2009. The declarations, numeral height measurements, metric unit usages, and Unit Sale Price disclosures have been examined against the mandatory requirements of the Legal Metrology (Packaged Commodities) Rules, 2011. This record constitutes valid secondary electronic evidence under Section 63 of the Bharatiya Sakshya Adhiniyam, 2023.&quot;
                 </p>
               </div>
 
-              {/* Official DoCA Verification Stamp & Officer DSC Token */}
-              <div className="pt-3 border-t-2 border-neutral-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-2xs">
-                {/* Official Department Stamp */}
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-24 rounded-full border-2 border-dashed border-navy-800 flex flex-col items-center justify-center text-center p-2 text-navy-800 font-mono shrink-0 bg-navy-50/50">
-                    <ShieldCheck size={22} className="text-navy-800" weight="bold" />
-                    <span className="text-2xs uppercase font-bold leading-tight mt-1">
-                      DOCA DEL
-                    </span>
-                    <span className="text-2xs uppercase text-neutral-600 font-semibold">
-                      VERIFIED
-                    </span>
+              {/* Signature & Digital Verification */}
+              <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+                <div>
+                  <div className="font-serif italic text-base font-bold text-slate-950">
+                    {activeReport.generatedBy}
                   </div>
-                  <div className="space-y-0.5">
-                    <span className="font-bold text-neutral-900 block font-heading text-2xs">
-                      Department of Consumer Affairs Seal
-                    </span>
-                    <span className="text-neutral-500 block text-2xs">
-                      Official Enforcement Division Verification Stamp
-                    </span>
-                    <span className="text-neutral-500 font-mono text-2xs">
-                      SERIAL: DEL-INSP-2026-STAMP-442
-                    </span>
+                  <div className="text-2xs text-slate-500 font-mono mt-0.5">
+                    Senior Legal Metrology Inspector • DL-LM-INSP-0442
+                  </div>
+                  <div className="text-2xs font-mono text-slate-400 mt-0.5">
+                    TS: {activeReport.generatedDate} 14:32:08 IST
                   </div>
                 </div>
 
-                {/* Digital Officer DSC Token */}
-                <div className="space-y-1 text-left sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-neutral-100">
-                  <div className="font-serif italic text-sm font-bold text-neutral-900">
-                    {activeReport.generatedBy}
-                  </div>
-                  <div className="text-neutral-600 font-medium text-2xs">
-                    Digitally Signed via Officer DSC Token
-                  </div>
-                  <div className="text-neutral-500 font-mono text-2xs flex items-center sm:justify-end gap-1">
-                    <Fingerprint size={12} className="text-navy-700" />
-                    <span className="truncate max-w-xs">
-                      SHA-256: 7f83b1657ff1fc53b92dc18148a1d65d...b5c6
-                    </span>
-                  </div>
-                  <div className="text-neutral-400 font-mono text-2xs">
-                    TS: {activeReport.generatedDate} 14:32:08 UTC+05:30
-                  </div>
+                <div className="text-left sm:text-right font-mono text-2xs space-y-0.5">
+                  <span className="text-emerald-700 font-semibold block">
+                    Digitally Verified • DSC Token Active
+                  </span>
+                  <span className="text-slate-400 block truncate max-w-xs">
+                    SHA-256: 7f83b1657ff1fc53b92dc18148a1d65d...b5c6
+                  </span>
                 </div>
               </div>
 
               {/* Action Toolbar */}
-              <div className="pt-4 border-t border-neutral-200 flex items-center justify-end gap-3 no-print">
+              <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3 no-print">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handlePrint}
-                  icon={<Printer size={15} />}
+                  className="text-xs font-medium"
                 >
-                  Print Docket (window.print)
+                  Print Certificate
                 </Button>
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={() => handleDownloadPdf(activeReport.id, activeReport.reportNumber)}
                   loading={isDownloading}
-                  icon={<DownloadSimple size={15} />}
+                  className="text-xs font-medium"
                 >
-                  Download Certified PDF (FORM LM-INSP-2011)
+                  Download PDF (FORM LM-INSP-2011)
                 </Button>
               </div>
+
             </div>
           ) : (
-            <div className="bg-white p-12 rounded-card border border-neutral-200 text-center text-neutral-500 space-y-2">
-              <FileText size={32} className="mx-auto text-neutral-400" />
-              <p className="text-sm font-semibold text-neutral-800">No Report Selected</p>
-              <p className="text-xs">Select an inspection docket from the list to view the courtroom-ready certificate.</p>
+            <div className="p-12 rounded-xl border border-slate-200 text-center text-slate-500 text-xs">
+              Select an inspection docket to view the certified record.
             </div>
           )}
         </div>
+
       </div>
+
     </div>
   );
 };
