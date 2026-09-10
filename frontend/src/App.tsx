@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
 import { ToastContainer, ToastMessage } from "./components/common/Toast";
 import { GenerateReportModal } from "./components/reports/GenerateReportModal";
 import { AuthModal } from "./components/common/AuthModal";
-import { UserRole } from "./types";
 import { useAuthStore } from "./store/authStore";
 
 // Consumer Pages
@@ -18,19 +17,33 @@ import { OfficerDashboardPage } from "./pages/officer/OfficerDashboardPage";
 import { InspectionsPage } from "./pages/officer/InspectionsPage";
 import { ReportViewerPage } from "./pages/officer/ReportViewerPage";
 
+const VALID_PAGES = [
+  "landing",
+  "scanner",
+  "health",
+  "history",
+  "dashboard",
+  "inspections",
+  "reports"
+] as const;
+
+type PageKey = typeof VALID_PAGES[number];
+
+const parseHashPage = (): PageKey => {
+  if (typeof window === "undefined") return "landing";
+  const hash = window.location.hash.replace(/^#\/?/, "").trim().toLowerCase();
+  if (VALID_PAGES.includes(hash as PageKey)) {
+    return hash as PageKey;
+  }
+  return "landing";
+};
+
 export function App() {
-  const [activePage, setActivePage] = useState<string>("landing");
+  const [activePage, setActivePage] = useState<string>(() => parseHashPage());
   const { role: userRole, setRole: setUserRole } = useAuthStore();
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [toasts, setToasts] = useState<ToastMessage[]>([
-    {
-      id: "init-toast",
-      type: "info",
-      title: "PackDrashiti Engine Ready",
-      message: "Legal Metrology Rules 2011 rulebook loaded. Choose Consumer or Officer mode above.",
-    }
-  ]);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const addToast = (type: "success" | "error" | "warning" | "info", title: string, message: string) => {
     const id = `toast-${Date.now()}`;
@@ -44,24 +57,51 @@ export function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  const navigateTo = useCallback((page: string) => {
+    if (VALID_PAGES.includes(page as PageKey)) {
+      setActivePage(page);
+      if (window.location.hash !== `#${page}`) {
+        window.location.hash = page;
+      }
+    }
+  }, []);
+
+  // Synchronize with URL hash changes (browser back/forward, direct bookmarked links)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const pageFromHash = parseHashPage();
+      setActivePage(pageFromHash);
+    };
+
+    const initialHash = window.location.hash.replace(/^#\/?/, "").trim().toLowerCase();
+    if (!VALID_PAGES.includes(initialHash as PageKey)) {
+      window.location.hash = activePage;
+    }
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [activePage]);
+
   const handleToggleUserRole = () => {
     if (userRole === "consumer") {
       setUserRole("officer");
       addToast("info", "Officer Mode Enabled", "Switched to Enforcement Officer jurisdiction view.");
       if (activePage === "health" || activePage === "history") {
-        setActivePage("dashboard");
+        navigateTo("dashboard");
       }
     } else {
       setUserRole("consumer");
-      addToast("info", "Consumer Mode Enabled", "Switched to Citizen retail & nutrition verification.");
+      addToast("info", "Consumer Mode Enabled", "Switched to Citizen retail and nutrition verification.");
       if (activePage === "dashboard" || activePage === "reports" || activePage === "inspections") {
-        setActivePage("scanner");
+        navigateTo("scanner");
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-neutral-50 flex flex-col font-sans text-neutral-900">
       {/* Toast Notification Queue */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
@@ -72,16 +112,16 @@ export function App() {
         onSuccessToast={() => addToast("success", "Statutory Report Generated", "Inspection certificate downloaded successfully.")}
       />
 
-      {/* Supabase Authentication & Role Modal */}
+      {/* Authentication and Role Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={(msg) => addToast("success", "Authentication", msg)}
       />
 
-      {/* Adaptive Government Navbar */}
+      {/* Persistent Government Shell Navbar */}
       <Navbar
-        onNavigate={setActivePage}
+        onNavigate={navigateTo}
         activePage={activePage}
         userRole={userRole}
         onToggleUserRole={handleToggleUserRole}
@@ -92,11 +132,15 @@ export function App() {
       <main className="flex-1">
         {activePage === "landing" && (
           <LandingPage
-            onNavigate={setActivePage}
+            onNavigate={navigateTo}
             userRole={userRole}
             onSetUserRole={(role) => {
               setUserRole(role);
-              addToast("info", role === "officer" ? "Officer Mode Active" : "Consumer Mode Active", "Interface adjusted for selected audience.");
+              addToast(
+                "info", 
+                role === "officer" ? "Officer Mode Active" : "Consumer Mode Active", 
+                "Interface adjusted for selected audience."
+              );
             }}
           />
         )}
@@ -105,7 +149,7 @@ export function App() {
           <ScannerPage 
             userRole={userRole}
             onOpenReportModal={() => setIsReportModalOpen(true)}
-            onNavigateToHealth={() => setActivePage("health")}
+            onNavigateToHealth={() => navigateTo("health")}
             onSaveToast={() => addToast("success", "Saved to Repository", "Product scan record archived in compliance history.")}
           />
         )}
@@ -116,14 +160,14 @@ export function App() {
 
         {activePage === "history" && (
           <ProductHistoryPage
-            onNavigateToScanner={() => setActivePage("scanner")}
-            onNavigateToHealth={() => setActivePage("health")}
+            onNavigateToScanner={() => navigateTo("scanner")}
+            onNavigateToHealth={() => navigateTo("health")}
           />
         )}
 
         {activePage === "dashboard" && (
           <OfficerDashboardPage
-            onNavigate={setActivePage}
+            onNavigate={navigateTo}
             onOpenReportModal={() => setIsReportModalOpen(true)}
           />
         )}
@@ -139,7 +183,7 @@ export function App() {
         )}
       </main>
 
-      {/* Statutory Footer */}
+      {/* Statutory Government Footer */}
       <Footer />
     </div>
   );

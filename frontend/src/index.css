@@ -2,33 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-primary: #1B365D;
+  --color-primary-hover: #0F2540;
+  --color-primary-light: #F0F4F8;
+  --color-saffron: #D97706;
+  --color-saffron-light: #FFF9F0;
+  --color-success: #059669;
+  --color-violation: #DC2626;
+  --color-warning: #D97706;
+  --color-surface: #F8FAFC;
+  --color-surface-card: #FFFFFF;
+}
+
 @layer base {
+  * {
+    border-color: #E2E8F0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply bg-neutral-50 text-neutral-700 font-sans text-[15px] leading-relaxed;
+    @apply bg-neutral-50 text-neutral-800 font-sans text-base leading-relaxed antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading text-neutral-900 tracking-tight;
+    @apply font-heading text-neutral-900 tracking-tight font-bold;
+  }
+
+  /* Accessible focus indicators */
+  :focus-visible {
+    outline: 2px solid #1B365D;
+    outline-offset: 2px;
   }
 }
 
-/* Purposeful scrollbars */
+@layer components {
+  .surface-card {
+    @apply bg-white border border-neutral-200 rounded-card shadow-card transition-shadow duration-200;
+  }
+  .surface-card-hover {
+    @apply hover:border-neutral-300 hover:shadow-card-hover;
+  }
+  .table-header {
+    @apply bg-neutral-50 text-neutral-600 font-heading text-xs font-semibold uppercase tracking-wider py-3 px-4 border-b border-neutral-200;
+  }
+  .table-cell {
+    @apply py-3 px-4 text-sm text-neutral-800 border-b border-neutral-100;
+  }
+}
+
+/* Subtle, purposeful scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F3F4F6;
+  background: #F1F5F9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
-  border-radius: 3px;
+  background: #CBD5E1;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9CA3AF;
+  background: #94A3B8;
 }
 
-/* Print formatting for compliance reports */
+/* Print formatting for statutory compliance reports */
 @media print {
   .no-print {
     display: none !important;

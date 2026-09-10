@@ -14,7 +14,7 @@ import { useAuthStore } from '../../store/authStore';
 import { supabase } from '../../utils/supabaseClient';
 import type { UserRole } from '../../types/models';
 
-interface AuthModalProps {
+export interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (message: string) => void;
@@ -136,11 +136,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
     // Provide immediate demo session for local evaluation
     const demoUser = {
-      id: role === 'officer' ? '11111111-1111-1111-1111-111111111111' : '22222222-2222-2222-2222-222222222222',
-      email: role === 'officer' ? 'officer.verma@packdrashiti.gov.in' : 'citizen.sharma@example.com',
+      id:
+        role === 'officer'
+          ? '11111111-1111-1111-1111-111111111111'
+          : '22222222-2222-2222-2222-222222222222',
+      email:
+        role === 'officer'
+          ? 'officer.verma@packdrashiti.gov.in'
+          : 'citizen.sharma@example.com',
       role: role,
       fullName: role === 'officer' ? 'Inspector S. Verma' : 'Ramesh Sharma',
-      badgeNumber: role === 'officer' ? 'LMO-DL-2024-991' : undefined,
+      badgeNumber: role === 'officer' ? 'DL-LM-INSP-0442' : undefined,
       jurisdiction: role === 'officer' ? 'Delhi Central Enforcement Zone' : undefined,
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -159,7 +165,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     if (onSuccess) {
       onSuccess(
         role === 'officer'
-          ? 'Enforcement Officer Demo Access Activated (Badge: LMO-DL-2024-991).'
+          ? 'Enforcement Officer Demo Access Activated (Badge: DL-LM-INSP-0442).'
           : 'Citizen Demo Access Activated.'
       );
     }
@@ -167,41 +173,57 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs animate-fadeIn">
-      <div className="relative w-full max-w-md overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 p-4 backdrop-blur-sm animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-modal-title"
+    >
+      <div
+        className="fixed inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className="relative w-full max-w-md overflow-hidden rounded-card border border-neutral-200 bg-white shadow-modal z-10 flex flex-col max-h-[92vh] animate-slideUp">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4 bg-neutral-50/50">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0F3A4C] text-white">
-              <ShieldCheck size={20} weight="bold" />
+        <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4 bg-neutral-50/80 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-navy-800 text-white shadow-xs shrink-0">
+              <ShieldCheck size={22} weight="bold" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-neutral-900 font-heading">
+              <h2
+                id="auth-modal-title"
+                className="text-base font-bold text-neutral-900 font-heading"
+              >
                 PackDrashiti Authentication
               </h2>
-              <p className="text-xs text-neutral-500">Legal Metrology Portal Access</p>
+              <p className="text-xs text-neutral-500 font-sans">
+                Legal Metrology Enforcement Portal
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
+            aria-label="Close dialog"
+            className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-navy-800"
           >
-            <X size={18} />
+            <X size={18} weight="bold" />
           </button>
         </div>
 
         {/* Tab Toggle */}
-        <div className="grid grid-cols-2 border-b border-neutral-200 text-xs font-semibold">
+        <div className="grid grid-cols-2 border-b border-neutral-200 text-xs font-semibold shrink-0">
           <button
             type="button"
             onClick={() => {
               setMode('signin');
               setErrorMsg(null);
             }}
-            className={`py-3 text-center transition-colors border-b-2 ${
+            className={`py-3 text-center transition-colors border-b-2 font-heading ${
               mode === 'signin'
-                ? 'border-[#0F3A4C] text-[#0F3A4C] bg-white font-bold'
-                : 'border-transparent text-neutral-500 hover:text-neutral-900 bg-neutral-50'
+                ? 'border-navy-800 text-navy-800 bg-white font-bold'
+                : 'border-transparent text-neutral-500 hover:text-neutral-900 bg-neutral-50/60 font-medium'
             }`}
           >
             Sign In
@@ -212,10 +234,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               setMode('signup');
               setErrorMsg(null);
             }}
-            className={`py-3 text-center transition-colors border-b-2 ${
+            className={`py-3 text-center transition-colors border-b-2 font-heading ${
               mode === 'signup'
-                ? 'border-[#0F3A4C] text-[#0F3A4C] bg-white font-bold'
-                : 'border-transparent text-neutral-500 hover:text-neutral-900 bg-neutral-50'
+                ? 'border-navy-800 text-navy-800 bg-white font-bold'
+                : 'border-transparent text-neutral-500 hover:text-neutral-900 bg-neutral-50/60 font-medium'
             }`}
           >
             Register Account
@@ -223,11 +245,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         </div>
 
         {/* Form Body */}
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 overflow-y-auto">
           {errorMsg && (
-            <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800">
-              <WarningCircle size={16} className="mt-0.5 shrink-0 text-red-600" />
-              <span>{errorMsg}</span>
+            <div className="flex items-start gap-2.5 rounded-md border border-violation-border bg-violation-light p-3 text-xs text-violation">
+              <WarningCircle size={16} weight="bold" className="mt-0.5 shrink-0" />
+              <span className="font-medium">{errorMsg}</span>
             </div>
           )}
 
@@ -236,39 +258,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               <>
                 {/* Role Selector Pill */}
                 <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Account Jurisdiction Type
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1.5 font-heading">
+                    Account Category
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setSelectedRole('consumer')}
-                      className={`flex items-center justify-center gap-1.5 rounded-lg border p-2 text-xs font-semibold transition-all ${
+                      className={`flex items-center justify-center gap-1.5 rounded-md border p-2 text-xs font-semibold transition-all ${
                         selectedRole === 'consumer'
-                          ? 'border-[#0F3A4C] bg-[#0F3A4C]/5 text-[#0F3A4C]'
+                          ? 'border-saffron-500 bg-saffron-50 text-saffron-800 shadow-xs'
                           : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
                       }`}
                     >
-                      <User size={15} />
+                      <User size={15} weight="bold" />
                       Citizen Consumer
                     </button>
                     <button
                       type="button"
                       onClick={() => setSelectedRole('officer')}
-                      className={`flex items-center justify-center gap-1.5 rounded-lg border p-2 text-xs font-semibold transition-all ${
+                      className={`flex items-center justify-center gap-1.5 rounded-md border p-2 text-xs font-semibold transition-all ${
                         selectedRole === 'officer'
-                          ? 'border-[#0F3A4C] bg-[#0F3A4C]/5 text-[#0F3A4C]'
+                          ? 'border-navy-800 bg-navy-50 text-navy-800 shadow-xs'
                           : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
                       }`}
                     >
-                      <IdentificationCard size={15} />
+                      <IdentificationCard size={15} weight="bold" />
                       Enforcement Officer
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1 font-heading">
                     Full Legal Name
                   </label>
                   <input
@@ -276,15 +298,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Inspector R. K. Verma"
-                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-[#0F3A4C] focus:ring-1 focus:ring-[#0F3A4C] outline-hidden"
+                    placeholder="Inspector R. K. Verma"
+                    className="w-full rounded-md border border-neutral-300 px-3 py-2 text-xs sm:text-sm text-neutral-900 focus:border-navy-800 focus:ring-2 focus:ring-navy-800/20 focus:outline-hidden transition-all"
                   />
                 </div>
 
                 {selectedRole === 'officer' && (
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-neutral-700 mb-1">
+                      <label className="block text-xs font-semibold text-neutral-700 mb-1 font-heading">
                         Badge Number
                       </label>
                       <input
@@ -292,12 +314,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                         required
                         value={badgeNumber}
                         onChange={(e) => setBadgeNumber(e.target.value)}
-                        placeholder="LMO-DL-2024-XXXX"
-                        className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-[#0F3A4C] focus:ring-1 focus:ring-[#0F3A4C] outline-hidden font-mono"
+                        placeholder="DL-LM-INSP-0442"
+                        className="w-full rounded-md border border-neutral-300 px-3 py-2 text-xs sm:text-sm text-neutral-900 focus:border-navy-800 focus:ring-2 focus:ring-navy-800/20 focus:outline-hidden transition-all font-mono"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-neutral-700 mb-1">
+                      <label className="block text-xs font-semibold text-neutral-700 mb-1 font-heading">
                         Jurisdiction District
                       </label>
                       <input
@@ -306,7 +328,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                         value={jurisdiction}
                         onChange={(e) => setJurisdiction(e.target.value)}
                         placeholder="Delhi Central"
-                        className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-[#0F3A4C] focus:ring-1 focus:ring-[#0F3A4C] outline-hidden"
+                        className="w-full rounded-md border border-neutral-300 px-3 py-2 text-xs sm:text-sm text-neutral-900 focus:border-navy-800 focus:ring-2 focus:ring-navy-800/20 focus:outline-hidden transition-all"
                       />
                     </div>
                   </div>
@@ -315,28 +337,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
             )}
 
             <div>
-              <label className="block text-xs font-bold text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1 font-heading">
                 Official Email Address
               </label>
               <div className="relative">
-                <EnvelopeSimple size={15} className="absolute left-3 top-2.5 text-neutral-400" />
+                <EnvelopeSimple size={16} className="absolute left-3 top-2.5 text-neutral-400" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="officer@nic.in or user@example.com"
-                  className="w-full rounded-lg border border-neutral-300 pl-9 pr-3 py-2 text-xs text-neutral-900 focus:border-[#0F3A4C] focus:ring-1 focus:ring-[#0F3A4C] outline-hidden"
+                  className="w-full rounded-md border border-neutral-300 pl-9 pr-3 py-2 text-xs sm:text-sm text-neutral-900 focus:border-navy-800 focus:ring-2 focus:ring-navy-800/20 focus:outline-hidden transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1 font-heading">
                 Secure Password
               </label>
               <div className="relative">
-                <LockKey size={15} className="absolute left-3 top-2.5 text-neutral-400" />
+                <LockKey size={16} className="absolute left-3 top-2.5 text-neutral-400" />
                 <input
                   type="password"
                   required
@@ -344,7 +366,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Minimum 6 characters"
-                  className="w-full rounded-lg border border-neutral-300 pl-9 pr-3 py-2 text-xs text-neutral-900 focus:border-[#0F3A4C] focus:ring-1 focus:ring-[#0F3A4C] outline-hidden"
+                  className="w-full rounded-md border border-neutral-300 pl-9 pr-3 py-2 text-xs sm:text-sm text-neutral-900 focus:border-navy-800 focus:ring-2 focus:ring-navy-800/20 focus:outline-hidden transition-all"
                 />
               </div>
             </div>
@@ -353,46 +375,46 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               type="submit"
               variant="primary"
               size="md"
-              className="w-full justify-center bg-[#0F3A4C] hover:bg-[#0B2C3A]"
-              disabled={isLoading}
+              className="w-full justify-center"
+              loading={isLoading}
             >
-              {isLoading
-                ? 'Validating Credentials...'
-                : mode === 'signin'
-                ? 'Sign In to Portal'
-                : 'Complete Registration'}
+              {mode === 'signin' ? 'Sign In to Portal' : 'Complete Registration'}
             </Button>
           </form>
 
           {/* Instant Evaluation Demo Shortcuts */}
-          <div className="pt-3 border-t border-neutral-200">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
-              <Sparkle size={13} className="text-amber-500" />
-              <span>Instant Hackathon Evaluation Shortcuts</span>
+          <div className="pt-4 border-t border-neutral-200">
+            <div className="flex items-center gap-1.5 text-2xs font-bold text-neutral-500 uppercase tracking-wider mb-2.5 font-heading">
+              <Sparkle size={13} weight="fill" className="text-saffron-500" />
+              <span>Instant Evaluation Credentials</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => handleQuickDemoLogin('officer')}
-                className="rounded-lg border border-indigo-200 bg-indigo-50/60 p-2 text-left hover:bg-indigo-100/70 transition-colors"
+                className="rounded-md border border-navy-200 bg-navy-50/70 p-2.5 text-left hover:bg-navy-100 hover:border-navy-300 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-navy-800"
               >
-                <div className="font-bold text-xs text-indigo-900 flex items-center gap-1">
-                  <IdentificationCard size={14} />
+                <div className="font-bold text-xs text-navy-900 flex items-center gap-1.5 font-heading">
+                  <IdentificationCard size={15} weight="bold" className="text-navy-800" />
                   Officer Mode
                 </div>
-                <div className="text-[10px] text-indigo-700">Badge: LMO-DL-2024-991</div>
+                <div className="text-2xs text-navy-700 font-mono mt-0.5">
+                  DL-LM-INSP-0442
+                </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickDemoLogin('consumer')}
-                className="rounded-lg border border-neutral-200 bg-neutral-50 p-2 text-left hover:bg-neutral-100 transition-colors"
+                className="rounded-md border border-saffron-200 bg-saffron-50/70 p-2.5 text-left hover:bg-saffron-100 hover:border-saffron-300 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-saffron-500"
               >
-                <div className="font-bold text-xs text-neutral-800 flex items-center gap-1">
-                  <User size={14} />
+                <div className="font-bold text-xs text-saffron-900 flex items-center gap-1.5 font-heading">
+                  <User size={15} weight="bold" className="text-saffron-600" />
                   Citizen Mode
                 </div>
-                <div className="text-[10px] text-neutral-600">Consumer Retail Scanner</div>
+                <div className="text-2xs text-saffron-700 mt-0.5">
+                  Consumer Retail Scanner
+                </div>
               </button>
             </div>
           </div>

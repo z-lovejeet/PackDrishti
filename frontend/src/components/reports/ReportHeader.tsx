@@ -1,6 +1,5 @@
 import React from "react";
-import { ShieldCheck, Warning, XCircle, Barcode, Calendar, MapPin, Scales } from "@phosphor-icons/react";
-import { Badge } from "../common/Badge";
+import { ShieldCheck, Warning, XCircle, Barcode, Calendar, MapPin, Scales, CornersOut } from "@phosphor-icons/react";
 
 interface ReportHeaderProps {
   productName: string;
@@ -35,22 +34,28 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
     switch (overallStatus) {
       case "compliant":
         return {
-          badge: <Badge variant="compliant" size="md">Compliant under LMPC Rules</Badge>,
-          border: "border-l-success",
-          icon: <ShieldCheck size={24} className="text-success" weight="fill" />,
+          badgeClass: "bg-emerald-50 text-emerald-900 border-emerald-300",
+          border: "border-l-emerald-600",
+          statusText: "Compliant under LMPC Rules",
+          scoreBg: "bg-emerald-50 text-emerald-800 border-emerald-300",
+          icon: <ShieldCheck size={22} className="text-emerald-600 shrink-0" weight="fill" />,
         };
       case "violation":
         return {
-          badge: <Badge variant="violation" size="md">Statutory Infractions Detected</Badge>,
-          border: "border-l-violation",
-          icon: <XCircle size={24} className="text-violation" weight="fill" />,
+          badgeClass: "bg-rose-50 text-rose-900 border-rose-300",
+          border: "border-l-rose-600",
+          statusText: "Statutory Infractions Detected",
+          scoreBg: "bg-rose-50 text-rose-800 border-rose-300",
+          icon: <XCircle size={22} className="text-rose-600 shrink-0" weight="fill" />,
         };
       case "warning":
       default:
         return {
-          badge: <Badge variant="warning" size="md">Rectification Required</Badge>,
-          border: "border-l-warning",
-          icon: <Warning size={24} className="text-warning" weight="fill" />,
+          badgeClass: "bg-amber-50 text-amber-950 border-amber-300",
+          border: "border-l-amber-500",
+          statusText: "Rectification Required",
+          scoreBg: "bg-amber-50 text-amber-900 border-amber-300",
+          icon: <Warning size={22} className="text-amber-600 shrink-0" weight="fill" />,
         };
     }
   };
@@ -58,99 +63,112 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   const statusInfo = getStatusDisplay();
 
   return (
-    <div className={`bg-white p-5 rounded-[8px] border border-neutral-200 border-l-4 ${statusInfo.border} shadow-xs space-y-4`}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-100 pb-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+    <div
+      className={`bg-white p-6 rounded-lg border border-neutral-200 border-l-4 ${statusInfo.border} shadow-xs space-y-5`}
+    >
+      {/* Top Docket Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
+        <div className="space-y-2 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap text-2xs">
+            <span className="font-bold text-neutral-700 bg-neutral-100 px-2.5 py-0.5 rounded-md uppercase tracking-wider font-heading border border-neutral-200">
               {brand}
             </span>
             <span className="text-neutral-300">•</span>
-            <span className="text-xs font-semibold text-neutral-600">
+            <span className="font-semibold text-neutral-600 bg-neutral-50 px-2.5 py-0.5 rounded-md border border-neutral-200">
               {category}
             </span>
             <span className="text-neutral-300">•</span>
-            <span className="text-[11px] font-mono font-medium text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
-              {scanCode}
+            <span className="font-mono font-semibold text-neutral-700 bg-navy-50 text-navy-900 px-2.5 py-0.5 rounded-md border border-navy-200">
+              REF: {scanCode}
             </span>
           </div>
-          <h2 className="text-lg sm:text-xl font-bold text-neutral-900 font-heading">
+
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-heading tracking-tight leading-tight">
             {productName}
-          </h2>
+          </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Right Status Badges & Score Box */}
+        <div className="flex items-center gap-4 shrink-0 flex-wrap">
           {complianceScore !== undefined && (
-            <div className="text-right pr-3 border-r border-neutral-200">
-              <span className="text-2xl font-bold text-neutral-900 font-heading block">
-                {complianceScore}/100
-              </span>
-              <span className="text-[10px] text-neutral-500 uppercase font-semibold">
-                Score
-              </span>
+            <div
+              className={`flex items-center gap-2.5 px-3.5 py-2 rounded-lg border shadow-2xs ${statusInfo.scoreBg}`}
+            >
+              <div className="text-right">
+                <span className="text-2xl font-extrabold font-heading block leading-none">
+                  {complianceScore}
+                </span>
+                <span className="text-2xs uppercase tracking-wider font-bold opacity-80 block mt-0.5">
+                  Score / 100
+                </span>
+              </div>
             </div>
           )}
-          <div className="flex items-center gap-2">
+
+          <div
+            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-2xs ${statusInfo.badgeClass}`}
+          >
             {statusInfo.icon}
-            {statusInfo.badge}
+            <span className="text-xs font-bold font-heading">{statusInfo.statusText}</span>
           </div>
         </div>
       </div>
 
-      {/* Metadata Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div className="space-y-0.5">
-          <span className="text-neutral-500 flex items-center gap-1 text-[11px]">
-            <Calendar size={13} />
-            Scan Timestamp
+      {/* Structured Statutory Metrics Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Metric 1: GTIN / Barcode */}
+        <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200/80 space-y-1">
+          <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wide flex items-center gap-1.5">
+            <Barcode size={15} className="text-neutral-500" />
+            <span>GTIN / Barcode</span>
           </span>
-          <span className="font-semibold text-neutral-800 block">
+          <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 block truncate">
+            {barcode || "Not Available"}
+          </span>
+        </div>
+
+        {/* Metric 2: Rule 7 PDP Area */}
+        <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200/80 space-y-1">
+          <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wide flex items-center gap-1.5">
+            <CornersOut size={15} className="text-neutral-500" />
+            <span>PDP Area (Rule 7)</span>
+          </span>
+          <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 block">
+            {pdpAreaCm2 ? `${pdpAreaCm2} cm²` : "Calculated on PDP"}
+          </span>
+        </div>
+
+        {/* Metric 3: Declared MRP & Net Qty */}
+        <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200/80 space-y-1">
+          <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wide flex items-center gap-1.5">
+            <Scales size={15} className="text-neutral-500" />
+            <span>Declared MRP &amp; Qty</span>
+          </span>
+          <span className="font-heading font-bold text-xs sm:text-sm text-neutral-900 block truncate">
+            {declaredMrp || "₹ --"} {netQuantity ? `(${netQuantity})` : ""}
+          </span>
+        </div>
+
+        {/* Metric 4: Timestamp */}
+        <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200/80 space-y-1">
+          <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wide flex items-center gap-1.5">
+            <Calendar size={15} className="text-neutral-500" />
+            <span>Scan Timestamp</span>
+          </span>
+          <span className="font-sans font-semibold text-xs sm:text-sm text-neutral-800 block truncate">
             {scannedAt}
           </span>
         </div>
-
-        {declaredMrp && (
-          <div className="space-y-0.5">
-            <span className="text-neutral-500 flex items-center gap-1 text-[11px]">
-              <Scales size={13} />
-              Declared MRP / Qty
-            </span>
-            <span className="font-semibold text-neutral-800 block font-heading">
-              {declaredMrp} {netQuantity ? `(${netQuantity})` : ""}
-            </span>
-          </div>
-        )}
-
-        {pdpAreaCm2 && (
-          <div className="space-y-0.5">
-            <span className="text-neutral-500 text-[11px]">
-              PDP Area (Rule 7)
-            </span>
-            <span className="font-semibold text-neutral-800 block font-mono">
-              {pdpAreaCm2} cm²
-            </span>
-          </div>
-        )}
-
-        {barcode && (
-          <div className="space-y-0.5">
-            <span className="text-neutral-500 flex items-center gap-1 text-[11px]">
-              <Barcode size={13} />
-              GTIN / Barcode
-            </span>
-            <span className="font-semibold text-neutral-800 block font-mono">
-              {barcode}
-            </span>
-          </div>
-        )}
-
-        {location && (
-          <div className="col-span-2 sm:col-span-4 space-y-0.5 pt-1 border-t border-neutral-100 text-[11px] text-neutral-500 flex items-center gap-1">
-            <MapPin size={13} />
-            <span>Inspection Location: {location}</span>
-          </div>
-        )}
       </div>
+
+      {/* Inspection Jurisdiction Location Bar */}
+      {location && (
+        <div className="p-2.5 rounded-md bg-neutral-100/60 border border-neutral-200 text-2xs text-neutral-700 flex items-center gap-2">
+          <MapPin size={15} className="text-navy-800 shrink-0" weight="bold" />
+          <span className="font-semibold text-neutral-800">Inspection Division &amp; Location:</span>
+          <span className="font-mono text-neutral-600 truncate">{location}</span>
+        </div>
+      )}
     </div>
   );
 };

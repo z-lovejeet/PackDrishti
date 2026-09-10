@@ -6,8 +6,8 @@ import {
   Lightning,
   WarningCircle,
   UploadSimple,
+  Scan,
 } from '@phosphor-icons/react';
-import { Button } from '../common/Button';
 
 interface CameraProps {
   onCapture: (blob: Blob) => void;
@@ -23,6 +23,7 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
   const [hasTorch, setHasTorch] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [isCapturing, setIsCapturing] = useState<boolean>(false);
 
   const stopStream = useCallback(() => {
     if (streamRef.current) {
@@ -54,7 +55,7 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
         await videoRef.current.play();
       }
 
-      // Check for torch/flashlight support on track
+      // Check for torch/flashlight capability
       const track = stream.getVideoTracks()[0];
       const capabilities = track.getCapabilities ? track.getCapabilities() : null;
       if (capabilities && 'torch' in capabilities) {
@@ -66,7 +67,7 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
       const message =
         err instanceof Error
           ? err.message
-          : 'Unable to access camera. Please verify device permissions.';
+          : 'Unable to access video capture device. Please verify camera permissions in browser settings.';
       setCameraError(message);
     } finally {
       setIsInitializing(false);
@@ -85,6 +86,58 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
     };
   }, [isOpen, startStream, stopStream]);
 
+  const handleCapture = useCallback(() => {
+    if (!videoRef.current || isCapturing) return;
+
+    setIsCapturing(true);
+
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1920;
+    canvas.height = video.videoHeight || 1080;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      setIsCapturing(false);
+      return;
+    }
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Brief visual shutter flash before closing
+    setTimeout(() => {
+      canvas.toBlob(
+        (blob) => {
+          setIsCapturing(false);
+          if (blob) {
+            stopStream();
+            onCapture(blob);
+          }
+        },
+        'image/jpeg',
+        0.92
+      );
+    }, 150);
+  }, [isCapturing, onCapture, stopStream]);
+
+  // Keyboard shortcut for closing or capturing
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        stopStream();
+        onClose();
+      } else if ((e.key === ' ' || e.key === 'Enter') && !cameraError && !isInitializing && !isCapturing) {
+        e.preventDefault();
+        handleCapture();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, cameraError, isInitializing, isCapturing, stopStream, onClose, handleCapture]);
+
   const toggleCamera = () => {
     setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'));
   };
@@ -94,7 +147,6 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
     const track = streamRef.current.getVideoTracks()[0];
     try {
       const newTorchState = !torchOn;
-      // Advanced constraints for torch
       await (track as unknown as { applyConstraints: (c: unknown) => Promise<void> }).applyConstraints({
         advanced: [{ torch: newTorchState }],
       });
@@ -102,31 +154,6 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
     } catch {
       setHasTorch(false);
     }
-  };
-
-  const handleCapture = () => {
-    if (!videoRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          stopStream();
-          onCapture(blob);
-        }
-      },
-      'image/jpeg',
-      0.9
-    );
   };
 
   const handleFallbackFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,37 +166,57 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-800 bg-gray-950 shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/90 p-4 backdrop-blur-md animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Camera packaging scanner"
+    >
+      <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950 shadow-2xl flex flex-col">
         {/* Header Controls */}
-        <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3 text-white">
-          <div className="flex items-center gap-2">
-            <CameraIcon className="h-5 w-5 text-indigo-400" />
-            <span className="text-sm font-semibold tracking-wide">
-              Principal Display Panel Scanner
-            </span>
+        <div className="flex items-center justify-between border-b border-neutral-800 px-5 py-3.5 text-white bg-neutral-900/60">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy-800 text-white border border-navy-700">
+              <CameraIcon size={18} weight="bold" />
+            </div>
+            <div>
+              <span className="text-sm font-bold tracking-wide font-heading block">
+                Principal Display Panel Specimen Scanner
+              </span>
+              <span className="text-2xs text-neutral-400 font-mono">
+                Legal Metrology Rule 7 Frame Alignment
+              </span>
+            </div>
           </div>
           <button
             onClick={() => {
               stopStream();
               onClose();
             }}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
-            title="Close camera"
+            className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
+            title="Close camera (Escape)"
+            aria-label="Close camera"
           >
-            <X className="h-5 w-5" />
+            <X size={18} weight="bold" />
           </button>
         </div>
 
-        {/* Viewport */}
-        <div className="relative aspect-video w-full overflow-hidden bg-black flex items-center justify-center">
+        {/* Viewport Surface with HUD & Corner Brackets */}
+        <div className="relative aspect-video w-full overflow-hidden bg-black flex items-center justify-center select-none">
           {cameraError ? (
-            <div className="flex flex-col items-center gap-3 p-6 text-center text-gray-300">
-              <WarningCircle className="h-10 w-10 text-amber-500" />
-              <p className="text-sm">{cameraError}</p>
-              <label className="mt-2 inline-flex items-center gap-2 cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors">
-                <UploadSimple className="h-4 w-4" />
-                Upload Photo Instead
+            <div className="flex flex-col items-center gap-3 p-8 text-center text-neutral-300 max-w-md">
+              <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+                <WarningCircle size={28} weight="fill" />
+              </div>
+              <h4 className="text-sm font-bold text-white font-heading">
+                Camera Feed Unavailable
+              </h4>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                {cameraError}
+              </p>
+              <label className="mt-2 inline-flex items-center gap-2 cursor-pointer rounded-lg bg-navy-800 hover:bg-navy-900 px-4 py-2.5 text-xs font-semibold text-white border border-navy-700 shadow-xs transition-colors">
+                <UploadSimple size={16} weight="bold" />
+                <span>Upload Packaging Specimen Instead</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -188,65 +235,117 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, onClose, isOpen }) =>
                 className="h-full w-full object-cover"
               />
 
-              {/* Viewfinder Target Overlay */}
-              <div className="pointer-events-none absolute inset-8 rounded-xl border-2 border-dashed border-indigo-400/60 flex flex-col justify-between p-4">
-                <div className="flex justify-between text-[11px] font-mono text-indigo-300/80 uppercase">
-                  <span>Align Label Within Frame</span>
-                  <span>Rule 7 Compliance</span>
+              {/* Shutter Flash Overlay */}
+              {isCapturing && (
+                <div className="absolute inset-0 bg-white z-20 animate-fadeIn" />
+              )}
+
+              {/* Viewfinder Target HUD with 4 Corner Brackets */}
+              <div className="pointer-events-none absolute inset-6 sm:inset-10 flex flex-col justify-between p-2">
+                {/* Top Brackets & Header HUD */}
+                <div className="flex items-start justify-between">
+                  {/* Top-Left Bracket */}
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 border-t-3 border-l-3 border-saffron-400 rounded-tl-md shadow-sm" />
+
+                  {/* Top Center Status Pill */}
+                  <div className="flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md px-3 py-1 rounded-full border border-neutral-700/80 text-2xs font-mono text-neutral-200">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Optical Alignment HUD</span>
+                  </div>
+
+                  {/* Top-Right Bracket */}
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 border-t-3 border-r-3 border-saffron-400 rounded-tr-md shadow-sm" />
                 </div>
-                <div className="flex justify-between text-[11px] font-mono text-indigo-300/80">
-                  <span>Automatic Lighting</span>
-                  <span>SI Units Metric</span>
+
+                {/* Center Crosshair Reticle */}
+                <div className="self-center flex items-center justify-center relative">
+                  <div className="w-12 h-12 border border-dashed border-white/40 rounded-full flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-saffron-400 rounded-full" />
+                  </div>
+                  <div className="absolute w-16 h-px bg-white/30" />
+                  <div className="absolute h-16 w-px bg-white/30" />
+                </div>
+
+                {/* Bottom Brackets & Footer HUD */}
+                <div className="flex items-end justify-between">
+                  {/* Bottom-Left Bracket */}
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 border-b-3 border-l-3 border-saffron-400 rounded-bl-md shadow-sm" />
+
+                  {/* Bottom Center Guidance */}
+                  <div className="flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md px-3 py-1 rounded-full border border-neutral-700/80 text-2xs font-medium text-neutral-300">
+                    <Scan size={14} className="text-saffron-400" />
+                    <span>Center Front or Back Label within Frame</span>
+                  </div>
+
+                  {/* Bottom-Right Bracket */}
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 border-b-3 border-r-3 border-saffron-400 rounded-br-md shadow-sm" />
                 </div>
               </div>
 
               {isInitializing && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-sm text-gray-300 font-medium">
-                  Initializing camera feed...
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/75 text-xs text-neutral-300 font-medium gap-2">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Initializing WebRTC camera stream...</span>
                 </div>
               )}
             </>
           )}
         </div>
 
-        {/* Footer Controls */}
+        {/* Footer Controls Toolbar */}
         {!cameraError && (
-          <div className="flex items-center justify-around border-t border-gray-800 bg-gray-950 px-6 py-4">
-            {hasTorch ? (
+          <div className="flex items-center justify-between border-t border-neutral-800 bg-neutral-950 px-8 py-4">
+            {/* Flashlight / Torch Button */}
+            <div className="w-16 flex justify-start">
+              {hasTorch ? (
+                <button
+                  type="button"
+                  onClick={toggleTorch}
+                  className={`rounded-full p-3 transition-all ${
+                    torchOn
+                      ? 'bg-amber-500 text-neutral-950 shadow-md ring-2 ring-amber-300'
+                      : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                  }`}
+                  title={torchOn ? 'Turn flashlight off' : 'Turn flashlight on'}
+                  aria-label={torchOn ? 'Flashlight enabled' : 'Flashlight disabled'}
+                >
+                  <Lightning size={20} weight={torchOn ? 'fill' : 'bold'} />
+                </button>
+              ) : (
+                <div className="w-10" />
+              )}
+            </div>
+
+            {/* Shutter Button with Pulse Feedback */}
+            <div className="flex flex-col items-center gap-1">
               <button
                 type="button"
-                onClick={toggleTorch}
-                className={`rounded-full p-3 transition-colors ${
-                  torchOn ? 'bg-amber-500 text-black' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-                title={torchOn ? 'Turn flash off' : 'Turn flash on'}
+                disabled={isInitializing || isCapturing}
+                onClick={handleCapture}
+                className="group relative flex h-18 w-18 items-center justify-center rounded-full border-4 border-white/80 bg-neutral-900 shadow-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-saffron-400"
+                title="Capture specimen photo (Spacebar)"
+                aria-label="Capture packaging photo"
               >
-                <Lightning className="h-5 w-5" />
+                {/* Animated pulse halo on idle */}
+                <div className="absolute inset-0 rounded-full border-2 border-saffron-400/50 animate-ping opacity-75" />
+                {/* Inner Shutter Surface */}
+                <div className="h-12 w-12 rounded-full bg-saffron-500 transition-all group-hover:scale-105 group-active:scale-90 group-hover:bg-saffron-400" />
               </button>
-            ) : (
-              <div className="w-11" />
-            )}
-
-            {/* Shutter Button */}
-            <button
-              type="button"
-              disabled={isInitializing}
-              onClick={handleCapture}
-              className="group relative flex h-16 w-16 items-center justify-center rounded-full border-4 border-indigo-500 bg-white shadow-lg transition-transform active:scale-95 disabled:opacity-50"
-              title="Capture packaging image"
-            >
-              <div className="h-11 w-11 rounded-full bg-indigo-600 transition-transform group-hover:scale-105" />
-            </button>
+              <span className="text-2xs text-neutral-400 font-mono">Press Shutter or Space</span>
+            </div>
 
             {/* Flip Camera Button */}
-            <button
-              type="button"
-              onClick={toggleCamera}
-              className="rounded-full bg-gray-800 p-3 text-gray-300 hover:bg-gray-700 transition-colors"
-              title="Switch camera"
-            >
-              <CameraRotate className="h-5 w-5" />
-            </button>
+            <div className="w-16 flex justify-end">
+              <button
+                type="button"
+                onClick={toggleCamera}
+                className="rounded-full bg-neutral-800 p-3 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
+                title="Switch camera sensor"
+                aria-label="Switch between environment and user camera"
+              >
+                <CameraRotate size={20} weight="bold" />
+              </button>
+            </div>
           </div>
         )}
       </div>
