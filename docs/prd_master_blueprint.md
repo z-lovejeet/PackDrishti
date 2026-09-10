@@ -58,7 +58,7 @@ MetroScan is an automated regulatory compliance verification and nutritional aud
 The platform uses a decoupled client-server architecture:
 - **Client Tier**: Single Page Application (SPA) built with React 19, TypeScript, and Tailwind CSS.
 - **Application Tier**: RESTful API built with Python FastAPI, providing asynchronous pipeline execution, request validation, and auth enforcement.
-- **Machine Learning Tier**: Computer Vision and NLP pipeline executing PaddleOCR, text layout analysis, Rule-based Named Entity Recognition (NER), spatial geometry engines, and nutrition extraction models.
+- **AI & Compliance Tier**: 4-Tier Hybrid Pipeline: Tier 1: Multimodal VLM (Gemini 1.5 Flash / GPT-4o-mini) + High-Performance OCR (PaddleOCR) with Pydantic structured output. Tier 2: Deterministic Python Rule Engine for audited legal verification. Tier 3: Statutory Legal RAG powered by PostgreSQL pgvector for automatic retrieval of statutory sections. Tier 4: LLM Consumer Synthesis for translating nutritional audits into plain-language warnings.
 - **Persistence Tier**: PostgreSQL 16 relational database for transactional integrity, coupled with S3-compatible object storage (Cloudflare R2 or AWS S3) for high-resolution packaging imagery.
 
 ```
@@ -270,51 +270,28 @@ Score Bands:
 
 ---
 
-## 6. Machine Learning & Computer Vision Pipeline
+## 6. 4-Tier Hybrid AI & Rules Pipeline
 
-```
-+--------------------------------------------------------------------------+
-|                         CV INGESTION PIPELINE                            |
-+--------------------------------------------------------------------------+
-  [Packaging Image Input]
-           |
-           v
-  1. PREPROCESSING MODULE
-     - Bilateral Filtering (Noise suppression while preserving edges)
-     - Adaptive CLAHE (Contrast Limited Adaptive Histogram Equalization)
-     - Perspective Rectification & Deskewing (Hough Line Transform)
-           |
-           v
-  2. TEXT DETECTION & SEGMENTATION (PaddleOCR DBNet)
-     - Real-time Differentiable Binarization for arbitrary-oriented text
-     - Generates oriented bounding polygons (x1, y1, x2, y2, x3, y3, x4, y4)
-           |
-           v
-  3. TEXT RECOGNITION (SVTR / PP-OCRv4 Recognition)
-     - Multilingual recognition supporting English, Hindi numerals, and Devnagari
-     - Confidence score thresholding (c >= 0.75)
-           |
-           v
-  4. SPATIAL LAYOUT & CALIBRATION
-     - Barcode detection (EAN-13 locator) to establish pixel-to-mm scale factor
-     - Principal Display Panel (PDP) bounding box calculation
-           |
-           +----------------------------------+
-           |                                  |
-           v                                  v
-  5. STATUTORY PARSER               6. NUTRITION TABLE PARSER
-     - Rule 6 Regex & NER Pipeline     - Table border detection
-     - Rule 7 Font Height Calculation  - Row/Column cell association
-     - Rule 9 WCAG Contrast Engine     - Nutrient unit normalization
-     - Rule 18 Tamper Detection        - ICMR threshold classification
-           |                                  |
-           +-----------------+----------------+
-                             |
-                             v
-  7. COMPLIANCE AGGREGATOR & REPORT BUILDER
-     - Merges extracted entities with statutory rule catalogue
-     - Generates structured JSON payload for API and database
-```
+Instead of brittle custom computer vision models, MetroScan uses a modern 4-tier hybrid pipeline to ensure 100% auditable mathematical logic for legal verification.
+
+### 6.1 Tier 1: Multimodal VLM & High-Performance OCR
+- **Engine**: Gemini 1.5 Flash / GPT-4o-mini coupled with PaddleOCR.
+- **Function**: Extracts spatial text, bounding boxes, and image layout data.
+- **Output**: Strict Pydantic structured output for downstream processing.
+
+### 6.2 Tier 2: Deterministic Python Rule Engine
+- **Engine**: Pure Python Mathematical Logic Engine.
+- **Function**: 100% auditable mathematical logic for legal verification. Performs Unit Sale Price calculations, strict SI metric units filtering, Rule 7 Table-I font height step function evaluation, and Rule 9 contrast checking.
+- **Constraint**: Never let an LLM do legal math! All verifications are deterministic.
+
+### 6.3 Tier 3: Statutory Legal RAG
+- **Engine**: PostgreSQL pgvector.
+- **Function**: Indexes the Legal Metrology Act 2009, Packaged Commodities Rules 2011 (with all amendments up to 2024), and court precedents.
+- **Output**: Automatically retrieves exact statutory sections and generates formal show-cause notices (FORM LM-INSP-2011).
+
+### 6.4 Tier 4: LLM Consumer Synthesis
+- **Engine**: Secondary LLM Prompt Chain.
+- **Function**: Translates complex ICMR-NIN nutritional audits into plain-language warnings and healthy Indian food recommendations for everyday consumers.
 
 ---
 
@@ -713,7 +690,7 @@ PHASE 1 (COMPLETED)    PHASE 2 (SPRINTS 1-2)    PHASE 3 (SPRINT 3)     PHASE 4 (
 
 - **Phase 1 (Completed)**: Complete UI/UX prototype in React 19, TypeScript, and Tailwind CSS. All 7 screens and modular components built and verified.
 - **Phase 2 (Sprints 1-2)**: Backend foundational services: FastAPI, SQLAlchemy models, Alembic migrations, JWT authentication, and image storage upload endpoints.
-- **Phase 3 (Sprint 3)**: Machine Learning core: PaddleOCR integration, bounding box parser, Rule 6 statutory extraction engine, Rule 7 Table-I font calibration, and WCAG contrast calculator.
+- **Phase 3 (Sprint 3)**: AI Pipeline core: VLM prompt tuning, pgvector RAG indexing, deterministic rule engine verification, Rule 7 Table-I font calibration, and WCAG contrast calculator.
 - **Phase 4 (Sprint 4)**: System Integration: Connect frontend to real backend endpoints, live image upload workflow, dynamic FORM LM-INSP-2011 PDF generation, and ICMR-NIN nutrition parser.
 - **Phase 5 (Sprint 5)**: Hardening & SIH Presentation: Benchmark accuracy testing on 50+ real Indian packaging samples, latency optimization, mobile layout verification, and final deployment.
 

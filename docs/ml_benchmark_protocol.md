@@ -18,12 +18,12 @@ This document establishes the formal machine learning accuracy benchmark and qua
 Enforcement proceedings initiated under Section 36(1) or Section 36(2) of the Act carry legal liability, including statutory compoundable compounding notices and penal prosecution. Consequently, algorithmic verification of package labels cannot rely on qualitative heuristics or loose approximations. The MetroScan automated compliance engine must operate under certified, reproducible, and mathematically grounded evaluation standards before being cleared for operational use by State Legal Metrology Officers and Indian consumers.
 
 ### 1.2 Evaluation Objectives
-The objective of this protocol is to benchmark and continuously validate the core analytical sub-systems of the MetroScan platform:
-1. **Optical Character Recognition (OCR) Engine**: Rigorous character-level and word-level accuracy assessment on complex, curved, glossy, and low-contrast packaging substrates.
-2. **Statutory Entity Extraction & Classification (NER / LayoutLM)**: Token-level and semantic-level extraction precision, recall, and F1 performance across all 11 mandatory declarations mandated under Rule 6.
-3. **Computer Vision Font Measurement & Spatial Calibration**: Physical letter and numeral height measurement accuracy in millimeters compared directly against digital vernier caliper measurements taken from physical packaging specimens under Rule 7 Table-I.
-4. **Statutory Compliance & Violation Inference Engine**: Detection fidelity of legal infractions (such as non-standard SI units, missing mandatory declarations, absent or inconsistent Unit Sale Prices, and dual MRP indicators) while maintaining a statutory false positive rate below 5.0%.
-5. **End-to-End Pipeline Latency Profiling**: Real-time operational profiling ensuring multi-stage processing completes within strict latency targets across cloud CPU/GPU environments.
+The objective of this protocol is to benchmark and continuously validate the analytical sub-systems of the MetroScan platform across four distinct architectural tiers:
+1. **Tier 1: Multimodal VLM & High-Performance OCR Extraction Engine**: Rigorous character-level and word-level accuracy assessment (CER <= 5%, WER <= 8%) on complex, curved, glossy, and low-contrast packaging substrates, alongside spatial entity localization and bounding box precision (IoU >= 0.70) across all 11 mandatory declarations mandated under Rule 6.
+2. **Tier 2: Deterministic Python Rule Engine**: 100% mathematical verification accuracy on Unit Sale Price (USP) arithmetic, Rule 7 Table-I font calibration step functions, Rule 9 WCAG 2.1 contrast ratios, and Rule 13 SI metric unit validation, while maintaining a statutory false positive rate below 5.0%. Zero tolerance for mathematical or statutory hallucination.
+3. **Tier 3: Statutory Legal RAG Retrieval Engine**: Precision and recall of statutory retrieval over the Legal Metrology Act 2009, Packaged Commodities Rules 2011 (amended through 2024), gazette notifications, and compounding schedules (MRR >= 0.85, Context Recall >= 90%, Hit Rate @ 3 >= 92%).
+4. **Tier 4: LLM Pydantic Schema Adherence & Consumer Synthesis**: Structural integrity and factual fidelity of consumer-facing advisories, enforcing a 100% valid JSON generation rate via strict Pydantic schemas and plain-language ICMR-NIN 2024 dietary interpretations.
+5. **End-to-End Pipeline Latency Profiling**: Real-time operational profiling ensuring multi-tier processing completes within strict latency targets across cloud CPU/GPU environments.
 
 ### 1.3 Evaluation Pipeline Architecture
 
@@ -37,23 +37,25 @@ The objective of this protocol is to benchmark and continuously validate the cor
                           |
                           v
          +----------------------------------+
-         |  Stage 2: OCR & Text Bounding    | ---> CER, WER, Character Recognition Accuracy
+         |  Tier 1: VLM & OCR Extraction   | ---> CER (<= 5%), WER (<= 8%), Bounding Box IoU (>= 0.70)
          +----------------------------------+
                           |
                           v
          +----------------------------------+
-         |  Stage 3: Entity Extraction      | ---> Precision, Recall, F1 across 11 Declarations
+         |  Tier 2: Deterministic Rule Eng  | ---> 100% Math Determinism (USP, Rule 7 Font, Rule 13 Units)
          +----------------------------------+
                           |
-                          v
-         +----------------------------------+
-         |  Stage 4: Spatial Font Height    | ---> MAE, RMSE in mm vs Vernier Caliper Ground Truth
-         +----------------------------------+
-                          |
-                          v
-         +----------------------------------+
-         |  Stage 5: Rule Compliance Engine | ---> Statutory Rule Violations, False Positive Rate (FPR)
-         +----------------------------------+
+            +-------------+-------------+
+            |                           |
+            v                           v
++-----------------------+   +-----------------------+
+| Tier 3: Statutory RAG |   | Tier 4: LLM Synthesis |
+| - MRR >= 0.85         |   | - 100% Pydantic JSON  |
+| - Context Recall >=90%|   | - Factual Grounding   |
+| - Hit Rate @ 3 >= 92% |   | - Plain-language Card |
++-----------+-----------+   +-----------+-----------+
+            |                           |
+            +-------------+-------------+
                           |
                           v
  [Benchmark Execution Report: Tabular Summary + Automated Quality Gate Assertion]
@@ -198,35 +200,67 @@ Where:
 - $TN_{\text{violation}}$: A compliant label element is correctly evaluated as lawful.
 
 ### 2.6 Latency Metrics
-Processing latency is measured from image ingestion through PDF inspection docket generation:
+Processing latency is measured across the four tiers from image ingestion through PDF inspection docket generation:
 
-$$T_{\text{total}} = T_{\text{preprocess}} + T_{\text{ocr}} + T_{\text{layout\_ner}} + T_{\text{font\_cv}} + T_{\text{rules\_engine}} + T_{\text{docket\_gen}}$$
+$$T_{\text{total}} = T_{\text{preprocess}} + T_{\text{vlm\_ocr}} + T_{\text{rules\_engine}} + T_{\text{rag\_retrieval}} + T_{\text{llm\_synthesis}} + T_{\text{docket\_gen}}$$
 
 Given $N$ sorted latency measurements $T_{(1)} \le T_{(2)} \le \dots \le T_{(N)}$:
 - **P50 (Median)**: $T_{(\lceil 0.50 \times N \rceil)}$
 - **P90 (90th Percentile)**: $T_{(\lceil 0.90 \times N \rceil)}$
 - **P99 (Tail Latency)**: $T_{(\lceil 0.99 \times N \rceil)}$
 
+### 2.7 Statutory RAG Retrieval Metrics
+To ensure that citations in statutory violation notices reference the exact gazette notifications and compounding schedules, the Tier 3 pgvector RAG module is benchmarked across query set $Q$:
+
+1. **Mean Reciprocal Rank (MRR)**:
+Evaluates how high the first relevant statutory clause appears in vector search results:
+
+$$\text{MRR} = \frac{1}{|Q|} \sum_{i=1}^{|Q|} \frac{1}{\text{rank}_i}$$
+
+2. **Context Recall**:
+Measures whether all legally required statutory provisos and penalty sections are retrieved:
+
+$$\text{Context Recall} = \frac{\sum_{i=1}^{|Q|} |S_{\text{retrieved}, i} \cap S_{\text{ground\_truth}, i}|}{\sum_{i=1}^{|Q|} |S_{\text{ground\_truth}, i}|}$$
+
+3. **Hit Rate @ 3 (Hit@3)**:
+Evaluates whether the authoritative statutory clause is present within the top 3 vector chunks:
+
+$$\text{Hit@3} = \frac{1}{|Q|} \sum_{i=1}^{|Q|} \mathbb{I}(\text{rank}_i \le 3)$$
+
+### 2.8 Rule Engine Determinism and Schema Adherence
+1. **Mathematical Determinism Rate ($\text{MDR}$)**:
+The Tier 2 Deterministic Rule Engine is evaluated against known ground-truth inputs with zero tolerance for floating-point or arithmetic deviation:
+
+$$\text{MDR} = \frac{1}{N_{\text{math}}} \sum_{j=1}^{N_{\text{math}}} \mathbb{I}(\text{USP}_{\text{pred}, j} = \text{USP}_{\text{calc}, j}) = 100.0\%$$
+
+2. **Pydantic Schema Adherence Rate**:
+The rate at which Tier 1 VLM and Tier 4 LLM responses strictly validate against the defined Pydantic classes without type errors or missing fields:
+
+$$\text{SAR} = \frac{N_{\text{valid\_json}}}{N_{\text{total\_inferences}}} \times 100\%$$
+
 ---
 
 ## 3. Target Acceptance Thresholds (SIH Demo Readiness)
 
-The following quantitative acceptance thresholds govern evaluation criteria for SIH 2024 demo readiness and production deployment:
+The following quantitative acceptance thresholds govern evaluation criteria for SIH demo readiness and production deployment:
 
 ### 3.1 Performance Acceptance Threshold Table
 
 | Metric Category | Performance Metric | Baseline Minimal | SIH Demo Acceptance Target | Production Standard | Evaluation Methodology |
 |---|---|---|---|---|---|
-| **OCR Fidelity** | Overall Character Recognition Rate ($1 - \text{CER}$) | $\ge 82.0\%$ | $\ge 88.0\%$ | $\ge 95.0\%$ | Evaluated across 100+ packaging image specimens. |
-| **OCR Fidelity** | Word Recognition Rate ($1 - \text{WER}$) | $\ge 75.0\%$ | $\ge 82.0\%$ | $\ge 91.0\%$ | Case-insensitive token match after text normalization. |
-| **Entity Extraction** | Declaration Detection Recall | $\ge 80.0\%$ | $\ge 90.0\%$ | $\ge 96.0\%$ | Detects $\ge 9$ of 11 mandatory fields on clear packaging. |
-| **Entity Extraction** | Declaration Detection Precision | $\ge 85.0\%$ | $\ge 92.0\%$ | $\ge 97.5\%$ | Prevents entity hallucination and cross-field confusion. |
-| **Entity Extraction** | Macro-Averaged F1 Score | $\ge 82.5\%$ | $\ge 91.0\%$ | $\ge 96.7\%$ | Harmonic mean across all 11 mandatory fields. |
+| **VLM/OCR Extraction** | Overall Character Recognition Rate ($1 - \text{CER}$) | $\ge 85.0\%$ | $\ge 92.0\%$ | $\ge 96.0\%$ | Evaluated across 50-SKU golden benchmark corpus. |
+| **VLM/OCR Extraction** | Word Recognition Rate ($1 - \text{WER}$) | $\ge 80.0\%$ | $\ge 88.0\%$ | $\ge 93.0\%$ | Case-insensitive token match after text normalization. |
+| **Spatial Localization** | Bounding Box Spatial IoU | $\ge 0.55$ | $\ge 0.70$ | $\ge 0.85$ | IoU against ground-truth declaration bounding boxes. |
+| **Entity Extraction** | Declaration Detection Recall | $\ge 82.0\%$ | $\ge 92.0\%$ | $\ge 97.0\%$ | Detects $\ge 10$ of 11 mandatory fields on clear packaging. |
+| **Entity Extraction** | Declaration Detection Precision | $\ge 88.0\%$ | $\ge 94.0\%$ | $\ge 98.0\%$ | Prevents entity hallucination and cross-field confusion. |
 | **Font Measurement** | Font Height Mean Absolute Error (MAE) | $\le 0.60\text{ mm}$ | $\le 0.40\text{ mm}$ | $\le 0.20\text{ mm}$ | Compared against digital vernier caliper measurements. |
-| **Font Measurement** | Font Height Root Mean Squared Error (RMSE) | $\le 0.80\text{ mm}$ | $\le 0.55\text{ mm}$ | $\le 0.30\text{ mm}$ | Penalizes large font estimation variance. |
 | **Font Compliance** | Table-I Classification Accuracy | $\ge 88.0\%$ | $\ge 94.0\%$ | $\ge 98.5\%$ | Pass/fail agreement on Rule 7 Table-I minimums. |
+| **Rule Determinism** | Mathematical Verification Accuracy (USP & SI) | $100.0\%$ | $100.0\%$ | $100.0\%$ | Zero tolerance: deterministic Python calculation. |
 | **Rule Engine** | Statutory False Positive Rate (FPR) | $< 8.0\%$ | $< 5.0\%$ | $< 1.0\%$ | Minimizes wrongful violation notices to lawful businesses. |
-| **Rule Engine** | Proscribed Unit Abbreviation Recall | $\ge 92.0\%$ | $\ge 98.0\%$ | $100.0\%$ | Detection of illegal `gms`, `Kgs`, `ML`, `ltrs` tokens. |
+| **Statutory RAG** | Mean Reciprocal Rank (MRR) | $\ge 0.75$ | $\ge 0.85$ | $\ge 0.92$ | Top rank of authoritative gazette notification clause. |
+| **Statutory RAG** | Statutory Context Recall | $\ge 80.0\%$ | $\ge 90.0\%$ | $\ge 96.0\%$ | Retrieval of all relevant compounding penalty sections. |
+| **Statutory RAG** | Hit Rate @ 3 (Hit@3) | $\ge 85.0\%$ | $\ge 92.0\%$ | $\ge 98.0\%$ | Authoritative rule within top 3 vector matches. |
+| **LLM Synthesis** | Pydantic Schema Adherence Rate | $\ge 95.0\%$ | $100.0\%$ | $100.0\%$ | Valid JSON generation enforced by Pydantic validators. |
 | **System Latency** | Pipeline Latency P50 (Median) | $\le 6.0\text{ s}$ | $\le 4.5\text{ s}$ | $\le 2.5\text{ s}$ | Standard CPU/GPU cloud instances (4 vCPU, 8 GB RAM). |
 | **System Latency** | Pipeline Latency P90 (90th Percentile) | $\le 10.0\text{ s}$ | $\le 8.0\text{ s}$ | $\le 4.0\text{ s}$ | Maximum acceptable turnaround for field inspection. |
 | **System Latency** | Pipeline Latency P99 (Tail Latency) | $\le 14.0\text{ s}$ | $\le 11.5\text{ s}$ | $\le 6.0\text{ s}$ | Worst-case high-resolution packaging capture. |
@@ -480,7 +514,7 @@ class BenchmarkRunner:
         """Simulates or coordinates pipeline execution and evaluates metrics against ground truth."""
         t_start = time.perf_counter()
 
-        # Latency model representing preprocessing, OCR, LayoutLM, CV font calibration, and rule evaluation
+        # Latency model representing preprocessing, VLM/OCR extraction, CV font calibration, Rule Engine, and Statutory RAG
         simulated_latency = 2.1 + (len(annotation.get("declarations", [])) * 0.18)
         self.records["latencies_ms"].append(simulated_latency * 1000.0)
         self.records["total_samples"] += 1
@@ -665,7 +699,7 @@ During optical scanning and automated compliance evaluation, packaging exhibits 
 | ERR-OPT-03 | Non-Planar & Cylindrical Curvature | Label text wrapped around cylindrical cans, beverage bottles, or flexible pouches. | Deodorant spray can or soft drink bottle label wrapping $180^{\circ}$. | Lateral text compression; glyph width compressed below $1/3$ height threshold. | Cylindrical surface normal reconstruction and polar unwrapping via contour bounding ellipse fitting. |
 | ERR-TXT-01 | Script & Numeral Confusion | Visual similarity between Latin characters and Indian numerals / fonts. | Numeral `0` confused with uppercase `O`; numeral `1` confused with lowercase `l` or uppercase `I`. | Net quantity `100 g` transcribed as `lOO g`; falsely triggers SI unit syntax violation. | Domain-specific regex token constraint: numeric values preceding metric symbols are cast to Arabic numerals. |
 | ERR-TXT-02 | Proscribed Metric Unit Misuse | Brand typography utilizing illegal imperial or obsolete abbreviations (`gms`, `Kgs`, `ML`, `ltrs`). | Ground spice sprinkler packaging declaring `100 gms` instead of `100 g`. | Regulatory violation under Rule 13; risk of parser misclassifying unit as unparseable. | Rule 13 syntax engine maintains explicit dictionary of illegal variants and flags actionable statutory offence under Section 36(1). |
-| ERR-LAY-01 | Tabular Cell Bleed | Dense nutrition fact tables and ingredient lists printed without solid border dividers. | Multi-column table with Protein (g) and Carbohydrates (g) aligned horizontally without rules. | Token bounding boxes group across columns, shifting nutrient values into wrong fields. | Hybrid layout analysis: combining LayoutLM coordinate embeddings with vertical morphological projection profiles. |
+| ERR-LAY-01 | Tabular Cell Bleed | Dense nutrition fact tables and ingredient lists printed without solid border dividers. | Multi-column table with Protein (g) and Carbohydrates (g) aligned horizontally without rules. | Token bounding boxes group across columns, shifting nutrient values into wrong fields. | Multimodal VLM structured grid parsing combining spatial 2D coordinates with tabular Pydantic schema constraints. |
 | ERR-LAY-02 | Sub-Millimeter Line Crowding | Multi-line statutory fine print with vertical line pitch $< 0.8\text{ mm}$. | Manufacturer address, factory license, and consumer care email packed into 4 lines. | Line segmentation merges adjacent text lines into concatenated multi-line string. | Adaptive vertical projection profiling with sub-pixel peak-valley thresholding for fine line splitting. |
 | ERR-CAL-01 | Barcode Occlusion & Scuffing | Torn, smudged, or partially cropped EAN-13 barcode preventing spatial calibration. | Cardboard box where retail price barcode is torn during shipping handling. | Failure to compute spatial scale factor $S$ (mm/pixel) via standard barcode reference. | Fallback calibration hierarchy: (1) Standard regulatory logo dimension (e.g. FSSAI logo standard diameter); (2) Manual container dimensions entered by inspector. |
 | ERR-RUL-01 | Unconventional Manufacturing Date Formats | Packing dates formatted as obscure Julian days or coded lot sequences without clear legend. | Pouch printed with "Pkd: 26084 / L4" without explicit calendar month and year. | Rule engine cannot confirm MM/YYYY compliance under Rule 6(1)(d). | Ambiguity quarantine logic: flags non-conforming date encoding for officer verification rather than emitting false compliance. |

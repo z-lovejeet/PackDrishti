@@ -3,7 +3,7 @@
 ## 1. Executive Roadmap Overview & Engineering Tenets
 
 **Current State vs Production Target Gap Analysis**
-Currently, the MetroScan project consists of a React frontend prototype utilizing mock data. The production target requires a robust dual-audience architecture (Consumer vs Officer), complete with an integrated FastAPI backend, OCR-based machine learning inference, and PostgreSQL persistence. The gap involves migrating away from static `frontend/src/data/mock.ts` stubs to live API endpoints, implementing role-based access control (RBAC), setting up real-time ML processing for packaging rule verification, and deploying automated CI/CD pipelines.
+Currently, the MetroScan project consists of a React frontend prototype utilizing mock data. The production target requires a robust dual-audience architecture (Consumer vs Officer), complete with an integrated FastAPI backend, a 4-tier hybrid AI pipeline, and PostgreSQL persistence. The gap involves migrating away from static `frontend/src/data/mock.ts` stubs to live API endpoints, implementing role-based access control (RBAC), setting up real-time AI processing for packaging rule verification, and deploying automated CI/CD pipelines.
 
 **Dual-Audience Architecture Requirements**
 1. **Consumer Portal:** Focuses on sub-500ms latency health metrics, nutritional scanning, allergen detection, and simplified compliance indicators.
@@ -31,10 +31,10 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Define environment variables in `backend/.env.template`.
 - [ ] Setup `backend/src/core/config.py` using Pydantic Settings.
 
-**Member 3 (Data Analyst / ML Engineer)**
-- [ ] Define Python environment with Poetry or conda in `ml/`.
-- [ ] Install PaddleOCR (PP-OCRv4) and OpenCV locally.
-- [ ] Gather 5 initial SKU images into `ml/data/raw/` for local baseline tests.
+**Member 3 (AI Engineer)**
+- [ ] Define Python environment with Poetry or conda in `ai/`.
+- [ ] Setup VLM API keys and PaddleOCR locally.
+- [ ] Initialize pgvector database connections for RAG testing.
 
 **Member 4 (Tester + DevOps Engineer)**
 - [ ] Scaffold `docker-compose.yml` for local PostgreSQL 16 and Redis.
@@ -57,9 +57,9 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Generate initial Alembic migration: `alembic revision --autogenerate -m "init"`.
 - [ ] Implement JWT RBAC utilities in `backend/src/core/security.py`.
 
-**Member 3 (Data Analyst / ML Engineer)**
-- [ ] Structure the ML inference response schema mapping to `backend/src/schemas/ml_results.py`.
-- [ ] Prototype Rule 6 RegEx parser in `ml/scripts/rule6_parser.py`.
+**Member 3 (AI Engineer)**
+- [ ] Structure the Pydantic response schema mapping to `backend/src/schemas/ai_results.py`.
+- [ ] Prototype Deterministic Rule Engine logic in `ai/scripts/rule_engine.py`.
 
 **Member 4 (Tester + DevOps Engineer)**
 - [ ] Write Pytest fixtures for DB sessions in `backend/tests/conftest.py`.
@@ -69,9 +69,9 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - Execution: `alembic upgrade head && pytest backend/tests/test_db.py`
 - Output: 100% pass on DB model validation and relationships.
 
-### Phase 3: Computer Vision & Statutory Rules Engine (ML v1)
-**Estimated Duration:** 6 Days | **Milestones:** OCR pipeline operational, Rules 6, 7, 9 parsed correctly on sample images.
-**Entry Pre-requisites:** 50-SKU dataset compiled.
+### Phase 3: 4-Tier Hybrid AI Pipeline & Rules Engine
+**Estimated Duration:** 6 Days | **Milestones:** VLM/OCR operational, deterministic rules running, pgvector indexed.
+**Entry Pre-requisites:** VLM API access and statutory texts available for RAG.
 
 **Member 1 (Frontend Developer)**
 - [ ] Build camera module in `frontend/src/components/Scanner/Camera.tsx`.
@@ -81,18 +81,18 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Create `POST /api/v1/scans/analyze` endpoint accepting multipart/form-data.
 - [ ] Implement Cloudflare R2 / S3 upload function in `backend/src/services/storage.py`.
 
-**Member 3 (Data Analyst / ML Engineer)**
-- [ ] Build OpenCV preprocessing pipeline in `ml/src/preprocess/image_clean.py` (Rule 9 contrast enhancement).
-- [ ] Integrate PP-OCRv4 in `ml/src/inference/ocr_runner.py`.
-- [ ] Implement Rule 7 Table-I font calibration script `ml/src/rules/font_analyzer.py`.
+**Member 3 (AI Engineer)**
+- [ ] Tier 1: Implement VLM + PaddleOCR extraction in `ai/src/pipeline/extractor.py`.
+- [ ] Tier 2: Build Deterministic Python Rule Engine for legal math in `ai/src/rules/deterministic.py`.
+- [ ] Tier 3: Setup pgvector Statutory RAG in `ai/src/rag/indexer.py`.
 
 **Member 4 (Tester + DevOps Engineer)**
-- [ ] Create ML benchmark runner script `ml/tests/benchmark.py` verifying precision/recall against 50-SKU truth data.
-- [ ] Containerize ML pipeline in `backend/Dockerfile`.
+- [ ] Create AI benchmark runner script `ai/tests/benchmark.py` verifying precision/recall against rule logic.
+- [ ] Containerize AI pipeline in `backend/Dockerfile`.
 
 **Phase Verification Gate & Acceptance Criteria**
-- Execution: `python ml/tests/benchmark.py --dataset ml/data/test_50`
-- Output: Inference time < 1500ms, Character Error Rate (CER) < 5%.
+- Execution: `python ai/tests/benchmark.py`
+- Output: Strict deterministic rule passes without LLM math errors.
 
 ### Phase 4: Frontend API Integration & Scanner Flow Refinement
 **Estimated Duration:** 4 Days | **Milestones:** Real-time scanning feedback loop completed without mock data.
@@ -106,7 +106,7 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Optimize response latency on inference endpoint.
 - [ ] Implement rate limiting middleware in `backend/src/core/middleware.py`.
 
-**Member 3 (Data Analyst / ML Engineer)**
+**Member 3 (AI Engineer)**
 - [ ] Handle edge cases (motion blur, low light) based on frontend staging feedback.
 - [ ] Deliver fallback heuristic rules to `backend/src/services/rules_engine.py`.
 
@@ -130,8 +130,8 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Integrate ICMR-NIN nutrition standards database in PostgreSQL.
 - [ ] Create `GET /api/v1/health/score/{scan_id}` endpoint in `backend/src/api/health.py`.
 
-**Member 3 (Data Analyst / ML Engineer)**
-- [ ] Build structural table parser for nutrition facts in `ml/src/rules/nutrition_parser.py`.
+**Member 3 (AI Engineer)**
+- [ ] Build structural table parser for nutrition facts in `ai/src/rules/nutrition_parser.py`.
 - [ ] Map extracted text to structured JSON schema matching ICMR-NIN format.
 
 **Member 4 (Tester + DevOps Engineer)**
@@ -153,8 +153,8 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Create aggregate statistics endpoints in `backend/src/api/admin.py`.
 - [ ] Implement WeasyPrint PDF generator in `backend/src/services/pdf_gen.py` outputting FORM LM-INSP-2011.
 
-**Member 3 (Data Analyst / ML Engineer)**
-- [ ] Implement non-compliance classification model outputting exact legal clauses violated in `ml/src/rules/compliance_checker.py`.
+**Member 3 (AI Engineer)**
+- [ ] Implement non-compliance classification model outputting exact legal clauses violated in `ai/src/rules/compliance_checker.py`.
 
 **Member 4 (Tester + DevOps Engineer)**
 - [ ] Validate PDF outputs against legal format requirements.
@@ -176,7 +176,7 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Audit SQLAlchemy queries for injection flaws.
 - [ ] Verify JWT expiration, rotation, and secret management.
 
-**Member 3 (Data Analyst / ML Engineer)**
+**Member 3 (AI Engineer)**
 - [ ] Harden API boundaries to prevent adversarial image attacks (excessive resolution handling).
 
 **Member 4 (Tester + DevOps Engineer)**
@@ -199,7 +199,7 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Implement caching layer (Redis) for static lookup tables.
 - [ ] Tune PostgreSQL connection pooling settings.
 
-**Member 3 (Data Analyst / ML Engineer)**
+**Member 3 (AI Engineer)**
 - [ ] Freeze model weights and rule parameters.
 - [ ] Run final 50-SKU benchmark and document metrics for judges.
 
@@ -213,7 +213,7 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 
 ## 3. Cross-Team Integration Protocol & Hand-off Contracts
 
-- **ML to Backend:** Member 3 delivers inference logic as a Python module in the shared `backend/src/services/ml/` directory or as a separate internal microservice API. Interface schema defined via Pydantic in `backend/src/schemas/ml.py`.
+- **AI to Backend:** Member 3 delivers inference logic as a Python module in the shared `backend/src/services/ai/` directory or as a separate internal microservice API. Interface schema defined via Pydantic in `backend/src/schemas/ml.py`.
 - **Backend to Frontend:** Member 2 maintains strict OpenAPI specs available at `/docs`. Member 1 generates frontend types directly from the OpenAPI `openapi.json` file.
 - **Merge & Deployment:** All PRs must target the `main` branch and require review from at least one other member. Member 4's GitHub Actions act as the ultimate gatekeeper, preventing merges that fail tests or decrease coverage below 80%. Staging deployments happen automatically on push to `main`.
 

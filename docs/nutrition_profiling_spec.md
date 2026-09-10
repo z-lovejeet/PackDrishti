@@ -502,7 +502,7 @@ When a consumer scans an ultra-processed or HFSS item, MetroScan executes a mult
        +---> Nutrition Profiling Pipeline
                 |
                 v
-        [Step 1: PaddleOCR / LayoutLM Table Extractor]
+         [Step 1: Multimodal VLM / PaddleOCR Nutrition Table Extractor]
                 |
                 v
         [Step 2: Nutrition Extraction & 100g Normalizer]

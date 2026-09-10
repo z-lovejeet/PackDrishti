@@ -6,7 +6,7 @@
 - **Base URL**: `/api/v1`
 - **Default Media Type**: `application/json`
 - **Security Scheme**: RFC 6750 Bearer Token (JSON Web Token - JWT)
-- **Target Systems**: React 19 Frontend Web & Mobile Client, Python FastAPI Gateway & Backend Services, PaddleOCR / YOLOv8 / LLM AI Pipeline Workers, PostgreSQL Relational Database, MinIO / S3 Storage Subsystem
+- **Target Systems**: React 19 Frontend Web & Mobile Client, Python FastAPI Gateway & Backend Services, Multimodal VLM / PaddleOCR / Statutory RAG AI Pipeline Workers, PostgreSQL Relational Database, MinIO / S3 Storage Subsystem
 
 ---
 
@@ -17,7 +17,7 @@ This document provides the exhaustive, formal RESTful API contract for Project M
 The API defined herein forms the binding architectural contract between:
 - **Client Tier**: Web dashboard and mobile field inspection application.
 - **Application Tier**: Python FastAPI asynchronous application server.
-- **AI Processing Pipeline**: High-throughput distributed inference workers executing PaddleOCR text detection, YOLOv8 boundary recognition, calibrated pixel-to-millimeter physical measurement models, and statutory clause classification engines.
+- **AI Processing Pipeline**: High-throughput distributed inference workers executing Multimodal VLM (Gemini 1.5 Flash / GPT-4o-mini) and PaddleOCR spatial extraction, deterministic Python rule verification, calibrated pixel-to-millimeter physical measurement models, and pgvector statutory RAG retrieval.
 - **Persistence Tier**: Relational PostgreSQL database and S3-compatible document/image storage.
 
 All endpoints strictly mandate the JSON data interchange format for structured payloads, multipart form encodings for raw binary file uploads, and standard binary streams for statutory PDF downloads.
@@ -478,7 +478,12 @@ Executes the automated legal metrology inspection pipeline on an uploaded packag
         "description": "The consumer care coordinates omit a physical address and letter height is 1.6mm against statutory minimum 2.5mm for PDP of 180 cm2.",
         "penalty_clause": "Fine up to Rs. 25,000 for first offence under Legal Metrology Act, 2009",
         "severity": "high",
-        "corrective_action": "Issue formal show-cause notice under Section 36(1) to manufacturer"
+        "corrective_action": "Issue formal show-cause notice under Section 36(1) to manufacturer",
+        "statutory_citations": {
+          "gazette_reference": "G.S.R. 202(E) dated 18.03.2011",
+          "rag_retrieved_section": "Section 36(1): Whoever manufactures, packs, imports, sells, distributes, delivers or otherwise transfers... any pre-packaged commodity which does not conform to the declarations... shall be punished with fine.",
+          "court_precedent": "State of UP vs. XYZ Corp (2018) - Emphasizes mandatory postal address."
+        }
       }
     ],
     "metadata": {
@@ -489,9 +494,10 @@ Executes the automated legal metrology inspection pipeline on an uploaded packag
       },
       "calibrated_dpi": 300,
       "ai_models_executed": [
+        "gemini_1.5_flash_vlm_v1",
         "paddleocr_v4_server",
-        "yolov8_label_segmenter_v2",
-        "metroscan_rule_matrix_engine_v1"
+        "metroscan_rule_matrix_engine_v1",
+        "statutory_rag_pgvector_v1"
       ]
     }
   },
@@ -1035,6 +1041,70 @@ Advances the legal status of an open violation file.
 #### Potential Error Responses:
 - `400 Bad Request`: `VIOLATION_INVALID_STATUS_TRANSITION`.
 - `404 Not Found`: `VIOLATION_NOT_FOUND`.
+
+---
+
+### 6.5 Generate Statutory Notice Draft (LLM + RAG)
+Automatically drafts a formal show-cause notice under Section 36(1) using LLM reasoning and RAG-retrieved statutory contexts.
+
+- **Path**: `POST /api/v1/violations/{violation_id}/generate-notice`
+- **Authentication**: Bearer Token required (Restricted to roles: `officer`, `admin`)
+- **Request Content-Type**: `application/json`
+
+#### Request Body Schema:
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `officer_comments` | String | Optional | Specific observations to include in the LLM prompt. |
+| `tone` | String | Optional | Enum: `formal_legal`, `warning_advisory`. Default: `formal_legal`. |
+
+#### Response: `200 OK`
+```json
+{
+  "status": "success",
+  "data": {
+    "violation_id": "viol-9921-2026",
+    "notice_draft_markdown": "### SHOW CAUSE NOTICE\n\n**Under Section 36(1) of the Legal Metrology Act, 2009**\n\nTo,\nSunLite Organics Pvt Ltd...\n\nWhereas, an inspection was conducted...",
+    "rag_citations_used": [
+      "Section 36(1) Legal Metrology Act, 2009",
+      "Rule 6(1)(n) LMPC Rules, 2011"
+    ],
+    "llm_model": "gemini-1.5-pro",
+    "generated_at": "2026-09-10T14:30:00.000Z"
+  }
+}
+```
+
+---
+
+### 6.6 Semantic Search Legal Rules (pgvector)
+Performs a semantic similarity search across the statutory knowledge base (Legal Metrology Acts, Rules, Precedents) using pgvector embeddings.
+
+- **Path**: `GET /api/v1/rules/search`
+- **Authentication**: Bearer Token required
+- **Query Parameters**:
+  - `q` (String, required): Search query (e.g., `dual mrp`).
+  - `limit` (Integer, optional): Number of results to return. Default: 5.
+  - `threshold` (Float, optional): Cosine similarity threshold. Default: 0.75.
+
+#### Response: `200 OK`
+```json
+{
+  "status": "success",
+  "data": {
+    "query": "dual mrp",
+    "results": [
+      {
+        "id": "e4b2d184-729c-48be-8f3b-5517226084cb",
+        "rule_identifier": "Rule 18(2)",
+        "title": "Prohibition on Dual MRP",
+        "act_reference": "LMPC Rules, 2011",
+        "similarity_score": 0.92,
+        "content_snippet": "No manufacturer or packer or importer shall declare different maximum retail prices on an identical pre-packaged commodity..."
+      }
+    ]
+  }
+}
+```
 
 ---
 

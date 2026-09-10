@@ -22,8 +22,8 @@ The development team consists of four technical members. All soft skills, slide 
 | Member 2: Backend   | Python FastAPI,     | /backend/routers, /models,    |
 | Developer           | SQLAlchemy, Alembic | /backend/schemas, /services   |
 +---------------------+---------------------+-------------------------------+
-| Member 3: Data      | PaddleOCR, OpenCV,  | /ml/ocr_engine, /declaration, |
-| Analyst / ML Eng.   | Python, Regex NER   | /ml/nutrition, /ml/test_data  |
+| Member 3: AI        | VLM, pgvector,      | /ai/vlm_prompts, /ai/rag,     |
+| Engineer            | Python Rule Engine  | /ai/rule_engine, /ai/synthesis|
 +---------------------+---------------------+-------------------------------+
 | Member 4: Tester &  | Playwright, Pytest, | /tests/e2e, /tests/api,       |
 | DevOps Engineer     | Docker, GitHub CI   | /.github/workflows, /deploy   |
@@ -87,45 +87,32 @@ The development team consists of four technical members. All soft skills, slide 
 
 ---
 
-### Member 3: Data Analyst / Machine Learning Engineer
-**Core Objective**: Build, calibrate, and benchmark the computer vision, OCR, layout extraction, and legal metrology rules inference engine.
+### Member 3: AI Engineer
+**Core Objective**: Build, calibrate, and benchmark the 4-tier hybrid pipeline (Multimodal VLM/OCR + Deterministic Python Rule Engine + Statutory RAG + LLM Synthesis).
 
 #### Primary Responsibilities
-1. **Optical Character Recognition (OCR) Pipeline**:
-   - Implement PaddleOCR (PP-OCRv4 with DBNet detection and SVTR recognition) optimized for English and Devnagari packaging text.
-   - Implement image preprocessing pipeline using OpenCV: deskewing, noise filtering, and Adaptive CLAHE for reflective foil/plastic packaging.
-2. **Statutory Entity Extraction & Rule 6 Parsing**:
-   - Develop regex and heuristic Named Entity Recognition (NER) pipeline to parse:
-     - Manufacturer names, addresses, and 6-digit PIN codes.
-     - Net quantity with strict metric validation (flagging `gms`, `Kgs`, `ltrs`).
-     - MRP with mandatory "inclusive of all taxes" clause.
-     - Unit Sale Price (USP) and mathematical verification against net quantity.
-     - Month and year of manufacture/packing.
-     - Consumer care coordinates (department, address, phone, email).
-3. **Physical Font Height Estimation & Rule 7 Table-I Engine**:
-   - Develop pixel-to-millimeter calibration algorithm using standardized barcode (EAN-13) detection or container aspect ratio.
-   - Compare measured letter heights against Table-I minimum thresholds for given PDP area.
-4. **Rule 9 Contrast Ratio & Rule 18 Tamper Detection**:
-   - Implement text foreground/background color extraction and WCAG 2.1 relative luminance calculation.
-   - Build edge-discontinuity and sticker boundary detection algorithm to flag dual-MRP labels.
-5. **Nutrition Table Parser & ICMR Health Engine**:
-   - Detect tabular bounding boxes on packaging back panels.
-   - Extract nutrient figures (sugars, sodium, fats) per 100g/ml and map to ICMR-NIN 2024 thresholds.
-6. **Dataset Collection & Ground Truth Benchmarking**:
-   - Curate a benchmark dataset of 50+ real Indian packaged commodities across food, cosmetics, and household categories.
-   - Establish ground-truth annotations and run automated accuracy benchmarking.
+1. **Tier 1: Multimodal VLM & OCR Integration**:
+   - Author VLM structured prompts for Gemini 1.5 Flash / GPT-4o-mini to extract spatial layout and text with PaddleOCR fallback.
+   - Enforce Pydantic structured output for reliable downstream ingestion.
+2. **Tier 2: Deterministic Python Rule Engine**:
+   - Implement 100% auditable mathematical logic for legal verification.
+   - Write pure Python modules for Unit Sale Price calculations, strict SI metric units filtering, Rule 7 Table-I font height step functions, and Rule 9 contrast limits.
+   - Ensure the LLM is never used for legal math.
+3. **Tier 3: Statutory Legal RAG**:
+   - Build the Statutory RAG vector index using PostgreSQL pgvector.
+   - Index the Legal Metrology Act 2009, Packaged Commodities Rules 2011, and court precedents.
+   - Automate retrieval of exact statutory sections to generate formal show-cause notices (FORM LM-INSP-2011).
+4. **Tier 4: LLM Consumer Synthesis**:
+   - Create synthesis pipelines to translate complex ICMR-NIN nutritional audits into plain-language warnings and healthy Indian food recommendations.
+5. **Shift from Manual Labeling**:
+   - Pivot from tedious manual image labeling in CVAT to building robust prompts, vector indexes, and the deterministic rule engine.
 
 #### Key Files Owned
-- `ml/ocr_engine.py` (PaddleOCR inference wrapper)
-- `ml/preprocessor.py` (OpenCV CLAHE, deskewing, binarization)
-- `ml/declaration_extractor.py` (Rule 6 entity recognition)
-- `ml/font_analyzer.py` (Rule 7 Table-I pixel-to-mm calculation)
-- `ml/contrast_analyzer.py` (Rule 9 WCAG contrast engine)
-- `ml/nutrition_parser.py` (Nutritional table detection and extraction)
-- `ml/tamper_detector.py` (Rule 18 sticker/dual-MRP detection)
-- `ml/compliance_pipeline.py` (Unified orchestrator)
-- `ml/test_data/` (Annotated images, ground truth JSON)
-- `ml/benchmarks/run_benchmarks.py` (Evaluation script)
+- `ai/vlm_prompts.py` (Structured prompt templates)
+- `ai/rule_engine.py` (Deterministic legal math and SI validation)
+- `ai/rag_indexer.py` (pgvector ingestion and search)
+- `ai/synthesis.py` (Consumer plain-language translation)
+- `ai/compliance_pipeline.py` (Unified 4-tier orchestrator)
 
 ---
 
@@ -171,7 +158,7 @@ The implementation plan spans five 2-week sprints (10 weeks total), starting 10 
 +---------------------------------------------------------------------------+
 | SPRINT 1: Setup & Data Foundation      | 10 Sep 2026 - 23 Sep 2026       |
 | SPRINT 2: Core APIs & Base OCR         | 24 Sep 2026 - 07 Oct 2026       |
-| SPRINT 3: Legal Metrology Rule Engine  | 08 Oct 2026 - 21 Oct 2026       |
+| SPRINT 3: 4-Tier Hybrid AI & Rules Engine| 08 Oct 2026 - 21 Oct 2026       |
 | SPRINT 4: Health Engine & Reports      | 22 Oct 2026 - 04 Nov 2026       |
 | SPRINT 5: Hardening, Benchmarks & Demo | 05 Nov 2026 - 19 Nov 2026       |
 +---------------------------------------------------------------------------+
@@ -193,13 +180,13 @@ The implementation plan spans five 2-week sprints (10 weeks total), starting 10 
 - **Dependencies**: Frontend requires Backend auth endpoints. Backend requires ML OCR wrapper function.
 - **Sprint Goal**: User can register, authenticate, and upload an image that stores in R2 and returns raw OCR text.
 
-### Sprint 3: Legal Metrology Rules Engine Integration (08 Oct - 21 Oct 2026)
+### Sprint 3: 4-Tier Hybrid AI & Rules Engine Integration (08 Oct - 21 Oct 2026)
 - **Member 1 (Frontend)**: Update `ScannerPage.tsx` to render dynamic bounding boxes on the packaging image and display real compliance declaration cards.
-- **Member 2 (Backend)**: Implement compliance scoring service; build violation tracking endpoints (`/api/v1/violations`); link scan records to database.
-- **Member 3 (ML/Data)**: Complete Rule 6 entity parser (MRP, net quantity, PIN, manufacturer); implement Rule 7 Table-I font height estimator and Rule 9 contrast calculator.
-- **Member 4 (Tester/DevOps)**: Implement automated ML accuracy benchmark runner (`run_benchmarks.py`); write Playwright test for end-to-end scanner flow.
-- **Dependencies**: Backend depends on ML rule parsing logic. Frontend depends on Backend `/api/v1/scan/upload` response schema.
-- **Sprint Goal**: Full end-to-end scanner flow functioning with live OCR, Rule 6 validation, and Rule 7 font measurement.
+- **Member 2 (Backend)**: Implement compliance scoring service; build violation tracking endpoints (`/api/v1/violations`); setup pgvector extension in PostgreSQL.
+- **Member 3 (AI/Data)**: Integrate VLM prompts; implement the Deterministic Python Rule Engine; build the pgvector Statutory RAG index.
+- **Member 4 (Tester/DevOps)**: Implement automated pipeline accuracy benchmark runner; write Playwright test for end-to-end scanner flow.
+- **Dependencies**: Backend depends on AI pipeline structured output. Frontend depends on Backend `/api/v1/scan/upload` response schema.
+- **Sprint Goal**: Full end-to-end scanner flow functioning with live VLM/OCR extraction, deterministic rule verification, and statutory RAG retrieval.
 
 ### Sprint 4: Nutrition Health Engine & Statutory Report Generation (22 Oct - 04 Nov 2026)
 - **Member 1 (Frontend)**: Wire `HealthCheckPage.tsx` to live health API; integrate `OfficerDashboardPage.tsx` with live analytics endpoints.

@@ -256,6 +256,15 @@ OCR_CONFIDENCE_THRESHOLD=0.60
 # Physical reference calibration: default packaging pixel-to-millimeter ratio
 # Calibrated for standard smartphone camera at 30cm distance (300 DPI)
 CALIBRATION_PIXEL_PER_MM=11.81
+
+# ------------------------------------------------------------------------------
+# 7. LLM & Statutory RAG Pipeline Configuration
+# ------------------------------------------------------------------------------
+LLM_PROVIDER=openai
+OPENAI_API_KEY=
+GEMINI_API_KEY=
+EMBEDDING_MODEL=text-embedding-3-small
+VECTOR_DIMENSION=1536
 ```
 
 #### Backend Variable Dictionary
@@ -302,7 +311,7 @@ services:
   # PostgreSQL 16 Relational Database Engine
   # ----------------------------------------------------------------------------
   metroscan-db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: metroscan-postgres
     restart: unless-stopped
     environment:

@@ -4,18 +4,20 @@
 **Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
 **Document Classification**: Standard Operating Procedure (SOP) and Technical Dataset Specification  
 **Version**: 1.0.0 (Production Benchmark Reference)  
-**Target Repository Directory**: `ml/test_data/`
+**Target Repository Directory**: `ai/benchmark_data/`
 
 ---
 
 ## 1. Document Header and Technical Objective
 
-### 1.1 Objective
-This document defines the technical protocol for creating, standardizing, and annotating the official benchmark ground truth dataset for the MetroScan regulatory compliance and optical character recognition (OCR) platform. The primary goal is to establish an immutable, physically verified dataset of at least 50 packaged commodities across representative retail categories in India. This dataset serves as the absolute baseline for:
-1. Evaluating OCR extraction accuracy (Character Error Rate [CER] and Word Error Rate [WER]) across varied packaging substrates, fonts, and print methods (rotogravure, flexography, thermal inkjet, offset lithography).
-2. Calibrating the automated Principal Display Panel (PDP) area calculation and Rule 7 Table-I statutory font height verification engine.
-3. Benchmarking layout analysis models (LayoutLMv3, YOLOv8/YOLOv11-OBB, and heuristic bounding-box parsers) against 19 fine-grained statutory declaration entity classes under the Legal Metrology (Packaged Commodities) Rules, 2011.
-4. Validating automated compliance auditing rules (Section 36(1) penalty triggers, Rule 6(1)(a) through Rule 6(1)(n), and ICMR-NIN 2024 nutritional profiling).
+### 1.1 Objective: Golden Ground-Truth Evaluation Benchmark Philosophy
+This document defines the technical protocol for creating, standardizing, and annotating the official benchmark ground truth dataset for the MetroScan regulatory compliance platform. In alignment with the modern AI architecture (Multimodal Vision-Language Models + Deterministic Python Rule Engine + Statutory RAG), custom computer vision models are not trained from scratch. Instead, this dataset serves strictly as an immutable, physically verified **50-SKU Golden Ground-Truth Evaluation Benchmark** across representative retail categories in India.
+
+This golden benchmark serves as the absolute scientific baseline for:
+1. Evaluating Multimodal VLM (Gemini 1.5 Flash / GPT-4o-mini) and OCR (PaddleOCR) extraction accuracy (Character Error Rate [CER <= 5%] and Word Error Rate [WER <= 8%]) across varied packaging substrates, fonts, and print methods (rotogravure, flexography, thermal inkjet, offset lithography).
+2. Calibrating the automated Principal Display Panel (PDP) area calculation and Rule 7 Table-I statutory font height verification engine against digital vernier caliper measurements.
+3. Benchmarking VLM spatial entity localization and bounding box precision (IoU >= 0.70) against the 19 fine-grained statutory declaration entity classes under the Legal Metrology (Packaged Commodities) Rules, 2011.
+4. Validating the Deterministic Python Rule Engine (100% mathematical accuracy on Unit Sale Price, SI metric units, and Rule 9 contrast) and Statutory RAG retrieval precision (MRR >= 0.85, Context Recall >= 90%).
 
 ### 1.2 Statutory Scope
 All physical samples, imaging workflows, and annotation taxonomies strictly adhere to:
@@ -1244,10 +1246,10 @@ if __name__ == "__main__":
 
 ## 8. Directory Structure and Repository Layout
 
-The benchmark packaging dataset must be organized under `ml/test_data/` strictly following this directory tree:
+The benchmark packaging dataset must be organized under `ai/benchmark_data/` strictly following this directory tree:
 
 ```
-ml/test_data/
+ai/benchmark_data/
 |-- README.md                           # Dataset quickstart, license, and benchmark checksums
 |-- images/                             # Master high-resolution product imagery (1920x1080 / 4K)
 |   |-- SKU_001_FB_FRONT.jpg
@@ -1275,11 +1277,11 @@ ml/test_data/
 |   |-- mitutoyo_50mm_grid_sample.jpg
 |   |-- lens_distortion_profile_50mm.json
 |   `-- cross_polarization_setup_diagram.png
-|-- manifests/                          # Split definitions for training, validation, and testing
+|-- manifests/                          # Evaluation benchmark slices and ground-truth manifests
 |   |-- benchmark_50_sku_manifest.json
 |   |-- challenging_edge_cases_split.json
 |   `-- fssai_nutritional_subset.json
-`-- reports/                            # Generated validation reports and OCR evaluation metrics
+`-- reports/                            # Generated validation reports and evaluation metrics
     |-- baseline_cer_wer_report.md
     `-- legal_metrology_accuracy_matrix.csv
 ```

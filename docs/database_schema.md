@@ -203,6 +203,7 @@ CREATE TYPE violation_record_status AS ENUM (
 -- Ensure Required Core Extensions are Available
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Set Timezone to UTC for All Default Timestamps
 SET timezone = 'UTC';
@@ -300,12 +301,32 @@ COMMENT ON COLUMN extracted_declarations.contrast_ratio IS 'Computed WCAG 2.1 lu
 COMMENT ON COLUMN extracted_declarations.bounding_box_json IS 'Polygonal spatial coordinates and OCR confidence scores.';
 
 -- ----------------------------------------------------------------------------
--- 4. TABLE: statutory_violations
+-- 4. TABLE: statutory_knowledge_base
+-- RAG Document store for Legal Metrology rules, sections, and precedents.
+-- ----------------------------------------------------------------------------
+CREATE TABLE statutory_knowledge_base (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rule_identifier VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    act_reference VARCHAR(255) NOT NULL,
+    amendment_year INT,
+    full_text TEXT NOT NULL,
+    metadata_json JSONB,
+    embedding vector(1536),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE statutory_knowledge_base IS 'Knowledge base for RAG (Retrieval-Augmented Generation) storing legal acts, rules, and case laws with embeddings.';
+COMMENT ON COLUMN statutory_knowledge_base.embedding IS 'Vector embeddings (e.g. text-embedding-3-small) for semantic search.';
+
+-- ----------------------------------------------------------------------------
+-- 5. TABLE: statutory_violations
 -- Legal infractions identified against the Legal Metrology Act & Rules.
 -- ----------------------------------------------------------------------------
 CREATE TABLE statutory_violations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     scan_id UUID NOT NULL REFERENCES product_scans(id) ON DELETE CASCADE,
+    cited_knowledge_id UUID REFERENCES statutory_knowledge_base(id) ON DELETE SET NULL,
     rule_reference VARCHAR(100) NOT NULL,
     act_section VARCHAR(100) NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -668,6 +689,13 @@ CREATE INDEX idx_health_audits_badges_gin
 -- Legal Timeline Query: Search for specific officer actions in history
 CREATE INDEX idx_violation_records_timeline_gin 
     ON violation_records USING gin (timeline_json jsonb_path_ops);
+
+-- ----------------------------------------------------------------------------
+-- 6. Vector Similarity Search Indexes (pgvector HNSW)
+-- ----------------------------------------------------------------------------
+-- HNSW (Hierarchical Navigable Small World) index for fast approximate nearest neighbor search over legal statutes
+CREATE INDEX idx_statutory_knowledge_embedding 
+    ON statutory_knowledge_base USING hnsw (embedding vector_cosine_ops);
 ```
 
 ### 5.1 Storage Engine Tuning Parameters

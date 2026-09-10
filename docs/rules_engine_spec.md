@@ -16,21 +16,30 @@ Under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commoditie
 
 Enforcement of these provisions historically depended upon physical inspection by State Legal Metrology Officers utilizing manual micrometer calipers, optical comparator scales, and physical documentation. The **MetroScan Statutory Rule Engine** translates statutory text, legislative provisos, gazette notifications, and schedule tables into a deterministic, machine-executable validation pipeline. The engine ingests optical text, bounding box spatial coordinates, and calibrated visual features to produce legally defensible compliance adjudications.
 
-### 1.2 System Execution Pipeline
-The Rule Engine operates downstream of the Document Layout Analysis and Optical Character Recognition (OCR) pipeline (LayoutLMv3 and TrOCR / Tesseract-OCR), and directly feeds both Officer Mode (statutory notices under Section 36) and Consumer Mode (fair pricing and transparency alerts).
+### 1.2 System Execution Pipeline: The Four-Tier Architecture
+The MetroScan statutory verification engine operates within a strict four-tier architecture designed to eliminate hallucinations, enforce mathematical determinism, and ground all legal actions in statutory law:
+
+- **Tier 1: Multimodal VLM & High-Performance OCR (Perception & Spatial Token Stream)**
+  High-accuracy extraction combining Multimodal Vision-Language Models (Google Gemini 1.5 Flash / OpenAI GPT-4o-mini) with structured Pydantic schemas, supplemented by PaddleOCR for low-latency edge/fallback processing. Extracts text tokens, bounding boxes `[ymin, xmin, ymax, xmax]`, and confidence metrics.
+- **Tier 2: Deterministic Python Rule Engine (Mathematical & Statutory Adjudication)**
+  100% deterministic, auditable code. Never let an LLM perform statutory math or font calculations! Implements Rule 6(1) mandatory declaration parsing, Rule 6(1)(e) Unit Sale Price arithmetic, Rule 7 Table-I font calibration step functions, Rule 9 WCAG 2.1 contrast formulas, and Rule 13 SI metric unit validation.
+- **Tier 3: Statutory Legal RAG (pgvector Semantic Search & Precedent Citation)**
+  PostgreSQL `pgvector` store indexing the Legal Metrology Act 2009, Packaged Commodities Rules 2011 (with all amendments up to 2024), gazette notifications, and compounding schedules. Automatically retrieves exact statutory sections and generates formal show-cause notices (FORM LM-INSP-2011).
+- **Tier 4: LLM Consumer Synthesis (Advisory & Nutritional Synthesis)**
+  Constrained LLM layer with strict Pydantic schemas translating deterministic findings into plain-language consumer cards, FSSAI nutritional audits, and ICMR-NIN 2024 dietary advisories.
 
 ```
 +-------------------------------------------------------------------------+
-|                    Optical Input & Spatial Feature Map                  |
-|  - OCR Bounding Boxes [x_min, y_min, x_max, y_max] + Confidence Scores  |
-|  - Transcribed Text Token Stream & Normalized String Array             |
-|  - High-Resolution Packaging Substrate Image (sRGB)                     |
-|  - GS1 EAN-13 Barcode / Container Aspect Ratio Reference                |
+|    Tier 1: Multimodal VLM & High-Performance OCR Extraction             |
+|  - Gemini 1.5 Flash / GPT-4o-mini structured output + PaddleOCR local   |
+|  - Spatial Bounding Boxes [ymin, xmin, ymax, xmax] + Confidence Scores  |
+|  - Transcribed Text Token Stream & Normalized String Array              |
+|  - Packaging Substrate Image & GS1 EAN-13 Barcode / Aspect Fiducial     |
 +------------------------------------+------------------------------------+
                                      |
                                      v
 +-------------------------------------------------------------------------+
-|                  MetroScan Statutory Rule Engine Core                   |
+|    Tier 2: Deterministic Python Rule Engine (100% Mathematical Logic)   |
 |                                                                         |
 |  +-------------------------------------------------------------------+  |
 |  | Section 2: Rule 6(1) Mandatory Declarations Parser & Regex Engine |  |
@@ -59,12 +68,23 @@ The Rule Engine operates downstream of the Document Layout Analysis and Optical 
 |  +-------------------------------------------------------------------+  |
 |  | Section 6: Composite Compliance Scoring (100-Point Model)         |  |
 |  | - Deductive Metric Formulation & Grade Categorization (A/B/C)     |  |
-|  +-------------------------------------------------------------------+  |
-|  | Section 7: Statutory Penalties Catalog (Act Sections 36, 48, 49)  |  |
+|  | - Zero Tolerance for Mathematical or Statutory Deviations         |  |
 |  +-------------------------------------------------------------------+  |
 +------------------------------------+------------------------------------+
                                      |
-                                     v
+         +---------------------------+---------------------------+
+         |                                                       |
+         v                                                       v
++------------------------------------+  +------------------------------------+
+| Tier 3: Statutory RAG (pgvector)   |  | Tier 4: LLM Consumer Synthesis     |
+| - Exact Section & Rule Retrieval   |  | - Plain-language Consumer Warnings |
+| - Gazette Notifications & Precedent|  | - ICMR-NIN 2024 Dietary Advisories |
+| - FORM LM-INSP-2011 Notice Drafting|  | - Healthier Indian Food Alternative|
++-----------------+------------------+  +-----------------+------------------+
+                  |                                       |
+                  +-------------------+-------------------+
+                                      |
+                                      v
 +-------------------------------------------------------------------------+
 |                  Downstream Adjudication & Action                       |
 |  - Officer Mode: FORM LM-INSP-2011 Inspection Docket & Seizure Order    |

@@ -40,17 +40,17 @@ This repository is structured as a monorepo containing frontend client applicati
 |   |-- models/                   # SQLAlchemy 2.0 ORM relational models
 |   |-- schemas/                  # Pydantic v2 validation contracts
 |   `-- services/                 # Compliance checker, PDF generator, storage service
-|-- ml/                           # Computer Vision and ML pipeline (in development)
-|   |-- ocr_engine.py             # PaddleOCR (PP-OCRv4) text and bounding box detection
-|   |-- declaration_extractor.py  # Rule 6 regex and entity extraction pipeline
-|   |-- font_analyzer.py          # Rule 7 Table-I physical font height estimator
+|-- ai/                           # Modern AI pipeline (OCR + VLM + Rules Engine + RAG)
+|   |-- vlm_extractor.py          # Multimodal VLM (Gemini/GPT-4o-mini) & PaddleOCR structured extraction
+|   |-- rules_engine.py           # Deterministic Python validation (USP math, SI units, Rule 7 Table-I)
+|   |-- statutory_rag.py          # PostgreSQL pgvector semantic search over Legal Metrology Acts
 |   |-- contrast_analyzer.py      # Rule 9 WCAG 2.1 color contrast calculator
-|   |-- nutrition_parser.py       # ICMR-NIN back-panel nutritional table extractor
-|   `-- test_data/                # Annotated Indian packaging benchmark dataset
+|   |-- nutrition_engine.py       # ICMR-NIN 2024 back-panel nutritional table parser and health scoring
+|   `-- benchmark_data/           # 50-SKU physical packaging ground-truth evaluation benchmark
 `-- tests/                        # Automated testing harness (in development)
     |-- e2e/                      # Playwright frontend end-to-end test specs
     |-- api/                      # Pytest backend REST API integration tests
-    `-- ml/                       # Accuracy evaluation scripts and regression tests
+    `-- ai/                       # RAG retrieval precision and extraction accuracy benchmarks
 ```
 
 ---
@@ -105,9 +105,9 @@ npm run build
 ## 5. Development Roles & Responsibilities
 
 1. **Frontend Developer**: React 19 SPA, API client layer (`src/services/api.ts`), AuthContext state, canvas image downsampling, dynamic bounding box overlays, and print stylesheets for statutory certificates.
-2. **Backend Developer**: FastAPI application gateway, PostgreSQL relational schema, SQLAlchemy 2.0 ORM, JWT RBAC security, multipart file streaming, and headless WeasyPrint PDF generator for FORM LM-INSP-2011.
-3. **Data Analyst / ML Engineer**: PaddleOCR (PP-OCRv4) wrapper, OpenCV preprocessing (CLAHE/deskewing), Rule 6 entity extraction, Rule 7 Table-I font calibration, Rule 9 contrast analyzer, and ICMR-NIN nutrition parser.
-4. **Tester + DevOps Engineer**: Playwright E2E test suites, Pytest API integration tests, automated ML accuracy regression harness, Docker containerization, GitHub Actions CI/CD pipelines, and cloud deployment.
+2. **Backend Developer**: FastAPI application gateway, PostgreSQL relational schema with pgvector, SQLAlchemy 2.0 ORM, JWT RBAC security, multipart file streaming, and headless WeasyPrint PDF generator for FORM LM-INSP-2011.
+3. **Data Analyst / AI Engineer**: Multimodal VLM/OCR prompt engineering with Pydantic structured output, Statutory RAG indexing using PostgreSQL pgvector, deterministic Python Rule Engine (USP math, SI unit validation, Rule 7 Table-I font calibration), and ICMR-NIN nutrition profiling engine.
+4. **Tester + DevOps Engineer**: Playwright E2E test suites, Pytest API integration tests, RAG retrieval precision and VLM extraction benchmark harness, Docker containerization, GitHub Actions CI/CD pipelines, and cloud deployment.
 
 ---
 
