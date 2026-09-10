@@ -117,6 +117,7 @@ Comprehensive system specifications and execution guidelines are located in the 
 
 ### Core Architecture & Strategy
 - [Master Blueprint & PRD](docs/prd_master_blueprint.md): Complete statutory cross-walk, PostgreSQL 16 schema DDL, REST API contracts, CV/ML pipeline architecture, and risk register.
+- [Development Roadmap](docs/development_roadmap.md): 8-phase implementation roadmap with specific tasks, target file paths, and deliverables for each of the 4 team members.
 - [Team Strategy & Execution Plan](docs/team_strategy.md): 10-week sprint calendar (Sprints 1 through 5), integration touchpoints, tech stack rationale, and engineering standards.
 
 ### Backend & Infrastructure Specifications
