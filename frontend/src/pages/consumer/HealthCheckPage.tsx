@@ -458,63 +458,57 @@ export const HealthCheckPage: React.FC = () => {
       />
 
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-5">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white flex items-center justify-center shadow-xs">
-              <Heartbeat size={20} weight="bold" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-heading tracking-tight">
-              Consumer Health &amp; Nutrition Audit
-            </h1>
-            <span className="text-2xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-800 border border-neutral-200 font-mono">
-              DIRECT VISION AGENT
-            </span>
-          </div>
-          <p className="text-xs text-neutral-600 max-w-2xl leading-relaxed">
-            Direct multimodal visual analysis of ingredients, nutrition panels, palm oil content, age restrictions, and long-term health risks against ICMR-NIN 2024 and WHO dietary standards.
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
+        <div>
+          <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
+            Nutritional Safety &amp; Ingredients • ICMR-NIN 2024
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1 tracking-tight">
+            Nutrition &amp; Ingredient Analysis
+          </h1>
+          <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
+            Evaluate nutritional profiles, palm oil content, added sugars, sodium density, and age-specific dietary suitability against national health standards.
           </p>
         </div>
 
         {(frontImageSrc || backImageSrc || currentAudit) && (
-          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          <div className="flex items-center gap-2.5 shrink-0">
             {currentAudit && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-2xs font-mono border border-neutral-200 bg-neutral-50 text-neutral-700 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Multimodal Health Analysis Active</span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-mono text-emerald-800 bg-emerald-50 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                <span>Audit Complete</span>
               </span>
             )}
             <Button
               variant="outline"
               size="sm"
               onClick={handleResetUploads}
-              icon={<ArrowClockwise size={15} weight="bold" />}
+              className="text-xs font-medium"
             >
-              Reset Health Scanner
+              Reset Scanner
             </Button>
           </div>
         )}
       </div>
 
       {/* Dual Photo Upload Section (Front Panel + Nutrition Facts Panel) */}
-      <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-100 pb-3">
+      <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-2xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div>
-            <h2 className="text-sm font-bold text-neutral-900 font-heading uppercase tracking-wide flex items-center gap-2">
-              <UploadSimple size={16} className="text-neutral-900" weight="bold" />
-              <span>Dual Packaging Ingestion</span>
+            <h2 className="text-xs font-bold font-mono text-slate-900 uppercase tracking-wider">
+              Packaging Panels &amp; Nutrition Table
             </h2>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Submit front brand panel and back ingredients/nutrition table for comprehensive multimodal audit.
+            <p className="text-xs text-slate-500 mt-1">
+              Submit front brand face and back nutrition facts table for comprehensive health evaluation.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleLoadDemo}
-              className="text-2xs font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 px-2.5 py-1 rounded border border-neutral-200 transition-colors"
+              className="text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded border border-slate-200 transition-colors"
             >
-              Load Demo Benchmark
+              Load Benchmark
             </button>
             <div className="text-2xs font-mono font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded border border-neutral-200">
               {frontImageSrc && backImageSrc ? '2/2 Panels Ready' : frontImageSrc || backImageSrc ? '1/2 Panels Ready' : '0/2 Panels Ready'}

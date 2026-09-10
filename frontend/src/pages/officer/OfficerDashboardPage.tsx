@@ -201,41 +201,41 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
       
       {/* Officer Header Bar */}
-      <section className="border-b border-slate-200/80 bg-slate-50/40">
+      <section className="border-b border-slate-200/80 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-6 sm:py-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            
-            <div className="space-y-1">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-950">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
+            <div>
+              <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
+                {officer.division} • {officer.zone}
+              </p>
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 tracking-tight">
                   {officer.name}
                 </h1>
-                <span className="font-mono text-2xs px-2.5 py-0.5 rounded border border-slate-300 bg-white text-slate-700 font-semibold">
+                <span className="font-mono text-2xs px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 font-semibold">
                   {officer.badgeNumber}
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
-                {officer.designation} • {officer.division} • {officer.zone}
+              <p className="text-xs text-slate-600 mt-1.5 max-w-xl leading-relaxed">
+                {officer.designation} • Jurisdiction: {officer.jurisdiction}. Enforcement workstation for statutory inspections and compounding proceedings.
               </p>
             </div>
 
             {/* Quick Actions */}
-            <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onNavigate("scanner")}
-                icon={<Scan size={14} weight="bold" />}
-                className="text-xs bg-white"
+                className="text-xs font-medium"
               >
-                New Field Scan
+                New Scan
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsCompoundingOpen(true)}
-                icon={<Scales size={14} weight="bold" />}
-                className="text-xs bg-white"
+                className="text-xs font-medium"
               >
                 Compounding Desk
               </Button>
@@ -243,21 +243,19 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={() => handleOpenNotice()}
-                icon={<FileText size={14} weight="bold" />}
-                className="text-xs bg-white"
+                className="text-xs font-medium"
               >
-                FORM LM-INSP-2011
+                Notice Draft
               </Button>
               <Button
                 variant="primary"
                 size="sm"
                 onClick={onOpenReportModal}
-                className="text-xs"
+                className="text-xs font-medium"
               >
                 Generate Report
               </Button>
             </div>
-
           </div>
         </div>
       </section>

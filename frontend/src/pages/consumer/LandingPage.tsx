@@ -1,14 +1,5 @@
 import React from "react";
-import { 
-  ArrowRight,
-  ShieldCheck, 
-  Scan, 
-  Heartbeat, 
-  IdentificationCard,
-  User,
-  FileText,
-  Scales
-} from "@phosphor-icons/react";
+import { ArrowRight } from "@phosphor-icons/react";
 import { UserRole } from "../../types";
 
 interface LandingPageProps {
@@ -19,7 +10,7 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onNavigate,
-  userRole,
+  userRole: _userRole,
   onSetUserRole,
 }) => {
   return (
@@ -31,7 +22,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Subtle Government Authority Pill */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 text-slate-600 text-2xs font-medium tracking-wide mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-slate-900" />
-          <span>Department of Consumer Affairs, Government of India</span>
+          <span>Department of Consumer Affairs • Legal Metrology Division</span>
         </div>
 
         {/* Primary Title */}
@@ -57,18 +48,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 group-hover:bg-slate-900 group-hover:text-white transition-colors duration-200">
-                  <User size={20} weight="bold" />
-                </div>
-                <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">Citizen Portal</span>
+                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 uppercase tracking-wider">
+                  Citizen Portal
+                </span>
+                <span className="text-xs font-mono text-slate-400">01</span>
               </div>
               <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Consumer Verification</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Scan packaged food products to verify Maximum Retail Price (MRP), Unit Sale Price, hidden palm oil, excessive sugar, and age-specific health risks.
+                Scan packaged food commodities to verify Maximum Retail Price, Unit Sale Price, hidden palm oil, added sugar content, and age-specific health warnings.
               </p>
             </div>
             
-            <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
+            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
               <span>Start product scan</span>
               <ArrowRight size={14} weight="bold" />
             </div>
@@ -84,18 +75,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 group-hover:bg-slate-900 group-hover:text-white transition-colors duration-200">
-                  <IdentificationCard size={20} weight="bold" />
-                </div>
-                <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">Enforcement</span>
+                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-900 text-white uppercase tracking-wider">
+                  Enforcement Desk
+                </span>
+                <span className="text-xs font-mono text-slate-400">02</span>
               </div>
               <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Legal Metrology Officer</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Field inspection station for Rule 7 Table-I font calibration, statutory show-cause notices (FORM LM-INSP-2011), and Section 48 compounding orders.
+                Field workstation for Rule 7 Table-I font calibration, statutory show-cause notices (FORM LM-INSP-2011), and Section 48 compounding fee assessment.
               </p>
             </div>
             
-            <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
+            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
               <span>Access officer command desk</span>
               <ArrowRight size={14} weight="bold" />
             </div>
@@ -131,7 +122,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Key Capabilities */}
       <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-4">Core Systems</div>
+        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">Core Modules</div>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-950 font-heading mb-12">
           Purpose-built for statutory rigor and consumer clarity.
         </h2>
@@ -139,12 +130,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           
           <div className="space-y-3">
-            <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-800">
-              <Scan size={18} weight="bold" />
-            </div>
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">01 / Label Optical Audit</div>
             <h3 className="text-base font-bold text-slate-950 font-heading">Direct Vision Perception</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Multimodal neural models inspect physical packaging images directly, extracting net quantity, MRP numerals, and principal display panel dimensions.
+              Multimodal models inspect physical packaging images directly, extracting net quantity, MRP numerals, and principal display panel dimensions.
             </p>
             <button 
               onClick={() => onNavigate("scanner")} 
@@ -155,9 +144,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <div className="space-y-3">
-            <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-800">
-              <Heartbeat size={18} weight="bold" />
-            </div>
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">02 / Health &amp; Nutrition</div>
             <h3 className="text-base font-bold text-slate-950 font-heading">Nutritional Health Agent</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               Examines ingredients and nutrition facts to identify hidden palm oil, excess sodium, and specific age-group dietary contraindications.
@@ -171,9 +158,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <div className="space-y-3">
-            <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-800">
-              <Scales size={18} weight="bold" />
-            </div>
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">03 / Statutory Precedents</div>
             <h3 className="text-base font-bold text-slate-950 font-heading">Statutory RAG Index</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               Grounded in the Gazette of India Extraordinary standards, providing court-admissible legal sections and compounding fee calculations.

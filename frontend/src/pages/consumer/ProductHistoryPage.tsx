@@ -250,29 +250,28 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
     <div className="min-h-screen bg-neutral-50 p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto font-sans text-neutral-900">
       
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200 pb-5">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-bold text-navy-950 font-heading">
-              Commodity Compliance Archive
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
+        <div>
+          <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
+            Audit Records • Central Repository
+          </p>
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 tracking-tight">
+              Archived Inspections
             </h1>
-            
-            {/* Live Supabase Status Pill */}
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-2xs font-mono font-medium border shadow-xs ${
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-2xs font-mono border ${
               isLiveSource 
-                ? "bg-success-light text-success border-success-border" 
-                : "bg-saffron-50 text-saffron-800 border-saffron-200"
+                ? "bg-emerald-50 text-emerald-800 border-emerald-200" 
+                : "bg-slate-100 text-slate-700 border-slate-200"
             }`}>
-              <span className={`w-2 h-2 rounded-full ${isLiveSource ? "bg-success animate-pulse" : "bg-saffron-500"}`} />
-              <span className="font-semibold">
-                {isLiveSource ? "Supabase Live Connected" : "Local Demonstration Archive"}
-              </span>
-              <span className="text-neutral-300">•</span>
-              <span>{totalScans} Commodities Registered</span>
-            </div>
+              <span className={`w-1.5 h-1.5 rounded-full ${isLiveSource ? "bg-emerald-600" : "bg-slate-400"}`} />
+              <span>{isLiveSource ? "Live Database" : "Demonstration Ledger"}</span>
+              <span className="text-slate-300">•</span>
+              <span>{totalScans} commodities</span>
+            </span>
           </div>
-          <p className="text-xs text-neutral-600">
-            Central repository of audited pre-packaged goods, Rule 6 declaration logs, Table-I font assessments, and ICMR-NIN 2024 nutritional evaluations.
+          <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
+            Historical log of verified pre-packaged commodities, statutory Rule 6 declarations, Table-I font assessments, and nutritional evaluations.
           </p>
         </div>
 
@@ -283,26 +282,18 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
             size="sm"
             onClick={fetchLiveHistory}
             disabled={isLoading}
-            className="text-2xs font-semibold"
-            icon={
-              isLoading ? (
-                <SpinnerGap size={15} className="animate-spin text-navy-800" />
-              ) : (
-                <ArrowClockwise size={15} className="text-navy-800" />
-              )
-            }
+            className="text-xs font-medium"
           >
-            Refresh
+            {isLoading ? "Refreshing..." : "Refresh"}
           </Button>
 
           <Button
             variant="primary"
             size="sm"
             onClick={onNavigateToScanner}
-            className="text-2xs font-semibold"
-            icon={<Scan size={16} />}
+            className="text-xs font-medium"
           >
-            Scan New Product
+            New Inspection
           </Button>
         </div>
       </div>

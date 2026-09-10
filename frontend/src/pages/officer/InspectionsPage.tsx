@@ -332,49 +332,29 @@ export const InspectionsPage: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header with Statutory Field Inspection Ledger branding */}
-      <div className="bg-white rounded-card border border-neutral-200 shadow-card p-5 border-t-4 border-t-navy-800">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-heading tracking-tight">
-                Statutory Field Inspection Ledger
-              </h1>
-              <span className="text-2xs font-mono font-bold px-2.5 py-0.5 rounded-badge bg-navy-50 text-navy-800 border border-navy-200">
-                ENFORCEMENT RECORD
-              </span>
-              <span className="text-2xs font-bold px-2.5 py-0.5 rounded-badge bg-saffron-50 text-saffron-700 border border-saffron-200">
-                LMPC ACT 2009 • RULE 29
-              </span>
-            </div>
-            <p className="text-xs text-neutral-600 max-w-3xl leading-relaxed">
-              Official judicial and administrative register of market inspections, Section 36(1) show-cause notices, PDP font height defaults, and Section 48 compounding orders across Central Enforcement Division.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5 shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportLedger}
-              icon={<DownloadSimple size={16} />}
-            >
-              Export Inspection Docket (CSV)
-            </Button>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
+        <div>
+          <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
+            Statutory Field Register • LMPC Rules, 2011
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1 tracking-tight">
+            Field Inspection Ledger
+          </h1>
+          <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
+            Administrative register of market inspections, Section 36(1) notices, Rule 7 Table-I defaults, and compounding orders.
+          </p>
         </div>
 
-        {/* Sub-strip with jurisdiction authority note */}
-        <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-2xs text-neutral-500 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <Shield size={14} className="text-navy-800" />
-            <span className="font-semibold text-neutral-700">
-              Prescribed under Legal Metrology (Packaged Commodities) Rules, 2011
-            </span>
-          </div>
-          <span className="font-mono text-neutral-600">
-            JURISDICTION: ZONE-1 DELHI NCT
-          </span>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportLedger}
+            className="text-xs font-medium"
+          >
+            Export CSV
+          </Button>
         </div>
       </div>
 

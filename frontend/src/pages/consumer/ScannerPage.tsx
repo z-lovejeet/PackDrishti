@@ -325,45 +325,42 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         onClose={() => setIsCameraOpen(false)}
       />
 
-      {/* Top Inspection Station Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-5">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="w-8 h-8 rounded-lg bg-navy-800 text-white flex items-center justify-center shadow-xs">
-              <Scan size={20} weight="bold" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-heading tracking-tight">
-              Packaging Compliance Audit Engine
-            </h1>
-            <span className="text-2xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-navy-50 text-navy-800 border border-navy-200 shadow-2xs font-mono">
-              {userRole === "officer" ? "ENFORCEMENT AUDIT ENGINE" : "CONSUMER VERIFICATION"}
-            </span>
-          </div>
-          <p className="text-xs text-neutral-600 max-w-2xl leading-relaxed">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
+        <div>
+          <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
             {userRole === "officer" 
-              ? "Official statutory inspection workstation for detecting missing declarations, measuring Rule 7 Table-I cap-heights, and drafting Section 36(1) compounding orders."
-              : "Verify packaged commodity compliance under Legal Metrology Rules, 2011. Inspect mandatory MRP, Unit Sale Price, manufacturing date, and manufacturer details."}
+              ? "Enforcement Inspection • LMPC Rules, 2011"
+              : "Consumer Verification • LMPC Rules, 2011"}
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1 tracking-tight">
+            {userRole === "officer" ? "Statutory Label Inspection" : "Package Compliance Audit"}
+          </h1>
+          <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
+            {userRole === "officer" 
+              ? "Inspect mandatory Rule 6 declarations, verify Rule 7 Table-I numeral cap-heights, and check statutory Unit Sale Pricing."
+              : "Verify packaged commodity compliance against Legal Metrology requirements, including Maximum Retail Price, Unit Sale Price, and manufacturer details."}
           </p>
         </div>
 
         {currentScan && (
-          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          <div className="flex items-center gap-2.5 shrink-0">
             <Button
               variant="outline"
               size="sm"
               onClick={onOpenReportModal}
-              icon={<DownloadSimple size={16} weight="bold" />}
+              className="text-xs font-medium"
             >
-              Export Report (PDF)
+              Export PDF
             </Button>
             {onSaveToast && (
               <Button
                 variant="primary"
                 size="sm"
                 onClick={onSaveToast}
-                icon={<BookmarkSimple size={16} weight="bold" />}
+                className="text-xs font-medium"
               >
-                Save to Repository
+                Save Record
               </Button>
             )}
           </div>
@@ -396,15 +393,14 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       )}
 
       {/* Packaging Ingestion Area */}
-      <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+      <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-2xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
-            <h2 className="text-sm font-bold text-neutral-900 font-heading uppercase tracking-wide flex items-center gap-2">
-              <UploadSimple size={16} className="text-navy-800" weight="bold" />
-              <span>Packaging Evidence Ingestion &amp; OCR</span>
+            <h2 className="text-xs font-bold font-mono text-slate-900 uppercase tracking-wider">
+              Packaging Evidence &amp; Label Panels
             </h2>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Client downsampling preserves OCR acuity under 2MB statutory maximum. Validated through 4-tier LangGraph legal engine.
+            <p className="text-xs text-slate-500 mt-1">
+              Capture or upload front display face and back statutory declarations panel for compliance audit.
             </p>
           </div>
           {imageSrc && (
@@ -412,9 +408,9 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               variant="outline"
               size="sm"
               onClick={resetScanner}
-              icon={<ArrowClockwise size={15} weight="bold" />}
+              className="text-xs font-medium"
             >
-              Scan Another Specimen
+              Reset Scanner
             </Button>
           )}
         </div>
@@ -773,50 +769,29 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
             pdpAreaCm2={currentScan.pdpAreaCm2}
           />
 
-          {/* Dual-Model Consensus Advisory Card in Institutional Navy / Amber Banner */}
+          {/* Statutory Findings & Consumer Advisory */}
           {liveResult?.consumer_advisory && (
-            <div className="p-5 rounded-lg bg-navy-50/90 border border-navy-200/90 shadow-xs space-y-2.5">
-              <div className="flex items-center justify-between gap-3 flex-wrap border-b border-navy-200/60 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-md bg-navy-800 text-saffron-400 flex items-center justify-center shrink-0">
-                    <Sparkle size={16} weight="fill" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-navy-950 font-heading uppercase tracking-wide">
-                      Ministry Dual-Model Consensus Advisory
-                    </h3>
-                    <span className="text-2xs text-neutral-500 font-medium">
-                      Deterministic Statutory Verification &amp; Advisory
-                    </span>
-                  </div>
+            <div className="p-5 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs space-y-2.5">
+              <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-200/80 pb-2.5">
+                <div>
+                  <h3 className="text-xs font-bold font-mono text-slate-900 uppercase tracking-wider">
+                    Statutory Assessment Summary
+                  </h3>
+                  <span className="text-2xs text-slate-500 font-normal">
+                    Automated evaluation against Legal Metrology Rules, 2011
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-2xs font-mono font-semibold text-navy-800 bg-white px-2.5 py-1 rounded-md border border-navy-200 shadow-2xs">
-                    Execution Latency: {liveResult.execution_time_ms.toFixed(0)} ms
+                  <span className="text-2xs font-mono text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    Ref: {currentScan.scanCode}
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-navy-950 leading-relaxed font-sans">
+              <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-sans">
                 {liveResult.consumer_advisory}
               </p>
-
-              <div className="pt-2 flex items-center justify-between gap-2 border-t border-navy-200/50 text-2xs text-neutral-600 flex-wrap">
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1 font-medium">
-                    <ShieldCheck size={14} className="text-emerald-700" weight="bold" />
-                    <span>LMPC 2011 Verified</span>
-                  </span>
-                  <span className="flex items-center gap-1 font-medium">
-                    <Database size={14} className="text-navy-800" weight="bold" />
-                    <span>pgvector Law Precedents Linked</span>
-                  </span>
-                </div>
-                <span className="font-mono text-neutral-500">
-                  Ref Code: {currentScan.scanCode}
-                </span>
-              </div>
             </div>
           )}
 

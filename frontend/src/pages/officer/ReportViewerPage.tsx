@@ -196,36 +196,29 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header with Statutory Branding */}
-      <div className="bg-white rounded-card border border-neutral-200 shadow-card p-5 border-t-4 border-t-navy-800 no-print">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 font-heading tracking-tight">
-                Statutory Compliance Reports & Dockets
-              </h1>
-              <span className="text-2xs font-mono font-bold px-2.5 py-0.5 rounded-badge bg-navy-50 text-navy-800 border border-navy-200">
-                OFFICIAL REPOSITORY
-              </span>
-              <span className="text-2xs font-bold px-2.5 py-0.5 rounded-badge bg-saffron-50 text-saffron-700 border border-saffron-200">
-                LMPC FORM LM-INSP-2011
-              </span>
-            </div>
-            <p className="text-xs text-neutral-600 max-w-3xl leading-relaxed">
-              Official judicial certificates of market inspection, packaging conformity assessments under LMPC Rules 2011, and Section 36(1) prosecution dockets.
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80 no-print">
+        <div>
+          <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
+            Official Records • Form LM-INSP-2011
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1 tracking-tight">
+            Compliance Dockets &amp; Reports
+          </h1>
+          <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
+            Certified inspection dockets, packaging conformity assessments, and evidentiary records for legal metrology enforcement.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onOpenNewReportModal}
-              icon={<FileText size={16} />}
-            >
-              Generate New Report
-            </Button>
-          </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onOpenNewReportModal}
+            className="text-xs font-medium"
+          >
+            Generate New Report
+          </Button>
         </div>
       </div>
 

@@ -1,20 +1,5 @@
 import React, { useState } from "react";
-import { 
-  ShieldCheck, 
-  Scan, 
-  Heartbeat, 
-  FileText, 
-  Archive, 
-  SquaresFour, 
-  DownloadSimple, 
-  User, 
-  IdentificationCard, 
-  SignIn, 
-  SignOut,
-  List,
-  X,
-  Globe
-} from "@phosphor-icons/react";
+import { ShieldCheck, List, X } from "@phosphor-icons/react";
 import { Button } from "../common/Button";
 import { UserRole } from "../../types";
 import { useAuthStore } from "../../store/authStore";
@@ -44,49 +29,46 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
       {/* Top Government Masthead */}
-      <div className="bg-navy-950 text-neutral-300 text-2xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-navy-900/80">
+      <div className="bg-slate-950 text-slate-300 text-2xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-slate-900">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-            <span className="font-bold tracking-wider text-white uppercase">
+            <span className="font-semibold tracking-wider text-white uppercase">
               Government of India
             </span>
-            <span className="text-neutral-500">•</span>
-            <span className="font-medium tracking-wide text-neutral-200 uppercase">
+            <span className="text-slate-600">•</span>
+            <span className="text-slate-300">
               Ministry of Consumer Affairs, Food &amp; Public Distribution
             </span>
-            <span className="text-neutral-500 hidden md:inline">•</span>
-            <span className="text-neutral-300 hidden md:inline">
+            <span className="text-slate-600 hidden md:inline">•</span>
+            <span className="text-slate-400 hidden md:inline">
               Department of Consumer Affairs (Legal Metrology Division)
             </span>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0 text-2xs">
-            <div className="flex items-center gap-1 text-neutral-400">
-              <Globe size={13} className="text-saffron-400" />
-              <span className="hidden sm:inline text-neutral-400">Language:</span>
-            </div>
-            <div className="flex items-center gap-1.5 font-medium">
+          <div className="flex items-center gap-2.5 shrink-0 text-2xs">
+            <span className="text-slate-500 hidden sm:inline">Language:</span>
+            <div className="flex items-center gap-1 font-medium">
               <button
                 type="button"
                 onClick={() => setLanguage("en")}
-                className={`transition-colors cursor-pointer px-1.5 py-0.5 rounded ${
-                  language === "en" 
-                    ? "text-white font-bold bg-navy-900" 
-                    : "text-neutral-400 hover:text-white"
+                className={`transition-colors cursor-pointer px-1.5 py-0.5 rounded text-2xs ${
+                  language === "en"
+                    ? "text-white font-semibold bg-slate-800"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 English
               </button>
-              <span className="text-neutral-600">|</span>
+              <span className="text-slate-700">|</span>
               <button
                 type="button"
                 onClick={() => setLanguage("hi")}
-                className={`transition-colors cursor-pointer px-1.5 py-0.5 rounded ${
-                  language === "hi" 
-                    ? "text-white font-bold bg-navy-900" 
-                    : "text-neutral-400 hover:text-white"
+                className={`transition-colors cursor-pointer px-1.5 py-0.5 rounded text-2xs ${
+                  language === "hi"
+                    ? "text-white font-semibold bg-slate-800"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 हिन्दी
@@ -96,10 +78,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Main Navbar Bar */}
+      {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
-        {/* Logo and Identity */}
+        {/* Brand Lockup */}
         <div 
           onClick={() => handleNavClick("landing")}
           className="flex items-center gap-3 cursor-pointer select-none shrink-0 group"
@@ -113,33 +95,33 @@ export const Navbar: React.FC<NavbarProps> = ({
           }}
           aria-label="PackDrashiti Home"
         >
-          <div className="w-10 h-10 rounded-lg bg-navy-900 border border-navy-800 flex items-center justify-center text-saffron-400 shadow-xs group-hover:scale-105 transition-transform shrink-0">
-            <ShieldCheck size={24} weight="bold" />
+          <div className="w-9 h-9 rounded-lg bg-slate-950 flex items-center justify-center text-white shrink-0 shadow-2xs transition-transform group-hover:scale-105">
+            <ShieldCheck size={20} weight="bold" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-navy-950 tracking-tight font-heading leading-tight">
+              <span className="text-base font-bold text-slate-950 tracking-tight font-heading leading-tight">
                 PackDrashiti
               </span>
-              <span className="text-2xs uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-saffron-50 text-saffron-800 border border-saffron-200/80 font-mono">
+              <span className="text-2xs font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                 LMPC 2011
               </span>
             </div>
-            <p className="text-2xs text-neutral-500 font-medium leading-none mt-1">
-              Legal Metrology Division • Govt. of India
+            <p className="text-2xs text-slate-500 font-normal leading-none mt-0.5">
+              Legal Metrology Division
             </p>
           </div>
         </div>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold">
+        {/* Desktop Navigation Links (Typography-only, zero icon clutter) */}
+        <nav className="hidden lg:flex items-center gap-1 text-xs font-medium">
           <button
             type="button"
             onClick={() => handleNavClick("landing")}
-            className={`px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
               activePage === "landing"
-                ? "bg-navy-900 text-white font-bold shadow-xs"
-                : "text-neutral-600 hover:text-navy-950 hover:bg-neutral-100"
+                ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
             }`}
           >
             Overview
@@ -149,42 +131,39 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => handleNavClick("dashboard")}
-              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
                 activePage === "dashboard"
-                  ? "bg-navy-900 text-white font-bold shadow-xs"
-                  : "text-neutral-600 hover:text-navy-950 hover:bg-neutral-100"
+                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              <SquaresFour size={16} weight={activePage === "dashboard" ? "bold" : "regular"} className={activePage === "dashboard" ? "text-saffron-400" : "text-neutral-500"} />
-              <span>Officer Dashboard</span>
+              Officer Desk
             </button>
           )}
 
           <button
             type="button"
             onClick={() => handleNavClick("scanner")}
-            className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
               activePage === "scanner"
-                ? "bg-navy-900 text-white font-bold shadow-xs"
-                : "text-neutral-600 hover:text-navy-950 hover:bg-neutral-100"
+                ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
             }`}
           >
-            <Scan size={16} weight={activePage === "scanner" ? "bold" : "regular"} className={activePage === "scanner" ? "text-saffron-400" : "text-neutral-500"} />
-            <span>{userRole === "officer" ? "Field Scanner" : "Label Scanner"}</span>
+            {userRole === "officer" ? "Field Scanner" : "Label Scanner"}
           </button>
 
           {userRole === "consumer" && (
             <button
               type="button"
               onClick={() => handleNavClick("health")}
-              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
                 activePage === "health"
-                  ? "bg-navy-900 text-white font-bold shadow-xs"
-                  : "text-neutral-600 hover:text-navy-950 hover:bg-neutral-100"
+                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              <Heartbeat size={16} weight={activePage === "health" ? "bold" : "regular"} className={activePage === "health" ? "text-saffron-400" : "text-neutral-500"} />
-              <span>Health Check</span>
+              Health Check
             </button>
           )}
 
@@ -192,14 +171,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => handleNavClick("history")}
-              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
                 activePage === "history"
-                  ? "bg-navy-900 text-white font-bold shadow-xs"
-                  : "text-neutral-600 hover:text-navy-950 hover:bg-neutral-100"
+                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              <Archive size={16} weight={activePage === "history" ? "bold" : "regular"} className={activePage === "history" ? "text-saffron-400" : "text-neutral-500"} />
-              <span>My Scans</span>
+              Archived Scans
             </button>
           )}
 
@@ -207,14 +185,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => handleNavClick("inspections")}
-              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
                 activePage === "inspections"
-                  ? "bg-navy-900 text-white font-bold shadow-xs"
-                  : "text-neutral-600 hover:text-navy-950 hover:bg-neutral-100"
+                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              <FileText size={16} weight={activePage === "inspections" ? "bold" : "regular"} className={activePage === "inspections" ? "text-saffron-400" : "text-neutral-500"} />
-              <span>Inspection Ledger</span>
+              Inspection Ledger
             </button>
           )}
 
@@ -222,14 +199,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => handleNavClick("reports")}
-              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
                 activePage === "reports"
-                  ? "bg-navy-900 text-white font-bold shadow-xs"
-                  : "text-neutral-600 hover:text-navy-950 hover:bg-neutral-100"
+                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              <DownloadSimple size={16} weight={activePage === "reports" ? "bold" : "regular"} className={activePage === "reports" ? "text-saffron-400" : "text-neutral-500"} />
-              <span>Report Dockets</span>
+              Reports &amp; Dockets
             </button>
           )}
         </nav>
@@ -237,30 +213,25 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Section: Persona Switcher, Auth Controls, Primary CTA, Mobile Toggle */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
-          {/* Persona Segmented Control (Desktop) */}
+          {/* Persona Segmented Control (Pure text, zero icons) */}
           <div 
             role="group" 
-            aria-label="Persona Mode Selection"
-            className="hidden sm:flex items-center p-0.5 rounded-lg bg-neutral-100 border border-neutral-200 text-xs shadow-2xs"
+            aria-label="Operating Mode"
+            className="hidden sm:flex items-center p-0.5 rounded-lg bg-slate-100 border border-slate-200 text-xs shadow-2xs"
           >
             <button
               type="button"
               onClick={() => {
                 if (userRole !== "consumer") onToggleUserRole();
               }}
-              className={`px-2.5 py-1.5 rounded-md flex items-center gap-1.5 transition-all text-xs font-semibold ${
+              className={`px-2.5 py-1 rounded-md transition-all text-xs ${
                 userRole === "consumer"
-                  ? "bg-white text-navy-950 font-bold shadow-xs border border-neutral-200/80"
-                  : "text-neutral-600 hover:text-navy-950"
+                  ? "bg-white text-slate-950 font-semibold shadow-2xs border border-slate-200/80"
+                  : "text-slate-500 hover:text-slate-800 font-medium"
               }`}
-              title="Switch to Consumer Mode (Citizen retail and nutrition verification)"
+              title="Citizen consumer verification mode"
             >
-              <User 
-                size={14} 
-                weight={userRole === "consumer" ? "bold" : "regular"} 
-                className={userRole === "consumer" ? "text-saffron-600" : "text-neutral-400"} 
-              />
-              <span>Consumer</span>
+              Consumer
             </button>
 
             <button
@@ -268,27 +239,22 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => {
                 if (userRole !== "officer") onToggleUserRole();
               }}
-              className={`px-2.5 py-1.5 rounded-md flex items-center gap-1.5 transition-all text-xs font-semibold ${
+              className={`px-2.5 py-1 rounded-md transition-all text-xs ${
                 userRole === "officer"
-                  ? "bg-navy-900 text-white font-bold shadow-xs"
-                  : "text-neutral-600 hover:text-navy-950"
+                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                  : "text-slate-500 hover:text-slate-800 font-medium"
               }`}
-              title="Switch to Officer Mode (Enforcement and Inspection jurisdiction)"
+              title="Statutory enforcement officer mode"
             >
-              <IdentificationCard 
-                size={14} 
-                weight={userRole === "officer" ? "bold" : "regular"} 
-                className={userRole === "officer" ? "text-saffron-400" : "text-neutral-400"} 
-              />
-              <span>Officer</span>
+              Officer
             </button>
           </div>
 
-          {/* Authentication Section */}
+          {/* Authentication Section (Pure text) */}
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <div className="hidden xl:flex items-center gap-1.5 bg-neutral-100 border border-neutral-200 text-neutral-800 px-2.5 py-1.5 rounded-lg text-2xs font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              <div className="hidden xl:flex items-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-800 px-2.5 py-1 rounded-md text-2xs font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                 <span className="font-medium max-w-[120px] truncate">
                   {user?.badgeNumber || user?.email?.split("@")[0] || "Authorized"}
                 </span>
@@ -296,48 +262,45 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={logout}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-neutral-300 text-neutral-700 hover:bg-neutral-100 hover:text-navy-900 transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1 rounded-md text-xs font-medium border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition-colors"
                 title="Sign out of portal"
               >
-                <SignOut size={14} weight="bold" />
-                <span className="hidden md:inline">Sign Out</span>
+                Sign Out
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={onOpenAuthModal}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-navy-200 bg-navy-50 text-navy-900 hover:bg-navy-100 hover:border-navy-300 transition-colors flex items-center gap-1.5 shadow-2xs"
-              title="Sign in or register for official access"
+              className="px-3 py-1 rounded-md text-xs font-medium border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 transition-colors shadow-2xs"
+              title="Sign in for official access"
             >
-              <SignIn size={14} weight="bold" className="text-saffron-600" />
-              <span>Sign In</span>
+              Sign In
             </button>
           )}
 
-          {/* Primary Action Button (Desktop) */}
+          {/* Primary Action Button (Pure text, sleek and restrained) */}
           <Button
             variant="primary"
             size="sm"
             onClick={() => handleNavClick("scanner")}
-            icon={<Scan size={14} weight="bold" />}
-            className="hidden md:inline-flex bg-navy-900 hover:bg-navy-800 text-white border-0 shadow-xs font-semibold text-xs"
+            className="hidden md:inline-flex text-xs font-medium"
           >
-            Scan Product
+            Scan Package
           </Button>
 
           {/* Mobile Menu Hamburger Button */}
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="lg:hidden p-2 rounded-lg border border-neutral-200 text-neutral-700 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-navy-900 transition-colors"
+            className="lg:hidden p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-colors"
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? (
-              <X size={20} weight="bold" />
+              <X size={18} weight="bold" />
             ) : (
-              <List size={20} weight="bold" />
+              <List size={18} weight="bold" />
             )}
           </button>
 
@@ -345,33 +308,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       </div>
 
-      {/* Mobile Menu Drawer / Dropdown */}
+      {/* Mobile Menu Drawer (Pure text navigation) */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-neutral-200 bg-white/98 backdrop-blur-md px-4 py-4 space-y-4 shadow-dropdown animate-fadeIn">
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-4 shadow-dropdown animate-fadeIn">
           
           {/* Mobile Persona Switcher */}
           <div>
-            <span className="text-2xs uppercase font-bold tracking-wider text-neutral-500 block mb-1.5">
+            <span className="text-2xs uppercase font-mono font-medium text-slate-500 block mb-1.5">
               Operating Mode
             </span>
-            <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-neutral-100 border border-neutral-200 text-xs">
+            <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs">
               <button
                 type="button"
                 onClick={() => {
                   if (userRole !== "consumer") onToggleUserRole();
                 }}
-                className={`py-2 px-3 rounded-md flex items-center justify-center gap-2 font-semibold transition-all ${
+                className={`py-1.5 px-3 rounded-md text-center font-medium transition-all ${
                   userRole === "consumer"
-                    ? "bg-white text-navy-950 font-bold shadow-xs border border-neutral-200/80"
-                    : "text-neutral-600 hover:text-navy-950"
+                    ? "bg-white text-slate-950 font-semibold shadow-2xs border border-slate-200"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
               >
-                <User 
-                  size={15} 
-                  weight={userRole === "consumer" ? "bold" : "regular"} 
-                  className={userRole === "consumer" ? "text-saffron-600" : "text-neutral-400"} 
-                />
-                <span>Consumer Mode</span>
+                Consumer
               </button>
 
               <button
@@ -379,40 +337,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => {
                   if (userRole !== "officer") onToggleUserRole();
                 }}
-                className={`py-2 px-3 rounded-md flex items-center justify-center gap-2 font-semibold transition-all ${
+                className={`py-1.5 px-3 rounded-md text-center font-medium transition-all ${
                   userRole === "officer"
-                    ? "bg-navy-900 text-white font-bold shadow-xs"
-                    : "text-neutral-600 hover:text-navy-950"
+                    ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
               >
-                <IdentificationCard 
-                  size={15} 
-                  weight={userRole === "officer" ? "bold" : "regular"} 
-                  className={userRole === "officer" ? "text-saffron-400" : "text-neutral-400"} 
-                />
-                <span>Officer Mode</span>
+                Officer
               </button>
             </div>
           </div>
 
           {/* Mobile Navigation Links */}
           <nav className="space-y-1">
-            <span className="text-2xs uppercase font-bold tracking-wider text-neutral-500 block mb-1.5">
+            <span className="text-2xs uppercase font-mono font-medium text-slate-500 block mb-1.5">
               Navigation
             </span>
 
             <button
               type="button"
               onClick={() => handleNavClick("landing")}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 activePage === "landing"
-                  ? "bg-navy-900 text-white font-bold"
-                  : "text-neutral-700 hover:bg-neutral-100 hover:text-navy-900"
+                  ? "bg-slate-900 text-white font-semibold"
+                  : "text-slate-700 hover:bg-slate-100"
               }`}
             >
               <span>Overview</span>
               {activePage === "landing" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-saffron-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
               )}
             </button>
 
@@ -420,18 +373,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => handleNavClick("dashboard")}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                   activePage === "dashboard"
-                    ? "bg-navy-900 text-white font-bold"
-                    : "text-neutral-700 hover:bg-neutral-100 hover:text-navy-900"
+                    ? "bg-slate-900 text-white font-semibold"
+                    : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <SquaresFour size={16} weight={activePage === "dashboard" ? "bold" : "regular"} className={activePage === "dashboard" ? "text-saffron-400" : "text-neutral-500"} />
-                  <span>Officer Dashboard</span>
-                </div>
+                <span>Officer Desk</span>
                 {activePage === "dashboard" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-saffron-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </button>
             )}
@@ -439,18 +389,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => handleNavClick("scanner")}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 activePage === "scanner"
-                  ? "bg-navy-900 text-white font-bold"
-                  : "text-neutral-700 hover:bg-neutral-100 hover:text-navy-900"
+                  ? "bg-slate-900 text-white font-semibold"
+                  : "text-slate-700 hover:bg-slate-100"
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <Scan size={16} weight={activePage === "scanner" ? "bold" : "regular"} className={activePage === "scanner" ? "text-saffron-400" : "text-neutral-500"} />
-                <span>{userRole === "officer" ? "Field Scanner" : "Label Scanner"}</span>
-              </div>
+              <span>{userRole === "officer" ? "Field Scanner" : "Label Scanner"}</span>
               {activePage === "scanner" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-saffron-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
               )}
             </button>
 
@@ -458,18 +405,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => handleNavClick("health")}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                   activePage === "health"
-                    ? "bg-navy-900 text-white font-bold"
-                    : "text-neutral-700 hover:bg-neutral-100 hover:text-navy-900"
+                    ? "bg-slate-900 text-white font-semibold"
+                    : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Heartbeat size={16} weight={activePage === "health" ? "bold" : "regular"} className={activePage === "health" ? "text-saffron-400" : "text-neutral-500"} />
-                  <span>Health Check</span>
-                </div>
+                <span>Health Check</span>
                 {activePage === "health" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-saffron-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </button>
             )}
@@ -478,18 +422,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => handleNavClick("history")}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                   activePage === "history"
-                    ? "bg-navy-900 text-white font-bold"
-                    : "text-neutral-700 hover:bg-neutral-100 hover:text-navy-900"
+                    ? "bg-slate-900 text-white font-semibold"
+                    : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Archive size={16} weight={activePage === "history" ? "bold" : "regular"} className={activePage === "history" ? "text-saffron-400" : "text-neutral-500"} />
-                  <span>My Scans</span>
-                </div>
+                <span>Archived Scans</span>
                 {activePage === "history" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-saffron-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </button>
             )}
@@ -498,18 +439,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => handleNavClick("inspections")}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                   activePage === "inspections"
-                    ? "bg-navy-900 text-white font-bold"
-                    : "text-neutral-700 hover:bg-neutral-100 hover:text-navy-900"
+                    ? "bg-slate-900 text-white font-semibold"
+                    : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <FileText size={16} weight={activePage === "inspections" ? "bold" : "regular"} className={activePage === "inspections" ? "text-saffron-400" : "text-neutral-500"} />
-                  <span>Inspection Ledger</span>
-                </div>
+                <span>Inspection Ledger</span>
                 {activePage === "inspections" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-saffron-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </button>
             )}
@@ -518,18 +456,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => handleNavClick("reports")}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                   activePage === "reports"
-                    ? "bg-navy-900 text-white font-bold"
-                    : "text-neutral-700 hover:bg-neutral-100 hover:text-navy-900"
+                    ? "bg-slate-900 text-white font-semibold"
+                    : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <DownloadSimple size={16} weight={activePage === "reports" ? "bold" : "regular"} className={activePage === "reports" ? "text-saffron-400" : "text-neutral-500"} />
-                  <span>Report Dockets</span>
-                </div>
+                <span>Reports &amp; Dockets</span>
                 {activePage === "reports" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-saffron-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </button>
             )}
@@ -540,29 +475,27 @@ export const Navbar: React.FC<NavbarProps> = ({
             variant="primary"
             size="md"
             onClick={() => handleNavClick("scanner")}
-            icon={<Scan size={16} weight="bold" />}
-            className="w-full bg-navy-900 hover:bg-navy-800 text-white font-semibold shadow-xs text-xs"
+            className="w-full text-xs font-medium"
           >
-            Scan Product Now
+            Scan Package Now
           </Button>
 
           {/* Mobile Auth and Status */}
-          <div className="pt-2 border-t border-neutral-200 flex items-center justify-between">
+          <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
             {isAuthenticated ? (
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="text-2xs font-mono font-medium text-neutral-700 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-2xs font-mono font-medium text-slate-700 truncate">
                     {user?.badgeNumber || user?.email || "Authorized"}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={logout}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-neutral-300 text-neutral-700 hover:bg-neutral-100 flex items-center gap-1.5"
+                  className="px-2.5 py-1 rounded-md text-xs font-medium border border-slate-200 text-slate-700 hover:bg-slate-100"
                 >
-                  <SignOut size={14} weight="bold" />
-                  <span>Sign Out</span>
+                  Sign Out
                 </button>
               </div>
             ) : (
@@ -572,10 +505,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setIsMobileMenuOpen(false);
                   if (onOpenAuthModal) onOpenAuthModal();
                 }}
-                className="w-full py-2 px-3 rounded-lg text-xs font-semibold border border-navy-200 bg-navy-50 text-navy-900 hover:bg-navy-100 flex items-center justify-center gap-2 shadow-2xs"
+                className="w-full py-2 px-3 rounded-md text-xs font-medium border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 text-center"
               >
-                <SignIn size={14} weight="bold" className="text-saffron-600" />
-                <span>Sign In to Statutory Portal</span>
+                Sign In to Portal
               </button>
             )}
           </div>
