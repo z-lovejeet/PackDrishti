@@ -1,7 +1,26 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.src.core.config import settings
 from backend.src.api.v1.router import api_router
+import logging
+
+logger = logging.getLogger("packdrashiti")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize database tables
+    try:
+        from backend.src.core.database import engine
+        from backend.src.models import Base
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables initialized successfully.")
+    except Exception as e:
+        logger.warning("Database table initialization notice: %s", e)
+    yield
+
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -10,6 +29,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
     docs_url=f"{settings.API_V1_STR}/docs" if settings.DEBUG else None,
     redoc_url=f"{settings.API_V1_STR}/redoc" if settings.DEBUG else None,
+    lifespan=lifespan,
 )
 
 from starlette.middleware.base import BaseHTTPMiddleware

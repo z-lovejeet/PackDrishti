@@ -11,148 +11,24 @@ import { NoticePreviewModal } from '../../components/officer/NoticePreviewModal'
 import { ViolationRecord } from '../../types';
 import { api } from '../../utils/apiClient';
 
-const DEFAULT_INSPECTION_RECORDS: ViolationRecord[] = [
-  {
-    id: 'viol-001',
-    violationCode: 'INSP-2026-DEL-049',
-    productName: 'VitaHealth Malted Nutrition Drink 500g',
-    brand: 'VitaHealth Consumer Foods Ltd.',
-    category: 'Food & Beverage',
-    ruleReference: 'Rule 6(1)(e)',
-    violationType: 'Missing Unit Sale Price (USP) on Principal Display Panel',
-    severity: 'high',
-    dateDetected: '10-Sep-2026',
-    status: 'Notice Issued',
-    assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-    location: 'Khari Baoli Wholesale Market, Old Delhi',
-    timeline: [
-      {
-        date: '10-Sep-2026 14:30 IST',
-        action: 'Statutory Field Notice Issued (FORM LM-INSP-2011)',
-        by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-        note: 'Physical inspection conducted at retail premises. Net quantity declaration verified (500g), but Unit Sale Price absent on PDP in contravention of Rule 6(1)(e).',
-      },
-      {
-        date: '10-Sep-2026 11:15 IST',
-        action: 'Digital Optical Scan Completed & Evidence Hashed',
-        by: 'Mobile Field Inspection Unit-1',
-        note: 'High-resolution PDP scan captured. SHA-256 evidence integrity token generated under Section 63 of BSA, 2023.',
-      },
-    ],
-  },
-  {
-    id: 'viol-002',
-    violationCode: 'INSP-2026-DEL-044',
-    productName: 'SunHarvest Cold Pressed Mustard Oil 1L',
-    brand: 'SunHarvest Agri Industries',
-    category: 'Edible Oils & Commodities',
-    ruleReference: 'Rule 7 Table-I',
-    violationType: 'Deficient Font Height for Volume Declaration (< 4.0mm)',
-    severity: 'medium',
-    dateDetected: '09-Sep-2026',
-    status: 'Under Review',
-    assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-    location: 'Daryaganj Retail Market, Central Delhi',
-    timeline: [
-      {
-        date: '09-Sep-2026 16:20 IST',
-        action: 'Formal Manufacturer Representation Received',
-        by: 'Legal Metrology Adjudication Desk',
-        note: 'Manufacturer submitted written response claiming batch was printed prior to latest notification amendment. Representation under review.',
-      },
-      {
-        date: '08-Sep-2026 13:40 IST',
-        action: 'Inspection Notice Dispatched to Manufacturer',
-        by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-        note: 'Font height optical measurement recorded at 2.4mm against statutory minimum requirement of 4.0mm for net volume exceeding 500ml.',
-      },
-    ],
-  },
-  {
-    id: 'viol-003',
-    violationCode: 'INSP-2026-DEL-038',
-    productName: 'PureGlow Herbal Skin Rejuvenation Cream 50g',
-    brand: 'Aura Botanicals India Pvt. Ltd.',
-    category: 'Personal Care & Cosmetics',
-    ruleReference: 'Rule 6(1)(d)',
-    violationType: 'MRP Format Non-Compliance & Dual Sticker Overwrite',
-    severity: 'high',
-    dateDetected: '08-Sep-2026',
-    status: 'Notice Issued',
-    assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-    location: 'Connaught Place Commercial Complex, New Delhi',
-    timeline: [
-      {
-        date: '08-Sep-2026 17:00 IST',
-        action: 'Show Cause Notice Served under Section 36(1)',
-        by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-        note: 'Original printed MRP of Rs. 299 overwritten with retail barcode sticker displaying Rs. 349 in violation of Rule 6(1)(d) and Rule 18(2).',
-      },
-      {
-        date: '08-Sep-2026 14:10 IST',
-        action: 'Seizure of Sample Specimens from Retail Shelf',
-        by: 'Central Enforcement Division Squad',
-        note: '3 retail packages seized under Section 15 of Legal Metrology Act, 2009 for evidentiary preservation.',
-      },
-    ],
-  },
-  {
-    id: 'viol-004',
-    violationCode: 'INSP-2026-DEL-031',
-    productName: 'Royal Feast Roasted Salted Cashews 250g',
-    brand: 'Himalayan Dry Fruits Emporium',
-    category: 'Food & Beverage',
-    ruleReference: 'Rule 6(1)(a)',
-    violationType: 'Incomplete Address of Packer / Missing Consumer Helpline',
-    severity: 'medium',
-    dateDetected: '07-Sep-2026',
-    status: 'Resolved',
-    assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-    location: 'Chandni Chowk Wholesale Market',
-    timeline: [
-      {
-        date: '07-Sep-2026 15:30 IST',
-        action: 'Compounding Order Executed under Section 48',
-        by: 'Controller of Legal Metrology, Delhi',
-        note: 'Compoundable fee of INR 15,000 deposited via e-Challan. Undertaking furnished by packer to recall and re-label non-compliant batch.',
-      },
-      {
-        date: '05-Sep-2026 11:00 IST',
-        action: 'Show Cause Notice Issued to Packer',
-        by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-        note: 'Failure to declare complete geographical address and consumer complaint redressal telephone number.',
-      },
-    ],
-  },
-  {
-    id: 'viol-005',
-    violationCode: 'INSP-2026-DEL-025',
-    productName: 'Crispo Multigrain Snack Pellets 120g',
-    brand: 'Apex Snacks & Confectionery',
-    category: 'Packaged Snacks',
-    ruleReference: 'Rule 9',
-    violationType: 'Low Color Contrast Between Text Declarations and Background',
-    severity: 'low',
-    dateDetected: '05-Sep-2026',
-    status: 'Resolved',
-    assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-    location: 'Karol Bagh Retail Bazaar',
-    timeline: [
-      {
-        date: '06-Sep-2026 12:00 IST',
-        action: 'Voluntary Rectification Accepted & Case Closed',
-        by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-        note: 'Manufacturer submitted revised high-contrast artwork compliant with Rule 9. No compounding penalty levied for first technical irregularity.',
-      },
-    ],
-  },
-];
+interface LedgerMetrics {
+  totalInspections: number;
+  certifiedCompliant: number;
+  infractionsFlagged: number;
+  compoundedClosed: number;
+}
 
 export const InspectionsPage: React.FC = () => {
-  const [records, setRecords] = useState<ViolationRecord[]>(DEFAULT_INSPECTION_RECORDS);
+  const [records, setRecords] = useState<ViolationRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [metrics, setMetrics] = useState<LedgerMetrics>({
+    totalInspections: 0,
+    certifiedCompliant: 0,
+    infractionsFlagged: 0,
+    compoundedClosed: 0,
+  });
   const [activeStatus, setActiveStatus] = useState<string>('All');
-  const [expandedId, setExpandedId] = useState<string | null>('viol-001');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCompoundingOpen, setIsCompoundingOpen] = useState(false);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
@@ -173,70 +49,93 @@ export const InspectionsPage: React.FC = () => {
     const fetchInspections = async () => {
       setLoading(true);
       try {
-        const res = await api.get<any>('/scan/history');
-        const historyList = Array.isArray(res) ? res : (res && res.history ? res.history : []);
+        const [historyRes, metricsRes] = await Promise.allSettled([
+          api.get<any>('/scan/history'),
+          api.get<any>('/dashboard/metrics'),
+        ]);
 
-        if (historyList && historyList.length > 0 && isMounted) {
-          const liveRecords: ViolationRecord[] = [];
-          historyList.forEach((h: any, hIdx: number) => {
-            if (h.violations && h.violations.length > 0) {
-              h.violations.forEach((v: any, vIdx: number) => {
+        if (metricsRes.status === 'fulfilled' && metricsRes.value && isMounted) {
+          const m = metricsRes.value;
+          setMetrics({
+            totalInspections: m.total_inspections || 0,
+            certifiedCompliant: m.compliant_count || 0,
+            infractionsFlagged: m.violations_recorded || 0,
+            compoundedClosed: m.compounded_closed || 0,
+          });
+        }
+
+        if (historyRes.status === 'fulfilled' && isMounted) {
+          const res = historyRes.value;
+          const historyList = Array.isArray(res) ? res : (res && res.history ? res.history : []);
+
+          if (historyList && historyList.length > 0) {
+            const liveRecords: ViolationRecord[] = [];
+            historyList.forEach((h: any, hIdx: number) => {
+              if (h.violations && h.violations.length > 0) {
+                h.violations.forEach((v: any, vIdx: number) => {
+                  liveRecords.push({
+                    id: v.violation_id || `live-${h.scan_id || hIdx}-${vIdx}`,
+                    violationCode: `INSP-2026-DEL-${String(hIdx * 10 + vIdx + 50).padStart(3, '0')}`,
+                    productName: h.product_name || 'Audited Packaging Specimen',
+                    brand: h.brand || h.brand_name || 'Inspected Brand',
+                    category: 'Packaged Commodity',
+                    ruleReference: v.rule_clause || 'Rule 6(1)',
+                    violationType: v.description || 'Statutory Non-Compliance',
+                    severity: v.severity || 'high',
+                    dateDetected: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
+                    status: 'Notice Issued',
+                    assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
+                    location: 'Delhi Enforcement Division',
+                    timeline: [
+                      {
+                        date: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleString() : '10-Sep-2026 14:00 IST',
+                        action: 'Statutory Non-Compliance Flagged via Field Optical Scan',
+                        by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
+                        note: v.description || 'Statutory infraction recorded under Legal Metrology Rules, 2011.',
+                      },
+                    ],
+                  });
+                });
+              } else if (h.compliance_status === 'violation') {
                 liveRecords.push({
-                  id: v.violation_id || `live-${h.scan_id || hIdx}-${vIdx}`,
-                  violationCode: `INSP-2026-DEL-${String(hIdx * 10 + vIdx + 50).padStart(3, '0')}`,
+                  id: `live-scan-${h.scan_id || hIdx}`,
+                  violationCode: `INSP-2026-DEL-${String(hIdx + 60).padStart(3, '0')}`,
                   productName: h.product_name || 'Audited Packaging Specimen',
-                  brand: h.brand || h.brand_name || 'Inspected Brand',
-                  category: 'Packaged Commodity',
-                  ruleReference: v.rule_clause || 'Rule 6(1)',
-                  violationType: v.description || 'Statutory Non-Compliance',
-                  severity: v.severity || 'high',
-                  dateDetected: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
+                  brand: h.brand_name || h.brand || 'Inspected Commodity',
+                  category: 'Pre-Packaged Commodity',
+                  ruleReference: 'Rule 6(1)(e)',
+                  violationType: 'Missing Mandatory Declaration / Unit Sale Price Defect',
+                  severity: 'high',
+                  dateDetected: h.created_at ? new Date(h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
                   status: 'Notice Issued',
                   assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-                  location: 'Delhi Enforcement Division',
+                  location: 'Central Delhi Market Division',
                   timeline: [
                     {
-                      date: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleString() : '10-Sep-2026 14:00 IST',
-                      action: 'Statutory Non-Compliance Flagged via Field Optical Scan',
+                      date: h.created_at ? new Date(h.created_at).toLocaleString() : 'Recent',
+                      action: 'Field Inspection Notice Drafted under Section 36(1)',
                       by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-                      note: v.description || 'Statutory infraction recorded under Legal Metrology Rules, 2011.',
+                      note: 'Non-compliant packaging sample logged into statutory ledger.',
                     },
                   ],
                 });
-              });
-            } else if (h.compliance_status === 'violation') {
-              liveRecords.push({
-                id: `live-scan-${h.scan_id || hIdx}`,
-                violationCode: `INSP-2026-DEL-${String(hIdx + 60).padStart(3, '0')}`,
-                productName: h.product_name || 'Audited Packaging Specimen',
-                brand: h.brand_name || h.brand || 'Inspected Commodity',
-                category: 'Pre-Packaged Commodity',
-                ruleReference: 'Rule 6(1)(e)',
-                violationType: 'Missing Mandatory Declaration / Unit Sale Price Defect',
-                severity: 'high',
-                dateDetected: h.created_at ? new Date(h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
-                status: 'Notice Issued',
-                assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-                location: 'Central Delhi Market Division',
-                timeline: [
-                  {
-                    date: h.created_at ? new Date(h.created_at).toLocaleString() : 'Recent',
-                    action: 'Field Inspection Notice Drafted under Section 36(1)',
-                    by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-                    note: 'Non-compliant packaging sample logged into statutory ledger.',
-                  },
-                ],
-              });
-            }
-          });
+              }
+            });
 
-          if (liveRecords.length > 0) {
-            setRecords([...liveRecords, ...DEFAULT_INSPECTION_RECORDS]);
-            setExpandedId(liveRecords[0].id);
+            setRecords(liveRecords);
+            if (liveRecords.length > 0) {
+              setExpandedId(liveRecords[0].id);
+            }
+          } else {
+            setRecords([]);
+            setExpandedId(null);
           }
         }
       } catch {
-        // Retain verified default ledger
+        if (isMounted) {
+          setRecords([]);
+          setExpandedId(null);
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -353,23 +252,33 @@ export const InspectionsPage: React.FC = () => {
           <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
             Total Inspections
           </span>
-          <div className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1">1,247</div>
-          <p className="text-2xs text-slate-500 mt-0.5">86 wholesale &amp; retail mandis</p>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1">
+            {metrics.totalInspections.toLocaleString()}
+          </div>
+          <p className="text-2xs text-slate-500 mt-0.5">Central register telemetry</p>
         </div>
 
         <div>
           <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
             Certified Compliant
           </span>
-          <div className="text-2xl sm:text-3xl font-bold font-heading text-emerald-700 mt-1">834</div>
-          <p className="text-2xs text-slate-500 mt-0.5">66.9% statutory conformity</p>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-emerald-700 mt-1">
+            {metrics.certifiedCompliant.toLocaleString()}
+          </div>
+          <p className="text-2xs text-slate-500 mt-0.5">
+            {metrics.totalInspections > 0
+              ? `${((metrics.certifiedCompliant / metrics.totalInspections) * 100).toFixed(1)}% statutory conformity`
+              : 'Zero non-compliance verified'}
+          </p>
         </div>
 
         <div>
           <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
             Infractions Flagged
           </span>
-          <div className="text-2xl sm:text-3xl font-bold font-heading text-rose-700 mt-1">413</div>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-rose-700 mt-1">
+            {metrics.infractionsFlagged.toLocaleString()}
+          </div>
           <p className="text-2xs text-slate-500 mt-0.5">Section 36(1) show-cause slated</p>
         </div>
 
@@ -377,7 +286,9 @@ export const InspectionsPage: React.FC = () => {
           <span className="text-2xs font-mono font-medium text-slate-500 uppercase tracking-wider block">
             Compounded &amp; Closed
           </span>
-          <div className="text-2xl sm:text-3xl font-bold font-heading text-amber-700 mt-1">290</div>
+          <div className="text-2xl sm:text-3xl font-bold font-heading text-amber-700 mt-1">
+            {metrics.compoundedClosed.toLocaleString()}
+          </div>
           <p className="text-2xs text-slate-500 mt-0.5">Section 48 compounding orders</p>
         </div>
       </div>
@@ -609,22 +520,26 @@ export const InspectionsPage: React.FC = () => {
         {filteredRecords.length === 0 && !loading && (
           <div className="p-12 text-center space-y-3">
             <p className="text-sm font-semibold text-slate-900">
-              No inspection records found
+              {records.length === 0 ? "Statutory Register Empty" : "No inspection records found"}
             </p>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              No dockets match &quot;{searchTerm}&quot; under status &quot;{activeStatus}&quot;.
+            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+              {records.length === 0
+                ? "No field inspection dockets or statutory notices have been recorded yet. Audits performed via the Inspection Station will automatically appear in this ledger."
+                : `No dockets match "${searchTerm}" under status "${activeStatus}".`}
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearchTerm('');
-                setActiveStatus('All');
-              }}
-              className="text-xs"
-            >
-              Reset Filters
-            </Button>
+            {records.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setActiveStatus('All');
+                }}
+                className="text-xs"
+              >
+                Reset Filters
+              </Button>
+            )}
           </div>
         )}
       </div>

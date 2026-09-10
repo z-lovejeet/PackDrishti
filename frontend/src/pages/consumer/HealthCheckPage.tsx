@@ -32,142 +32,6 @@ import { ProductHealthAudit } from '../../types';
 import { apiClient } from '../../utils/apiClient';
 import { downsampleImage, blobToFile } from '../../utils/imageProc';
 
-// Sample Benchmark Specimen for Instant Demo / Testing
-const SAMPLE_DEMO_AUDIT: ProductHealthAudit = {
-  id: 'DEMO-HEALTH-2026',
-  commodityName: 'Masala Instant Noodles with Tastemaker',
-  brandName: 'QuickBite Foods',
-  category: 'Ultra-Processed Packaged Food',
-  servingSize: '70 g (1 Single-Pack)',
-  netQuantity: '70 g',
-  mrp: 'Rs. 15.00',
-  pricePer100g: 'Rs. 21.43 per 100g',
-  priceRating: 'Fair Market Rate',
-  priceAnalysis: 'Statutory Unit Sale Price of Rs. 21.43/100g complies with Legal Metrology Rule 6(11). Budget market segment tier.',
-  overallRating: 'High Health Concern',
-  ratingScore: 24,
-  frontImageUrl: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=600&q=80',
-  backImageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80',
-  badges: [
-    { label: 'High Palm Oil', type: 'danger', description: 'Deep-fried in industrial refined palm olein' },
-    { label: 'High Sodium', type: 'danger', description: '1,640mg per 100g (82% of ICMR daily allowance)' },
-    { label: 'High Saturated Fat', type: 'danger', description: '12.8g saturated fat per 100g exceeds safe daily intake' },
-    { label: 'High Calories', type: 'warning', description: '468 kcal per 100g of empty carbohydrate calories' },
-    { label: 'Ultra-Processed (UPF)', type: 'danger', description: 'NOVA Group 4 industrial formulation' }
-  ],
-  nutrients: [
-    {
-      name: 'Energy / Calories',
-      valuePer100g: 468,
-      valuePerServe: 327.6,
-      unit: 'kcal',
-      icmrDailyLimit: '2000 kcal',
-      level: 'High',
-      assessment: 'High caloric density derived primarily from refined starch and palm oil.'
-    },
-    {
-      name: 'Added Sugars',
-      valuePer100g: 2.8,
-      valuePerServe: 1.96,
-      unit: 'g',
-      icmrDailyLimit: '25 g',
-      level: 'Low',
-      assessment: 'Within acceptable range, but tastemaker contains hidden maltodextrin.'
-    },
-    {
-      name: 'Total Sodium',
-      valuePer100g: 1640,
-      valuePerServe: 1148,
-      unit: 'mg',
-      icmrDailyLimit: '2000 mg',
-      level: 'Excessive',
-      assessment: '1148mg per single serve delivers 57.4% of total daily safe sodium limit.'
-    },
-    {
-      name: 'Saturated Fatty Acids',
-      valuePer100g: 12.8,
-      valuePerServe: 8.96,
-      unit: 'g',
-      icmrDailyLimit: '15 g',
-      level: 'Excessive',
-      assessment: 'Exceeds recommended per-meal threshold due to flash-frying in palm olein.'
-    },
-    {
-      name: 'Total Dietary Fiber',
-      valuePer100g: 1.8,
-      valuePerServe: 1.26,
-      unit: 'g',
-      icmrDailyLimit: '30 g',
-      level: 'Low',
-      assessment: 'Extremely deficient in dietary fiber due to refined wheat flour (maida).'
-    },
-    {
-      name: 'Protein',
-      valuePer100g: 7.2,
-      valuePerServe: 5.04,
-      unit: 'g',
-      icmrDailyLimit: '50 g',
-      level: 'Moderate',
-      assessment: 'Incomplete grain protein lacking essential amino acids (lysine).'
-    }
-  ],
-  shouldWeEatIt: 'Do NOT consume regularly. Strictly limit to rare occasional indulgence (maximum once a month) or avoid entirely if managing cardiovascular or metabolic conditions.',
-  howBadIsIt: 'This product is an ultra-processed food formulation (NOVA 4) dominated by refined wheat flour (Maida) deep-fried in 100% palm oil. A single 70g serving exposes the consumer to 57% of daily sodium and 60% of saturated fat thresholds with zero protective micronutrients or fiber.',
-  notEatableForAge: [
-    'Children under 5 years: Strictly contraindicated. Immature pediatric kidneys cannot process 1,148mg of sodium per serving, increasing risk of renal hyperfiltration and childhood blood pressure elevation.',
-    'Children & Adolescents (5-16 years): Strongly discouraged. High glycemic load combined with synthetic flavor enhancers promotes dopamine spikes, food addiction, and pediatric obesity.',
-    'Seniors over 60 years: Avoid. Rapid blood pressure elevation and arterial stiffness caused by high sodium and palmitic acid.'
-  ],
-  healthProblemsIfEatenMore: [
-    'Arterial Plaque & Hypertension: 1,640mg/100g sodium triggers vascular fluid retention, while high palmitic acid from palm oil accelerates LDL cholesterol oxidation and coronary plaque deposition.',
-    'Insulin Resistance & Type-2 Diabetes: Stripped refined carbohydrates induce steep postprandial glucose spikes followed by reactive hypoglycemia and chronic hyperinsulinemia.',
-    'Non-Alcoholic Fatty Liver Disease (NAFLD): Excess refined calories and saturated fats are shunted directly to the liver, driving hepatic de novo lipogenesis.',
-    'Gut Microbiome Disruption: Zero soluble fiber and chemical additives (stabilizers, MSG, artificial colorants) degrade protective intestinal mucosal barrier.'
-  ],
-  hasPalmOil: true,
-  palmOilDetails: 'Packaging ingredients list confirms Refined Palm Olein as the primary cooking medium. Palm olein contains 45-50% saturated palmitic acid, proven to trigger hepatic LDL synthesis and vascular endothelial dysfunction when heated repeatedly in industrial processing.',
-  hasAddedSugar: false,
-  addedSugarDetails: 'Low declared sucrose, but contains maltodextrin and hydrolysed vegetable protein.',
-  hasHighSodium: true,
-  hasArtificialAdditives: true,
-  ingredientsList: [
-    'Refined Wheat Flour (Maida)',
-    'Palm Oil (Palm Olein)',
-    'Iodised Salt',
-    'Wheat Gluten',
-    'Thickeners (INS 508, INS 412)',
-    'Acidity Regulators (INS 501(i), INS 500(i))',
-    'Humectant (INS 451(i))',
-    'Tastemaker: Hydrolysed Peanut Protein',
-    'Mixed Spices (Dehydrated Onion, Red Chilli Powder, Turmeric, Garlic Powder)',
-    'Noodle Powder',
-    'Sugar',
-    'Flavor Enhancer (INS 621 - Monosodium Glutamate)',
-    'Caramel Color (INS 150d)'
-  ],
-  flaggedIngredients: [
-    { name: 'Palm Oil (Palm Olein)', reason: 'Dense source of atherogenic saturated palmitic acid (45-50%).' },
-    { name: 'Monosodium Glutamate (INS 621)', reason: 'Excitotoxic flavor enhancer masking high sodium and poor nutritional density.' },
-    { name: 'Acidity Regulators (INS 501(i), 500(i))', reason: 'Synthetic alkaline carbonates used to texturize refined wheat gluten.' },
-    { name: 'Caramel Color (INS 150d)', reason: 'Class IV caramel manufactured with ammonia and sulfites.' }
-  ],
-  whoCanConsume: [
-    'Occasional consumption by active, healthy adults with normal blood pressure and no metabolic disorders.'
-  ],
-  whoShouldAvoid: [
-    'Hypertensive patients (extreme sodium causes immediate BP spikes).',
-    'Pre-diabetic and Type-2 diabetic individuals (acute glycemic index spike).',
-    'Patients with CAD, high LDL-C, or hypercholesterolemia (palm oil saturated fat).',
-    'Toddlers and young children under 10 years.'
-  ],
-  healthierAlternatives: [
-    'Whole Wheat or Foxtail Millet Khichdi with vegetables (rich in fiber, zero palm oil, balanced sodium).',
-    'Steamed Sprouted Moong Chaat with lemon and fresh herbs (high protein, zero saturated fat).',
-    'Oats or Ragi Upma cooked in cold-pressed mustard or groundnut oil.'
-  ],
-  dietarySummary: 'Audited against ICMR-NIN 2024 Dietary Guidelines. Classified as an Ultra-Processed Food (UPF) with excessive sodium and saturated fatty acids.'
-};
-
 export const HealthCheckPage: React.FC = () => {
   // Dual Image Upload States
   const [frontImageSrc, setFrontImageSrc] = useState<string | null>(null);
@@ -198,7 +62,7 @@ export const HealthCheckPage: React.FC = () => {
   const backCamRef = useRef<HTMLInputElement>(null);
   const unifiedFileRef = useRef<HTMLInputElement>(null);
 
-  // Active Audit Data Resolution: strictly live audit result or sample demo
+  // Active Audit Data Resolution: strictly live real-time audit result
   const currentAudit: ProductHealthAudit | null = liveAuditResult;
 
   const handleFrontFile = (file: File) => {
@@ -252,14 +116,6 @@ export const HealthCheckPage: React.FC = () => {
     }
   };
 
-  const handleLoadDemo = () => {
-    handleResetUploads();
-    setLiveAuditResult(SAMPLE_DEMO_AUDIT);
-    setFrontImageSrc(SAMPLE_DEMO_AUDIT.frontImageUrl);
-    setBackImageSrc(SAMPLE_DEMO_AUDIT.backImageUrl);
-    setFrontFileName('instant_noodles_front.jpg');
-    setBackFileName('instant_noodles_back_nutrients.jpg');
-  };
 
   const runDualScanAudit = async () => {
     setIsAnalyzing(true);
@@ -503,13 +359,6 @@ export const HealthCheckPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleLoadDemo}
-              className="text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded border border-slate-200 transition-colors"
-            >
-              Load Benchmark
-            </button>
             <div className="text-2xs font-mono font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded border border-neutral-200">
               {frontImageSrc && backImageSrc ? '2/2 Panels Ready' : frontImageSrc || backImageSrc ? '1/2 Panels Ready' : '0/2 Panels Ready'}
             </div>
@@ -1170,18 +1019,8 @@ export const HealthCheckPage: React.FC = () => {
               Ready for Multimodal Health &amp; Nutrition Verification
             </h3>
             <p className="text-xs text-neutral-500 max-w-lg mx-auto leading-relaxed">
-              Upload photographs of both Front brand packaging and Rear nutrition facts table above, or click below to inspect a benchmark specimen.
+              Upload photographs of both Front brand packaging and Rear nutrition facts table above to initiate autonomous multimodal health verification.
             </p>
-            <div className="pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLoadDemo}
-                icon={<Sparkle size={14} weight="bold" />}
-              >
-                Inspect Sample Specimen (Instant Noodles with Palm Oil)
-              </Button>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-2 text-left">

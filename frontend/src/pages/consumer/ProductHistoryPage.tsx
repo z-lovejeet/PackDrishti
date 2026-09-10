@@ -36,100 +36,6 @@ interface ApiHistoryRecord {
   created_at: string | null;
 }
 
-// Fallback demonstration dataset representing typical Indian pre-packaged commodities
-const DEMO_SAMPLE_ITEMS: ScanHistoryItem[] = [
-  {
-    id: "demo-scan-01",
-    scanCode: "LMPC-2024-8841",
-    productName: "Fortune Sunlite Refined Sunflower Oil 1L",
-    brand: "Fortune (Adani Wilmar Ltd)",
-    category: "Edible Oils & Fats",
-    scanDate: "10 Sep 2026",
-    scanType: "label_compliance",
-    status: "compliant",
-    declaredMrp: "INR 145.00",
-    thumbnailUrl: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&q=80",
-    summaryNote: "Full statutory compliance verified under Legal Metrology Rules 2011. Mandatory manufacturer address with PIN (380009), standard SI metric unit (L), and Rule 7 Table-I font cap-height (4.2mm) verified.",
-    violationsCount: 0,
-    healthScore: 96,
-  },
-  {
-    id: "demo-scan-02",
-    scanCode: "LMPC-2024-8912",
-    productName: "Tata Salt Lite 1kg",
-    brand: "Tata Consumer Products",
-    category: "Salt & Spices",
-    scanDate: "09 Sep 2026",
-    scanType: "label_compliance",
-    status: "compliant",
-    declaredMrp: "INR 42.00",
-    thumbnailUrl: "https://images.unsplash.com/photo-1518110903495-cd79e122680a?w=400&q=80",
-    summaryNote: "Rule 6 declarations compliant. 15% low sodium formulation aligns with ICMR-NIN 2024 dietary guidelines. Consumer care contacts and manufacturing batch fully declared.",
-    violationsCount: 0,
-    healthScore: 94,
-  },
-  {
-    id: "demo-scan-03",
-    scanCode: "LMPC-2024-9023",
-    productName: "SweetCrunch Choco Butter Biscuits 200g",
-    brand: "Delight Bakers India",
-    category: "Bakery & Confectionery",
-    scanDate: "08 Sep 2026",
-    scanType: "label_compliance",
-    status: "violation",
-    declaredMrp: "INR 60.00",
-    thumbnailUrl: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&q=80",
-    summaryNote: "Non-compliant under Rule 6(1)(e) Proviso: Missing mandatory Unit Sale Price (USP in INR/g). Added sugar content (34.2g/100g) exceeds ICMR-NIN 2024 maximum dietary threshold.",
-    violationsCount: 2,
-    healthScore: 48,
-  },
-  {
-    id: "demo-scan-04",
-    scanCode: "LMPC-2024-9184",
-    productName: "Amul Taaza Homogenised Toned Milk 1L",
-    brand: "Amul (GCMMF Ltd)",
-    category: "Dairy Products",
-    scanDate: "07 Sep 2026",
-    scanType: "consumer_health",
-    status: "healthy",
-    declaredMrp: "INR 56.00",
-    thumbnailUrl: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80",
-    summaryNote: "Excellent compliance across all 11 mandatory declarations. Standard SI metric unit symbol verified. Balanced nutritional profile under ICMR-NIN 2024 dietary norms.",
-    violationsCount: 0,
-    healthScore: 98,
-  },
-  {
-    id: "demo-scan-05",
-    scanCode: "LMPC-2024-9247",
-    productName: "Royal Feast Premium Basmati Rice 5kg",
-    brand: "Royal Agro Packagers",
-    category: "Grains & Pulses",
-    scanDate: "06 Sep 2026",
-    scanType: "label_compliance",
-    status: "violation",
-    declaredMrp: "INR 495.00",
-    thumbnailUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80",
-    summaryNote: "Statutory infraction under Rule 7 Table-I: Net quantity numeral cap-height measured at 2.8mm, failing the mandatory 4.0mm minimum threshold for PDP area > 500 cm2. Subject to Section 36(1) compounding.",
-    violationsCount: 1,
-    healthScore: 52,
-  },
-  {
-    id: "demo-scan-06",
-    scanCode: "LMPC-2024-9331",
-    productName: "Himalayan Natural Multifloral Honey 500g",
-    brand: "Himalayan Nectar Corp",
-    category: "Honey & Natural Sweeteners",
-    scanDate: "05 Sep 2026",
-    scanType: "label_compliance",
-    status: "compliant",
-    declaredMrp: "INR 280.00",
-    thumbnailUrl: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&q=80",
-    summaryNote: "Full compliance with Rule 6 declarations and FSSAI honey standards. Origin district declared, standard SI units verified, FOP font heights compliant.",
-    violationsCount: 0,
-    healthScore: 92,
-  },
-];
-
 export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
   onNavigateToScanner,
   onNavigateToHealth,
@@ -166,8 +72,7 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
             scanType: "label_compliance",
             status: isCompliant ? "compliant" : "violation",
             declaredMrp: record.mrp ? `INR ${record.mrp.toFixed(2)}` : "Declared on Package",
-            thumbnailUrl:
-              "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
+            thumbnailUrl: "",
             summaryNote: isCompliant
               ? "Full statutory compliance verified under Legal Metrology (Packaged Commodities) Rules 2011."
               : "Statutory infractions detected during automated optical verification under Section 36(1).",
@@ -178,13 +83,11 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
         setHistoryItems(mappedItems);
         setIsLiveSource(true);
       } else {
-        // Fallback to rich demo records if live database is empty
-        setHistoryItems(DEMO_SAMPLE_ITEMS);
-        setIsLiveSource(false);
+        setHistoryItems([]);
+        setIsLiveSource(true);
       }
     } catch {
-      // Fallback to demo sample items if network or backend is offline
-      setHistoryItems(DEMO_SAMPLE_ITEMS);
+      setHistoryItems([]);
       setIsLiveSource(false);
     } finally {
       setIsLoading(false);
@@ -622,40 +525,50 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
       {filteredItems.length === 0 && (
         <div className="bg-white rounded-card border border-neutral-200 p-8 sm:p-12 text-center space-y-4 shadow-card">
           <div className="w-16 h-16 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-400 flex items-center justify-center mx-auto">
-            <MagnifyingGlass size={32} weight="light" />
+            {historyItems.length === 0 ? (
+              <Archive size={32} weight="light" />
+            ) : (
+              <MagnifyingGlass size={32} weight="light" />
+            )}
           </div>
 
           <div className="space-y-1 max-w-md mx-auto">
             <h3 className="text-base font-bold text-neutral-900 font-heading">
-              No Commodities Match Your Search Criteria
+              {historyItems.length === 0
+                ? "No Inspection Scans Recorded Yet"
+                : "No Commodities Match Your Search Criteria"}
             </h3>
             <p className="text-xs text-neutral-600 leading-relaxed">
-              No commodities in the compliance repository match your query &quot;{searchTerm}&quot; under the selected filter scope.
+              {historyItems.length === 0
+                ? "Perform an optical inspection scan or nutrition audit to archive packages in this registry."
+                : `No commodities in the compliance repository match your query "${searchTerm}" under the selected filter scope.`}
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-3 pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearchTerm("");
-                setStatusFilter("all");
-                setScanTypeFilter("all");
-              }}
-              className="text-2xs"
-            >
-              Clear All Filters
-            </Button>
+            {historyItems.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStatusFilter("all");
+                  setScanTypeFilter("all");
+                }}
+                className="text-2xs"
+              >
+                Clear All Filters
+              </Button>
+            )}
 
             <Button
               variant="primary"
               size="sm"
               onClick={onNavigateToScanner}
-              className="text-2xs"
+              className="text-2xs font-semibold"
               icon={<Scan size={15} />}
             >
-              Scan New Product
+              Scan Package Now
             </Button>
           </div>
         </div>

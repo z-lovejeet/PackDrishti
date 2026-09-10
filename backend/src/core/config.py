@@ -31,10 +31,7 @@ class Settings(BaseSettings):
     SUPABASE_SERVICE_ROLE_KEY: str = ""
     SUPABASE_JWT_SECRET: str = "4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650"
 
-    # Direct PostgreSQL / Supabase pooler connection string for SQLAlchemy & Alembic
-    DATABASE_URL: str = (
-        "postgresql://packdrashiti_user:packdrashiti_pass@localhost:5432/packdrashiti_db"
-    )
+    DATABASE_URL: str = "sqlite+aiosqlite:///./packdrashiti.db"
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
     DATABASE_POOL_TIMEOUT: int = 30

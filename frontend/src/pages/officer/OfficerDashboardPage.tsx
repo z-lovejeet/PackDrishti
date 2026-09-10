@@ -28,96 +28,15 @@ const DEFAULT_OFFICER_PROFILE: OfficerProfile = {
   jurisdiction: "Delhi NCT",
 };
 
-const DEFAULT_VIOLATIONS: ViolationCategoryBreakdown[] = [
-  {
-    ruleClause: "Rule 6(1)(e)",
-    categoryTitle: "Missing / Erroneous Unit Sale Price (USP)",
-    actSection: "Section 36(1)",
-    count: 142,
-    percentage: 34.4,
-  },
-  {
-    ruleClause: "Rule 7 Table-I",
-    categoryTitle: "Deficient Font Height on Principal Display Panel",
-    actSection: "Section 36(1)",
-    count: 118,
-    percentage: 28.6,
-  },
-  {
-    ruleClause: "Rule 6(1)(d)",
-    categoryTitle: "MRP Format / Dual MRP Non-Compliance",
-    actSection: "Section 36(1)",
-    count: 87,
-    percentage: 21.1,
-  },
-  {
-    ruleClause: "Rule 9",
-    categoryTitle: "Inadequate Color Contrast on Mandatory Declarations",
-    actSection: "Section 39",
-    count: 41,
-    percentage: 9.9,
-  },
-  {
-    ruleClause: "Rule 6(1)(b)",
-    categoryTitle: "Non-Standard Measurement Units (Non-SI Standard)",
-    actSection: "Section 36(1)",
-    count: 25,
-    percentage: 6.0,
-  },
-];
-
 const INITIAL_METRICS: DashboardMetrics = {
-  totalInspections: 1247,
-  compliantCount: 834,
-  violationCount: 413,
-  compoundedCount: 290,
-  totalFinesLeviedInr: 4275000,
-  monthlyScansDelta: 14.2,
-  complianceRate: 66.9,
+  totalInspections: 0,
+  compliantCount: 0,
+  violationCount: 0,
+  compoundedCount: 0,
+  totalFinesLeviedInr: 0,
+  monthlyScansDelta: 0,
+  complianceRate: 0,
 };
-
-const DEFAULT_ACTIONS: EnforcementActionItem[] = [
-  {
-    id: "act-01",
-    caseRef: "INSP-2026-DEL-049",
-    productName: "VitaHealth Malted Nutrition Drink 500g",
-    actionType: "Show Cause Notice",
-    statutoryClause: "Rule 6(1)(e) & Sec 36(1)",
-    timestamp: "10-Sep-2026 14:30 IST",
-    targetEstablishment: "Khari Baoli Wholesale Market, Old Delhi",
-    status: "Pending Hearing",
-  },
-  {
-    id: "act-02",
-    caseRef: "INSP-2026-DEL-044",
-    productName: "SunHarvest Cold Pressed Mustard Oil 1L",
-    actionType: "Compounding Order",
-    statutoryClause: "Rule 7 Table-I & Sec 48",
-    timestamp: "10-Sep-2026 11:15 IST",
-    targetEstablishment: "Daryaganj Supermarket, Delhi",
-    status: "Settled",
-  },
-  {
-    id: "act-03",
-    caseRef: "INSP-2026-DEL-038",
-    productName: "Supreme Pure Basmati Rice 5kg",
-    actionType: "Cured & Dismissed",
-    statutoryClause: "Rule 6(1)(d) Rectification",
-    timestamp: "09-Sep-2026 16:45 IST",
-    targetEstablishment: "Chandni Chowk Retail Traders Association",
-    status: "Settled",
-  },
-  {
-    id: "act-04",
-    caseRef: "INSP-2026-DEL-032",
-    productName: "Herbal Glow Ayurvedic Face Wash 150ml",
-    actionType: "Seizure Memo",
-    statutoryClause: "Rule 6(1)(a) & Sec 15",
-    timestamp: "09-Sep-2026 12:20 IST",
-    targetEstablishment: "Connaught Place Super Store",
-    status: "Issued",
-  },
-];
 
 interface OfficerDashboardPageProps {
   onNavigate: (page: string) => void;
@@ -139,8 +58,8 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
   } | null>(null);
 
   const [metrics, setMetrics] = useState<DashboardMetrics>(INITIAL_METRICS);
-  const [actions, setActions] = useState<EnforcementActionItem[]>(DEFAULT_ACTIONS);
-  const [violations] = useState<ViolationCategoryBreakdown[]>(DEFAULT_VIOLATIONS);
+  const [actions, setActions] = useState<EnforcementActionItem[]>([]);
+  const [violations, setViolations] = useState<ViolationCategoryBreakdown[]>([]);
   const [officer] = useState<OfficerProfile>(DEFAULT_OFFICER_PROFILE);
 
   useEffect(() => {
@@ -149,37 +68,58 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
         const res = await api.get<any>("/dashboard/metrics");
         if (res) {
           setMetrics({
-            totalInspections: res.total_inspections ?? res.totalInspections ?? INITIAL_METRICS.totalInspections,
-            compliantCount: res.compliant_count ?? res.compliantCount ?? INITIAL_METRICS.compliantCount,
-            violationCount: res.violations_recorded ?? res.violationCount ?? INITIAL_METRICS.violationCount,
-            compoundedCount: res.compounded_closed ?? res.compoundedCount ?? INITIAL_METRICS.compoundedCount,
-            complianceRate: res.compliance_rate ?? res.complianceRate ?? INITIAL_METRICS.complianceRate,
-            totalFinesLeviedInr: res.total_compounding_assessed_inr ?? res.totalFinesLeviedInr ?? INITIAL_METRICS.totalFinesLeviedInr,
-            monthlyScansDelta: res.monthly_scans_delta ?? res.monthlyScansDelta ?? INITIAL_METRICS.monthlyScansDelta,
+            totalInspections: res.total_inspections ?? 0,
+            compliantCount: res.compliant_count ?? 0,
+            violationCount: res.violations_recorded ?? 0,
+            compoundedCount: res.compounded_closed ?? 0,
+            complianceRate: res.compliance_rate ?? 0,
+            totalFinesLeviedInr: res.total_compounding_assessed_inr ?? 0,
+            monthlyScansDelta: res.monthly_scans_delta ?? 0,
           });
+
+          if (res.top_violating_rules && Array.isArray(res.top_violating_rules) && res.top_violating_rules.length > 0) {
+            const totalViols = res.violations_recorded || 1;
+            setViolations(
+              res.top_violating_rules.map((r: any) => ({
+                ruleClause: r.rule || "Rule 6",
+                categoryTitle: r.title || "Statutory Non-Compliance",
+                actSection: "Section 36(1)",
+                count: r.count || 0,
+                percentage: Number(((r.count / totalViols) * 100).toFixed(1)),
+              }))
+            );
+          } else {
+            setViolations([]);
+          }
         }
       } catch {
-        // Keeps graceful defaults
+        // Real empty state retained
       }
 
       try {
         const actRes = await api.get<any>("/dashboard/activity");
-        const list = Array.isArray(actRes) ? actRes : (actRes?.activities ?? []);
-        if (list && list.length > 0) {
-          setActions(list.map((a: any) => ({
-            id: a.id || a.docket_number || `ACT-${Math.random()}`,
-            caseRef: a.docket_number || a.caseRef || "INSP-DEL-001",
-            productName: a.product_name || a.productName || "Packaged Commodity",
-            actionType: (a.action || a.actionType || "Show Cause Notice") as EnforcementActionItem["actionType"],
-            statutoryClause: a.statutory_clause || a.statutoryClause || "Rule 6(1)",
-            timestamp: a.timestamp || "Recent",
-            targetEstablishment: a.location || a.targetEstablishment || "Retail Market",
-            status: (a.status || "Pending Hearing") as EnforcementActionItem["status"],
-            fineAmountInr: a.fine_amount_inr ?? a.fineAmountInr,
-          })));
+        if (actRes) {
+          const list = Array.isArray(actRes) ? actRes : (actRes?.activities ?? []);
+          if (list && list.length > 0) {
+            setActions(
+              list.map((a: any) => ({
+                id: a.id || a.docket_number || `ACT-${Math.random()}`,
+                caseRef: a.docket_number || a.caseRef || "INSP-DEL-001",
+                productName: a.product_name || a.productName || "Packaged Commodity",
+                actionType: (a.action || a.actionType || "Show Cause Notice") as EnforcementActionItem["actionType"],
+                statutoryClause: a.statutory_clause || a.statutoryClause || "LMPCR 2011",
+                timestamp: a.timestamp || "Recent",
+                targetEstablishment: a.location || a.targetEstablishment || "Retail Market",
+                status: (a.status || "Pending Hearing") as EnforcementActionItem["status"],
+                fineAmountInr: a.fine_amount_inr ?? a.fineAmountInr,
+              }))
+            );
+          } else {
+            setActions([]);
+          }
         }
       } catch {
-        // Keeps graceful defaults
+        // Real empty state retained
       }
     };
 
@@ -187,12 +127,13 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
   }, []);
 
   const handleOpenNotice = (item?: EnforcementActionItem) => {
+    if (!item) return;
     setSelectedNoticeItem({
-      scanId: item?.caseRef || "INSP-2026-DEL-049",
-      productName: item?.productName || "VitaHealth Malted Nutrition Drink 500g",
-      brand: "VitaHealth Nutrition",
-      mrp: "320.00",
-      netQty: "500 g",
+      scanId: item.caseRef,
+      productName: item.productName,
+      brand: "Packaged Commodity",
+      mrp: item.fineAmountInr ? `Rs. ${item.fineAmountInr}` : "Declared on Package",
+      netQty: "Standard Size",
     });
     setIsNoticeOpen(true);
   };
@@ -379,39 +320,45 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
               </button>
             </div>
 
-            <div className="divide-y divide-slate-100">
-              {actions.map((act) => (
-                <div key={act.id} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-2xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">
-                        {act.caseRef}
-                      </span>
-                      <span className="text-xs font-medium text-slate-500">
-                        {act.actionType}
-                      </span>
+            {actions.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-500">
+                No enforcement notices or compounding actions logged yet. Inspections conducted via the scanner will appear here.
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {actions.map((act) => (
+                  <div key={act.id} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-2xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">
+                          {act.caseRef}
+                        </span>
+                        <span className="text-xs font-medium text-slate-500">
+                          {act.actionType}
+                        </span>
+                      </div>
+                      <div className="text-xs font-bold text-slate-900">
+                        {act.productName}
+                      </div>
+                      <div className="text-2xs text-slate-500">
+                        {act.targetEstablishment} • {act.statutoryClause}
+                      </div>
                     </div>
-                    <div className="text-xs font-bold text-slate-900">
-                      {act.productName}
-                    </div>
-                    <div className="text-2xs text-slate-500">
-                      {act.targetEstablishment} • {act.statutoryClause}
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-2xs font-mono text-slate-400">{act.timestamp}</span>
-                    <button
-                      onClick={() => handleOpenNotice(act)}
-                      className="text-xs text-slate-700 hover:text-slate-950 p-1.5 rounded hover:bg-slate-100"
-                      title="Inspect Notice"
-                    >
-                      <ArrowSquareOut size={16} />
-                    </button>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-2xs font-mono text-slate-400">{act.timestamp}</span>
+                      <button
+                        onClick={() => handleOpenNotice(act)}
+                        className="text-xs text-slate-700 hover:text-slate-950 p-1.5 rounded hover:bg-slate-100"
+                        title="Inspect Notice"
+                      >
+                        <ArrowSquareOut size={16} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
           </div>
 
@@ -439,25 +386,33 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {violations.map((v) => (
-                    <tr key={v.ruleClause} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-4 px-5 font-mono font-bold text-slate-900">
-                        {v.ruleClause}
-                      </td>
-                      <td className="py-4 px-5 text-slate-700 font-medium">
-                        {v.categoryTitle}
-                      </td>
-                      <td className="py-4 px-5 font-mono text-slate-500">
-                        {v.actSection}
-                      </td>
-                      <td className="py-4 px-5 text-right font-mono font-bold text-slate-900">
-                        {v.count}
-                      </td>
-                      <td className="py-4 px-5 text-right font-mono text-slate-600">
-                        {v.percentage}%
+                  {violations.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-xs text-slate-500">
+                        No statutory infractions recorded in this jurisdiction yet.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    violations.map((v) => (
+                      <tr key={v.ruleClause} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-4 px-5 font-mono font-bold text-slate-900">
+                          {v.ruleClause}
+                        </td>
+                        <td className="py-4 px-5 text-slate-700 font-medium">
+                          {v.categoryTitle}
+                        </td>
+                        <td className="py-4 px-5 font-mono text-slate-500">
+                          {v.actSection}
+                        </td>
+                        <td className="py-4 px-5 text-right font-mono font-bold text-slate-900">
+                          {v.count}
+                        </td>
+                        <td className="py-4 px-5 text-right font-mono text-slate-600">
+                          {v.percentage}%
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

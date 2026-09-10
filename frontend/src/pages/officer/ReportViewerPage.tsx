@@ -8,79 +8,6 @@ import { Button } from "../../components/common/Button";
 import { ComplianceReport } from "../../types";
 import { api } from "../../utils/apiClient";
 
-const DEFAULT_REPORTS: ComplianceReport[] = [
-  {
-    id: "rep-001",
-    reportNumber: "REP-2026-DEL-049",
-    title: "Statutory Packaging Audit: VitaHealth Malted Nutrition Drink 500g",
-    reportType: "Single Product Audit",
-    generatedDate: "10-Sep-2026",
-    generatedBy: "Sh. Rajesh Kumar Sharma",
-    designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
-    district: "Zone-1 (Central & Old Delhi), Delhi NCT",
-    totalProductsScanned: 1,
-    compliantCount: 0,
-    violationCount: 1,
-    format: "PDF",
-  },
-  {
-    id: "rep-002",
-    reportNumber: "REP-2026-DEL-044",
-    title: "Statutory Packaging Audit: SunHarvest Cold Pressed Mustard Oil 1L",
-    reportType: "Single Product Audit",
-    generatedDate: "09-Sep-2026",
-    generatedBy: "Sh. Rajesh Kumar Sharma",
-    designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
-    district: "Zone-1 (Central & Old Delhi), Delhi NCT",
-    totalProductsScanned: 1,
-    compliantCount: 0,
-    violationCount: 1,
-    format: "PDF",
-  },
-  {
-    id: "rep-003",
-    reportNumber: "REP-2026-DEL-041",
-    title: "Marketplace Surveillance Audit: Khari Baoli Spice Traders Cluster",
-    reportType: "Marketplace Inspection",
-    generatedDate: "08-Sep-2026",
-    generatedBy: "Sh. Rajesh Kumar Sharma",
-    designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
-    district: "Central Enforcement Division, Delhi NCT",
-    totalProductsScanned: 18,
-    compliantCount: 14,
-    violationCount: 4,
-    format: "PDF",
-  },
-  {
-    id: "rep-004",
-    reportNumber: "REP-2026-DEL-035",
-    title: "Statutory Packaging Audit: Supreme Pure Basmati Rice 5kg",
-    reportType: "Single Product Audit",
-    generatedDate: "07-Sep-2026",
-    generatedBy: "Sh. Rajesh Kumar Sharma",
-    designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
-    district: "Zone-1 (Central & Old Delhi), Delhi NCT",
-    totalProductsScanned: 1,
-    compliantCount: 1,
-    violationCount: 0,
-    format: "PDF",
-  },
-  {
-    id: "rep-005",
-    reportNumber: "REP-2026-DEL-M08",
-    title: "Monthly District Enforcement Summary: August 2026",
-    reportType: "Monthly District Summary",
-    generatedDate: "01-Sep-2026",
-    generatedBy: "Sh. Rajesh Kumar Sharma",
-    designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
-    district: "Zone-1 (Central & Old Delhi), Delhi NCT",
-    totalProductsScanned: 412,
-    compliantCount: 284,
-    violationCount: 128,
-    format: "PDF",
-  },
-];
-
 interface ReportViewerPageProps {
   onOpenNewReportModal: () => void;
 }
@@ -88,10 +15,10 @@ interface ReportViewerPageProps {
 export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
   onOpenNewReportModal,
 }) => {
-  const [reports, setReports] = useState<ComplianceReport[]>(DEFAULT_REPORTS);
+  const [reports, setReports] = useState<ComplianceReport[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
-  const [activeReport, setActiveReport] = useState<ComplianceReport | null>(DEFAULT_REPORTS[0]);
+  const [activeReport, setActiveReport] = useState<ComplianceReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -120,12 +47,17 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
             format: "PDF",
           }));
 
-          const combined = [...liveReports, ...DEFAULT_REPORTS];
-          setReports(combined);
-          setActiveReport(combined[0]);
+          setReports(liveReports);
+          setActiveReport(liveReports[0]);
+        } else if (isMounted) {
+          setReports([]);
+          setActiveReport(null);
         }
       } catch {
-        // Retain verified default reports
+        if (isMounted) {
+          setReports([]);
+          setActiveReport(null);
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -315,8 +247,15 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
             })}
 
             {filteredReports.length === 0 && !isLoading && (
-              <div className="p-8 border border-slate-200 rounded-xl text-center text-xs text-slate-500">
-                No inspection dockets match your search query.
+              <div className="p-8 border border-slate-200 rounded-xl text-center space-y-2">
+                <p className="text-xs font-semibold text-slate-800">
+                  {reports.length === 0 ? "No Inspection Dockets Generated Yet" : "No matching inspection dockets"}
+                </p>
+                <p className="text-2xs text-slate-500 max-w-xs mx-auto leading-relaxed">
+                  {reports.length === 0
+                    ? "Statutory inspection dockets and FORM LM-INSP-2011 compliance records will appear here as packaging scans are performed."
+                    : "No inspection dockets match your search query or format filter."}
+                </p>
               </div>
             )}
           </div>
@@ -529,8 +468,15 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
 
             </div>
           ) : (
-            <div className="p-12 rounded-xl border border-slate-200 text-center text-slate-500 text-xs">
-              Select an inspection docket to view the certified record.
+            <div className="p-16 rounded-xl border border-slate-200 bg-white text-center space-y-3">
+              <p className="text-sm font-semibold text-slate-800">
+                {reports.length === 0 ? "No Active Inspection Docket" : "Select an Inspection Docket"}
+              </p>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                {reports.length === 0
+                  ? "Field dockets and certified statutory inspection reports under Schedule IV Form LM-INSP-2011 will be rendered here once packaging scans are performed."
+                  : "Select any inspection docket from the register on the left to preview the court-admissible certificate sheet."}
+              </p>
             </div>
           )}
         </div>

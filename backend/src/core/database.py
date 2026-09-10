@@ -8,12 +8,14 @@ logger = logging.getLogger("packdrashiti.database")
 
 def get_async_database_url(url: str) -> str:
     """
-    Converts standard postgresql:// URL to postgresql+asyncpg:// for async engine support.
+    Converts standard postgresql:// URL to postgresql+asyncpg:// or ensures aiosqlite for SQLite.
     """
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     if url.startswith("postgres://"):
         return url.replace("postgres://", "postgresql+asyncpg://", 1)
+    if url.startswith("sqlite:///") and not url.startswith("sqlite+aiosqlite:///"):
+        return url.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
     return url
 
 

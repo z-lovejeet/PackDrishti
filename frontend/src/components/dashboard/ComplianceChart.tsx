@@ -12,10 +12,11 @@ export const ComplianceChart: React.FC<ComplianceChartProps> = ({
   violationCount,
   pendingCount,
 }) => {
-  const total = Math.max(1, compliantCount + violationCount + pendingCount);
-  const compliantPct = Math.round((compliantCount / total) * 100);
-  const violationPct = Math.round((violationCount / total) * 100);
-  const pendingPct = Math.max(0, 100 - compliantPct - violationPct);
+  const actualTotal = compliantCount + violationCount + pendingCount;
+  const total = Math.max(1, actualTotal);
+  const compliantPct = actualTotal > 0 ? Math.round((compliantCount / total) * 100) : 0;
+  const violationPct = actualTotal > 0 ? Math.round((violationCount / total) * 100) : 0;
+  const pendingPct = actualTotal > 0 ? Math.max(0, 100 - compliantPct - violationPct) : 0;
 
   return (
     <div className="bg-white p-5 rounded-card border border-neutral-200 shadow-card space-y-5">
@@ -26,7 +27,7 @@ export const ComplianceChart: React.FC<ComplianceChartProps> = ({
             Jurisdiction Compliance Distribution
           </h3>
           <p className="text-2xs text-neutral-500 mt-0.5">
-            Total {total.toLocaleString("en-IN")} commodities inspected across current cycle
+            Total {actualTotal.toLocaleString("en-IN")} commodities inspected across current cycle
           </p>
         </div>
         <div className="text-right shrink-0">

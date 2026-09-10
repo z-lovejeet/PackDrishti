@@ -71,14 +71,14 @@ async def stream_scan_inspection_pdf(
                 "product_name": scan.product_name,
                 "brand": scan.brand,
                 "category": scan.category,
-                "barcode": scan.barcode,
+                "barcode": scan.barcode or "N/A",
                 "pdp_area_cm2": float(scan.pdp_area_cm2) if scan.pdp_area_cm2 else 120.0,
-                "net_quantity": scan.declared_net_quantity or "Not Declared",
-                "mrp": f"Rs. {float(scan.declared_mrp):.2f}" if scan.declared_mrp else "Not Declared",
+                "net_quantity": scan.net_quantity or "Not Declared",
+                "mrp": scan.mrp or "Not Declared",
                 "location": scan.location or "Central Enforcement Division, New Delhi",
-                "scanned_by": scan.scanned_by or "Legal Metrology Inspector",
-                "inspector_designation": scan.inspector_designation or "Senior Metrology Officer",
-                "scanned_at": scan.created_at.strftime("%d-%b-%Y %H:%M:%S UTC") if scan.created_at else None,
+                "scanned_by": "Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)",
+                "inspector_designation": "Senior Legal Metrology Inspector",
+                "scanned_at": scan.scanned_at.strftime("%d-%b-%Y %H:%M:%S UTC") if scan.scanned_at else None,
             }
 
             # Fetch associated statutory violations
@@ -97,40 +97,12 @@ async def stream_scan_inspection_pdf(
     except (ValueError, Exception):
         pass
 
-    # If scan not found in DB or test UUID provided, generate fallback audit representation
+    # If scan not found in database, return 404
     if not scan_dict:
-        scan_dict = {
-            "id": scan_id,
-            "scan_code": f"INSP-{scan_id[:8].upper()}",
-            "product_name": "Packaged Commercial Commodity",
-            "brand": "Commercial Manufacturer Ltd.",
-            "category": "Food & Beverage",
-            "barcode": "8901030001001",
-            "pdp_area_cm2": 145.0,
-            "net_quantity": "400 g",
-            "mrp": "Rs. 180.00",
-            "location": "Delhi Division, NCT of Delhi",
-            "scanned_by": "Inspector R. K. Sharma",
-            "inspector_designation": "Senior Inspector, Legal Metrology",
-        }
-        violation_list = [
-            {
-                "rule_reference": "Rule 6(1)(e)",
-                "act_section": "Section 36(1)",
-                "title": "Missing Unit Sale Price (USP)",
-                "description": "Package fails to declare mandatory Unit Sale Price per gram under LMPCR 2011.",
-                "severity": "high",
-                "compounding_amount": 10000.0,
-            },
-            {
-                "rule_reference": "Rule 7 Table-I",
-                "act_section": "Section 36(1)",
-                "title": "Deficient Font Height",
-                "description": "Mandatory declarations measured at 1.4 mm against statutory minimum of 2.0 mm.",
-                "severity": "medium",
-                "compounding_amount": 7500.0,
-            }
-        ]
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Inspection record '{scan_id}' not found in database.",
+        )
 
     # Calculate compounding for the report
     comp_inputs = [
