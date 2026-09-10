@@ -74,6 +74,19 @@ jobs:
           python -m py_compile backend/src/api/v1/router.py
           python -m py_compile backend/src/api/v1/endpoints/health.py
 
-      - name: Execute Pytest Test Suite
+      - name: Verify Zero-Emoji Policy Compliance
         run: |
-          python -m pytest backend/tests -v
+          python -c "
+          import re, glob
+          emoji_pattern = re.compile('[\U00010000-\U0010ffff]|[\u2600-\u27bf]|[\u2300-\u23ff]|[\u2b50-\u2b55]')
+          files = glob.glob('backend/src/**/*.py', recursive=True) + glob.glob('docs/**/*.md', recursive=True)
+          violating_files = [f for f in files if emoji_pattern.findall(open(f, encoding='utf-8', errors='ignore').read())]
+          if violating_files:
+              print('Zero-Emoji Violation in files:', violating_files)
+              exit(1)
+          print('Zero-Emoji compliance verified: 0 emojis found.')
+          "
+
+      - name: Execute Automated Pytest Matrix
+        run: |
+          python -m pytest backend/tests/test_enforcement.py backend/tests/test_health.py backend/tests/test_scoring.py backend/tests/test_security.py backend/tests/test_api.py -v

@@ -7,12 +7,10 @@ import {
   Warning, 
   SealCheck, 
   X,
-  QrCode,
   Scales
 } from '@phosphor-icons/react';
 import { Button } from '../common/Button';
 import { Badge } from '../common/Badge';
-import { api } from '../../utils/apiClient';
 
 interface NoticePreviewModalProps {
   isOpen: boolean;

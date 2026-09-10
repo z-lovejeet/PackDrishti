@@ -12,6 +12,10 @@ app = FastAPI(
     redoc_url=f"{settings.API_V1_STR}/redoc" if settings.DEBUG else None,
 )
 
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+
 # Cross-Origin Resource Sharing (CORS) Middleware
 app.add_middleware(
     CORSMiddleware,
@@ -20,6 +24,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """
+    Enforces modern browser defense headers:
+    X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, HSTS, Referrer-Policy.
+    """
+    async def dispatch(self, request: Request, call_next):
+        response: Response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 @app.get("/health", summary="Root Liveness Probe", tags=["System Diagnostics"])

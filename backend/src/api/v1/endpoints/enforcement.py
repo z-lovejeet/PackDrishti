@@ -21,6 +21,7 @@ from backend.src.services.compounding_engine import (
     CompoundingCalculationResult,
     ViolationInput,
 )
+from backend.src.core.security import RateLimiter
 from backend.src.services.pdf_generator import StatutoryPDFGenerator
 
 router = APIRouter()
@@ -30,6 +31,7 @@ router = APIRouter()
     "/compounding/calculate",
     response_model=CompoundingCalculationResult,
     summary="Calculate Section 48 Compounding Fees",
+    dependencies=[Depends(RateLimiter(max_requests=60, window_seconds=60))],
 )
 async def calculate_statutory_compounding(
     request: CompoundingCalculationRequest,
