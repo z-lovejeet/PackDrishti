@@ -14,12 +14,15 @@ import {
 } from "@phosphor-icons/react";
 import { Button } from "../common/Button";
 import { UserRole } from "../../types";
+import { useAuthStore } from "../../store/authStore";
+import { SignIn, SignOut } from "@phosphor-icons/react";
 
 interface NavbarProps {
   onNavigate: (page: string) => void;
   activePage: string;
   userRole: UserRole;
   onToggleUserRole: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -27,7 +30,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   activePage,
   userRole,
   onToggleUserRole,
+  onOpenAuthModal,
 }) => {
+  const { isAuthenticated, user, logout } = useAuthStore();
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
       {/* Official Government Ministry Banner */}
@@ -189,6 +194,34 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
             <ArrowsLeftRight size={13} className="text-neutral-400 ml-0.5" />
           </button>
+
+          {/* Auth Button */}
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden lg:inline-block text-[11px] font-mono text-neutral-600 bg-neutral-100 px-2 py-1 rounded">
+                {user?.badgeNumber || user?.email?.split('@')[0] || 'Authenticated'}
+              </span>
+              <button
+                type="button"
+                onClick={logout}
+                className="px-2.5 py-1.5 rounded-[6px] text-xs font-semibold border border-neutral-300 text-neutral-700 hover:bg-neutral-100 transition-colors flex items-center gap-1.5"
+                title="Sign out of portal"
+              >
+                <SignOut size={14} />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="px-2.5 py-1.5 rounded-[6px] text-xs font-semibold border border-indigo-200 bg-indigo-50/70 text-indigo-900 hover:bg-indigo-100 transition-colors flex items-center gap-1.5"
+              title="Sign in or register"
+            >
+              <SignIn size={14} />
+              <span>Sign In</span>
+            </button>
+          )}
 
           <Button
             variant="primary"

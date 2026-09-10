@@ -3,6 +3,7 @@ import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
 import { ToastContainer, ToastMessage } from "./components/common/Toast";
 import { GenerateReportModal } from "./components/reports/GenerateReportModal";
+import { AuthModal } from "./components/common/AuthModal";
 import { UserRole } from "./types";
 import { useAuthStore } from "./store/authStore";
 
@@ -21,6 +22,7 @@ export function App() {
   const [activePage, setActivePage] = useState<string>("landing");
   const { role: userRole, setRole: setUserRole } = useAuthStore();
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([
     {
       id: "init-toast",
@@ -70,12 +72,20 @@ export function App() {
         onSuccessToast={() => addToast("success", "Statutory Report Generated", "Inspection certificate downloaded successfully.")}
       />
 
+      {/* Supabase Authentication & Role Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(msg) => addToast("success", "Authentication", msg)}
+      />
+
       {/* Adaptive Government Navbar */}
       <Navbar
         onNavigate={setActivePage}
         activePage={activePage}
         userRole={userRole}
         onToggleUserRole={handleToggleUserRole}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       {/* Main Content Area */}

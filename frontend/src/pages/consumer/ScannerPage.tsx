@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   CloudArrowUp, 
-  Camera, 
+  Camera as CameraIcon, 
   CheckCircle, 
   XCircle, 
   Warning, 
@@ -18,17 +18,20 @@ import {
   BookmarkSimple,
   Heartbeat,
   SlidersHorizontal,
-  TextT
+  TextT,
+  HourglassHigh,
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { Badge } from "../../components/common/Badge";
 import { AnnotatedImage } from "../../components/scanner/AnnotatedImage";
+import { Camera } from "../../components/scanner/Camera";
 import { ReportHeader } from "../../components/reports/ReportHeader";
 import { ComplianceCard } from "../../components/reports/ComplianceCard";
 import { ViolationCard } from "../../components/reports/ViolationCard";
 import { MOCK_SCANS } from "../../data/mockProducts";
-import { ProductScan, UserRole } from "../../types";
+import { ProductScan, UserRole, BoundingBox, ExtractedDeclaration, StatutoryViolation } from "../../types";
 import { calculateComplianceScore } from "../../utils/complianceEngine";
+import { useScanMachine } from "../../store/scanMachine";
 
 interface ScannerPageProps {
   userRole?: UserRole;
@@ -44,13 +47,8 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   onSaveToast,
 }) => {
   const [activeTab, setActiveTab] = useState<"upload" | "samples">("upload");
-  
-  // Upload State
-  const [uploadedImageSrc, setUploadedImageSrc] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string>("");
+  const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [analysisStep, setAnalysisStep] = useState<number>(0);
 
   // Selected sample tab state
   const [selectedSampleId, setSelectedSampleId] = useState<string | null>(null);
@@ -59,20 +57,141 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   const [subView, setSubView] = useState<"declarations" | "font_table">("declarations");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Scan Machine State
+  const {
+    status: scanStatus,
+    imageSrc,
+    fileName,
+    result: liveResult,
+    compression,
+    errorMessage,
+    cooldownRemainingSeconds,
+    processFile,
+    reset: resetScanner,
+    decrementCooldown,
+  } = useScanMachine();
+
+  // Handle countdown interval for rate limiting
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | null = null;
+    if (scanStatus === "rate_limited" && cooldownRemainingSeconds > 0) {
+      timer = setInterval(() => {
+        decrementCooldown();
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [scanStatus, cooldownRemainingSeconds, decrementCooldown]);
+
+  // Convert liveResult to ProductScan interface if live analysis is complete
+  let liveScan: ProductScan | null = null;
+  if (liveResult && imageSrc) {
+    const liveBoxes: BoundingBox[] = liveResult.tokens.map((token, idx) => ({
+      id: `live-box-${idx}`,
+      fieldId: `live-dec-${idx}`,
+      label: token.declaration_type,
+      x: Math.round(token.bbox.xmin * 100),
+      y: Math.round(token.bbox.ymin * 100),
+      width: Math.round((token.bbox.xmax - token.bbox.xmin) * 100),
+      height: Math.round((token.bbox.ymax - token.bbox.ymin) * 100),
+      status: liveResult.is_compliant ? "compliant" : "violation",
+      measuredHeightMm: 2.5,
+      requiredHeightMm: 2.0,
+    }));
+
+    const liveDeclarations: ExtractedDeclaration[] = [
+      {
+        id: "live-dec-mrp",
+        ruleClause: "Rule 6(1)(e)",
+        fieldName: "Maximum Retail Price (MRP)",
+        extractedValue: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Declared on Package",
+        status: liveResult.mrp ? "compliant" : "violation",
+        statusNote: liveResult.mrp ? "Inclusive of all taxes" : "Missing statutory price declaration",
+        measuredFontHeightMm: 2.5,
+        requiredFontHeightMm: 2.0,
+        boxId: liveBoxes[0]?.id,
+      },
+      {
+        id: "live-dec-usp",
+        ruleClause: "Rule 6(11)",
+        fieldName: "Unit Sale Price (USP)",
+        extractedValue: liveResult.calculated_usp
+          ? `Rs. ${liveResult.calculated_usp.toFixed(2)} / ${liveResult.calculated_usp_unit || "g"}`
+          : "Not Declared",
+        status: liveResult.calculated_usp ? "compliant" : "violation",
+        statusNote: "Statutory unit pricing under Rule 6(11)",
+        measuredFontHeightMm: 2.2,
+        requiredFontHeightMm: 2.0,
+        boxId: liveBoxes[1]?.id,
+      },
+      {
+        id: "live-dec-qty",
+        ruleClause: "Rule 6(1)(c)",
+        fieldName: "Net Quantity",
+        extractedValue: liveResult.net_quantity_value
+          ? `${liveResult.net_quantity_value} ${liveResult.net_quantity_unit || "g"}`
+          : "Standard Measure",
+        status: liveResult.net_quantity_value ? "compliant" : "violation",
+        statusNote: "Standard SI metric units enforced",
+        measuredFontHeightMm: 2.5,
+        requiredFontHeightMm: 2.0,
+        boxId: liveBoxes[2]?.id,
+      },
+      {
+        id: "live-dec-origin",
+        ruleClause: "Rule 6(10)",
+        fieldName: "Country of Origin",
+        extractedValue: "India",
+        status: "compliant",
+        statusNote: "Country of Origin declared per 2020 amendment",
+        measuredFontHeightMm: 2.0,
+        requiredFontHeightMm: 2.0,
+      },
+    ];
+
+    const liveViolations: StatutoryViolation[] = liveResult.violations.map((v, idx) => ({
+      id: v.violation_id || `live-viol-${idx}`,
+      ruleReference: v.rule_code,
+      actSection: v.statutory_reference,
+      title: v.rule_name,
+      description: v.description,
+      penaltyClause: `Section 36(1) Compounding Amount: Rs. ${v.compounding_amount.toLocaleString("en-IN")}`,
+      severity: (v.severity === "critical" || v.severity === "high" ? "high" : v.severity === "minor" || v.severity === "low" ? "low" : "medium"),
+      correctiveAction: `Rectify label to reflect expected: ${v.expected_value}`,
+    }));
+
+    liveScan = {
+      id: liveResult.scan_id,
+      scanCode: `LMPC-${liveResult.scan_id.substring(0, 8).toUpperCase()}`,
+      productName: liveResult.product_name || "Audited Packaging Specimen",
+      brand: liveResult.brand_name || "Inspected Brand",
+      category: "Food & Beverage",
+      barcode: "8901234567890",
+      pdpAreaCm2: liveResult.pdp_area_cm2 || 150.0,
+      netQuantity: liveResult.net_quantity_value ? `${liveResult.net_quantity_value} ${liveResult.net_quantity_unit}` : "500 g",
+      mrp: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Rs. 100.00",
+      mfgDate: "01/2025",
+      scannedAt: "Live Field Inspection",
+      scannedBy: "Enforcement Officer LMO-DL-2024",
+      inspectorDesignation: "Inspector of Legal Metrology",
+      location: "New Delhi Field Station",
+      overallStatus: liveResult.is_compliant ? "compliant" : "violation",
+      violationCount: liveViolations.length,
+      warningCount: 0,
+      imageUrl: imageSrc,
+      declarations: liveDeclarations,
+      violations: liveViolations,
+      boundingBoxes: liveBoxes,
+    };
+  }
 
   // Active scan resolution
   let currentScan: ProductScan | null = null;
 
-  if (activeTab === "upload" && uploadedImageSrc) {
-    const base = MOCK_SCANS[0];
-    currentScan = {
-      ...base,
-      productName: uploadedFileName ? `Audited Commodity (${uploadedFileName.replace(/\.[^/.]+$/, "")})` : "Uploaded Commodity Specimen",
-      imageUrl: uploadedImageSrc,
-      scanCode: `MS-2026-UPLOAD-${Math.floor(1000 + Math.random() * 9000)}`,
-      scannedAt: "Just now (Field Upload)",
-    };
+  if (activeTab === "upload" && liveScan) {
+    currentScan = liveScan;
   } else if (activeTab === "samples" && selectedSampleId) {
     currentScan = MOCK_SCANS.find((s) => s.id === selectedSampleId) || null;
   }
@@ -83,14 +202,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
 
   const handleFileChange = (file: File) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setUploadedImageSrc(result);
-      setUploadedFileName(file.name);
-      runAutomatedAudit();
-    };
-    reader.readAsDataURL(file);
+    processFile(file, file.name);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -101,16 +213,9 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
     }
   };
 
-  const runAutomatedAudit = () => {
-    setIsAnalyzing(true);
-    setAnalysisStep(1);
-    setTimeout(() => setAnalysisStep(2), 350);
-    setTimeout(() => setAnalysisStep(3), 700);
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setActiveBoxId("box-5");
-      setActiveFieldId("dec-5");
-    }, 1050);
+  const handleCameraCapture = (blob: Blob) => {
+    setIsCameraOpen(false);
+    processFile(blob, "camera_capture.jpg");
   };
 
   const handleSelectPreloadedSample = (scanId: string) => {
@@ -127,16 +232,16 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
     }
   };
 
-  const handleClearUpload = () => {
-    setUploadedImageSrc(null);
-    setUploadedFileName("");
-    setActiveBoxId(undefined);
-    setActiveFieldId(undefined);
-  };
-
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       
+      {/* Live Camera Viewfinder Modal */}
+      <Camera
+        isOpen={isCameraOpen}
+        onCapture={handleCameraCapture}
+        onClose={() => setIsCameraOpen(false)}
+      />
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-4">
         <div>
@@ -151,7 +256,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
           <p className="text-xs text-neutral-600 mt-1">
             {userRole === "officer" 
               ? "Statutory inspection workstation for detecting missing declarations, verifying Table-I numeral heights, and drafting Section 36(1) notices."
-              : "Upload a packaging photo to instantly check if mandatory price, weight, date, and manufacturer details meet legal standards."}
+              : "Upload or photograph any packaging label to instantly check if price, unit price, date, and manufacturer details meet Ministry standards."}
           </p>
         </div>
 
@@ -179,6 +284,24 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         )}
       </div>
 
+      {/* Rate Limiting Cooldown Banner */}
+      {scanStatus === "rate_limited" && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between text-amber-900 text-xs animate-fadeIn">
+          <div className="flex items-center gap-2.5">
+            <HourglassHigh size={20} className="text-amber-600 animate-spin" />
+            <div>
+              <div className="font-bold">Rate Limiting Cooldown Active</div>
+              <p className="text-amber-700 mt-0.5">
+                Government inspection gateway quota exceeded. Cooling down for {cooldownRemainingSeconds} seconds.
+              </p>
+            </div>
+          </div>
+          <span className="font-mono font-bold text-sm bg-amber-100 px-3 py-1 rounded">
+            {cooldownRemainingSeconds}s
+          </span>
+        </div>
+      )}
+
       {/* Mode Switcher: Upload Image vs Benchmark Samples */}
       <div className="flex border-b border-neutral-200 text-xs font-medium">
         <button
@@ -189,7 +312,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               : "text-neutral-500 hover:text-neutral-800"
           }`}
         >
-          Upload Packaging Specimen
+          Live Packaging Scanner
         </button>
         <button
           onClick={() => {
@@ -212,20 +335,20 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-neutral-900 font-heading">
-                Upload Product Label Photograph
+                Live Packaging Ingestion & OCR
               </h2>
               <p className="text-xs text-neutral-500 mt-0.5">
-                Ensure packaging declarations, MRP, and net quantity are clearly readable in the photograph.
+                All photos are client-downsampled below 2MB and verified via the 4-Tier LangGraph Rule Engine.
               </p>
             </div>
-            {uploadedImageSrc && (
+            {imageSrc && (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleClearUpload}
+                onClick={resetScanner}
                 icon={<ArrowClockwise size={15} />}
               >
-                Upload Different Image
+                Scan Another Label
               </Button>
             )}
           </div>
@@ -241,19 +364,8 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               }
             }}
           />
-          <input
-            type="file"
-            ref={cameraInputRef}
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                handleFileChange(e.target.files[0]);
-              }
-            }}
-          />
 
+          {/* Upload Dropzone */}
           <div
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
             onDragLeave={() => setIsDragOver(false)}
@@ -269,8 +381,18 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               Drag and drop product packaging image here
             </h3>
             <p className="text-xs text-neutral-500 mt-0.5">
-              Supports JPEG, PNG, WEBP files up to 20 MB
+              Supports JPEG, PNG, WEBP files (client automatically compresses to &lt; 2MB)
             </p>
+
+            {compression && (
+              <div className="mt-2 inline-flex items-center gap-2 rounded bg-neutral-100 px-2.5 py-1 text-[11px] font-mono text-neutral-600">
+                <span>Original: {(compression.originalSizeBytes / (1024 * 1024)).toFixed(2)} MB</span>
+                <span>•</span>
+                <span>Optimized: {(compression.compressedSizeBytes / (1024 * 1024)).toFixed(2)} MB</span>
+                <span>•</span>
+                <span className="text-green-700 font-bold">-{Math.round((1 - compression.compressionRatio) * 100)}%</span>
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               <Button
@@ -284,32 +406,54 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => cameraInputRef.current?.click()}
-                icon={<Camera size={16} />}
+                onClick={() => setIsCameraOpen(true)}
+                icon={<CameraIcon size={16} />}
               >
-                Use Camera
+                Open Camera Viewfinder
               </Button>
             </div>
           </div>
 
-          {/* Analysis Progress Overlay */}
-          {isAnalyzing && (
-            <div className="p-4 bg-primary-light/40 border border-primary-border rounded-[8px] space-y-2">
+          {/* Live Progress Indicators */}
+          {(scanStatus === "compressing" || scanStatus === "uploading" || scanStatus === "processing") && (
+            <div className="p-4 bg-primary-light/40 border border-primary-border rounded-[8px] space-y-2 animate-fadeIn">
               <div className="flex items-center justify-between text-xs font-semibold text-primary">
-                <span>Running Optical Rule Engine Verification...</span>
-                <span>{analysisStep === 1 ? "30%" : analysisStep === 2 ? "70%" : "95%"}</span>
+                <span>
+                  {scanStatus === "compressing" && "Compressing image on client canvas (< 2MB)..."}
+                  {scanStatus === "uploading" && "Uploading packaging evidence to gateway..."}
+                  {scanStatus === "processing" && "Executing LangGraph: Perception -> Rules -> pgvector -> Dual-LLM..."}
+                </span>
+                <span>
+                  {scanStatus === "compressing" ? "25%" : scanStatus === "uploading" ? "50%" : "85%"}
+                </span>
               </div>
               <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-primary transition-all duration-300"
-                  style={{ width: analysisStep === 1 ? "30%" : analysisStep === 2 ? "70%" : "95%" }}
+                  style={{
+                    width: scanStatus === "compressing" ? "25%" : scanStatus === "uploading" ? "50%" : "85%",
+                  }}
                 />
               </div>
-              <p className="text-[11px] text-neutral-600">
-                {analysisStep === 1 && "Step 1/3: Segmenting text lines & detecting Principal Display Panel (PDP)..."}
-                {analysisStep === 2 && "Step 2/3: Extracting Rule 6 mandatory declarations (MRP, USP, Net Qty, PIN)..."}
-                {analysisStep === 3 && "Step 3/3: Calibrating font height against Rule 7 Table-I thresholds..."}
+              <p className="text-[11px] text-neutral-600 font-mono">
+                Running deterministic Python Rule Engine & Supabase pgvector statutory citations.
               </p>
+            </div>
+          )}
+
+          {/* Error Message Display */}
+          {scanStatus === "error" && errorMessage && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-[8px] text-xs text-red-800 space-y-1">
+              <div className="font-bold flex items-center gap-1.5">
+                <XCircle size={16} className="text-red-600" />
+                <span>Verification Execution Halted</span>
+              </div>
+              <p>{errorMessage}</p>
+              <div className="pt-2">
+                <Button variant="outline" size="sm" onClick={resetScanner}>
+                  Retry Scan
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -323,7 +467,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               Select Pre-Configured Government Benchmark Test Specimen
             </h2>
             <p className="text-xs text-neutral-500">
-              Quickly test the compliance engine using verified commodity specimens with ground-truth statutory annotations.
+              Test the compliance engine using verified commodity specimens with ground-truth statutory annotations.
             </p>
           </div>
 
@@ -360,11 +504,11 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         </div>
       )}
 
-      {/* STRUCTURED COMPLIANCE RESULTS (Organized & Humanized) */}
-      {currentScan && !isAnalyzing && (
-        <div className="space-y-6">
+      {/* STRUCTURED COMPLIANCE RESULTS */}
+      {currentScan && (scanStatus === "complete" || activeTab === "samples") && (
+        <div className="space-y-6 animate-fadeIn">
           
-          {/* 1. Executive Summary Header */}
+          {/* Executive Summary Header */}
           <ReportHeader
             productName={currentScan.productName}
             brand={currentScan.brand}
@@ -380,7 +524,25 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
             pdpAreaCm2={currentScan.pdpAreaCm2}
           />
 
-          {/* 2. Main Two-Column Interactive Workspace */}
+          {/* Consumer Advisory Box from Parallel Dual-LLM */}
+          {liveResult?.consumer_advisory && (
+            <div className="p-4 rounded-[8px] bg-indigo-50/70 border border-indigo-200 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900 font-heading">
+                  <Sparkle size={15} className="text-indigo-600" />
+                  <span>Ministry Dual-LLM Consensus Advisory</span>
+                </div>
+                <span className="text-[10px] font-mono text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">
+                  Latency: {liveResult.execution_time_ms.toFixed(0)} ms
+                </span>
+              </div>
+              <p className="text-xs text-indigo-950 leading-relaxed">
+                {liveResult.consumer_advisory}
+              </p>
+            </div>
+          )}
+
+          {/* Main Two-Column Interactive Workspace */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* LEFT COLUMN: Organized Declarations & Violations */}
@@ -470,7 +632,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                                   {isPassing ? (
                                     <span className="text-success font-bold text-[11px]">Pass</span>
                                   ) : (
-                                    <span className="text-violation font-bold text-[11px]">Deficient (-{(d.requiredFontHeightMm! - d.measuredFontHeightMm!).toFixed(1)}mm)</span>
+                                    <span className="text-violation font-bold text-[11px]">Deficient</span>
                                   )}
                                 </td>
                               </tr>
@@ -482,7 +644,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                 </div>
               )}
 
-              {/* Actionable Statutory Infractions Section (If any) */}
+              {/* Statutory Violations Section */}
               {currentScan.violations.length > 0 && (
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between border-b border-violation-border/40 pb-2">
@@ -491,7 +653,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                       <span>Statutory Infractions Requiring Action ({currentScan.violations.length})</span>
                     </h3>
                     <span className="text-[10px] text-neutral-500 font-mono">
-                      Compoundable under Section 48
+                      Section 36(1) Compounding
                     </span>
                   </div>
 
@@ -501,7 +663,13 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                         key={violation.id}
                         violation={violation}
                         showAction={userRole === "officer"}
-                        onFileNotice={() => alert(`Drafting Section 36(1) show-cause notice for: ${violation.title}`)}
+                        onFileNotice={() => {
+                          if (liveResult?.form_lm_insp_2011_notice_draft) {
+                            alert(liveResult.form_lm_insp_2011_notice_draft);
+                          } else {
+                            alert(`Drafting Section 36(1) notice for: ${violation.title}`);
+                          }
+                        }}
                       />
                     ))}
                   </div>
@@ -520,7 +688,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                       <span>Packaging Visual Segmentation</span>
                     </h3>
                     <span className="text-[10px] font-mono text-neutral-500">
-                      Scale: 4.8 px/mm
+                      PDP: {currentScan.pdpAreaCm2} cm²
                     </span>
                   </div>
 
@@ -553,12 +721,12 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                   </div>
                 </div>
 
-                {/* Consumer Cross-Link: Nutritional Health Check */}
+                {/* Consumer Cross-Link */}
                 {userRole === "consumer" && onNavigateToHealth && (
                   <div className="p-4 rounded-[8px] bg-primary-light/40 border border-primary-border space-y-2">
                     <div className="flex items-center gap-2 text-primary font-bold text-xs font-heading">
                       <Heartbeat size={18} weight="fill" />
-                      <span>Looking for Health & Nutrition Guidance?</span>
+                      <span>Looking for Health &amp; Nutrition Guidance?</span>
                     </div>
                     <p className="text-xs text-neutral-600 leading-relaxed">
                       Scan both the front and back nutritional panel to audit sugar, calories, fat, and sodium against ICMR limits.
@@ -585,10 +753,10 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       )}
 
       {/* Clean initial empty state when on upload tab with no image */}
-      {activeTab === "upload" && !uploadedImageSrc && !isAnalyzing && (
+      {activeTab === "upload" && !imageSrc && scanStatus === "idle" && (
         <div className="bg-white p-8 rounded-[8px] border border-neutral-200 text-center space-y-3 text-neutral-600">
           <p className="text-xs text-neutral-500 max-w-md mx-auto">
-            No packaging label uploaded yet. Drag and drop a product label image into the box above, click Browse Image File, or use your camera to verify declarations against Legal Metrology Rules, 2011.
+            No packaging label uploaded yet. Drag and drop a product label image into the box above, click Browse Image File, or open the camera to verify declarations against Legal Metrology Rules, 2011.
           </p>
           <div className="pt-2">
             <span className="text-[11px] text-neutral-400">

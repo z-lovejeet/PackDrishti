@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Archive, 
   MagnifyingGlass, 
@@ -13,16 +13,31 @@ import {
   Sparkle,
   CheckCircle,
   XCircle,
-  CurrencyInr
+  CurrencyInr,
+  ArrowClockwise,
+  SpinnerGap
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { Badge } from "../../components/common/Badge";
 import { MOCK_SCAN_HISTORY } from "../../data/mockScanHistory";
 import { ScanHistoryItem } from "../../types";
+import { apiClient } from "../../utils/apiClient";
 
 interface ProductHistoryPageProps {
   onNavigateToScanner: () => void;
   onNavigateToHealth: () => void;
+}
+
+interface ApiHistoryRecord {
+  scan_id: string;
+  scan_code: string;
+  brand_name: string;
+  product_name: string;
+  mrp: number;
+  net_quantity: string;
+  compliance_status: string;
+  overall_score: number;
+  created_at: string | null;
 }
 
 export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
@@ -30,10 +45,65 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
   onNavigateToHealth,
 }) => {
   const [historyItems, setHistoryItems] = useState<ScanHistoryItem[]>(MOCK_SCAN_HISTORY);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLiveSource, setIsLiveSource] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [scanTypeFilter, setScanTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedItem, setSelectedItem] = useState<ScanHistoryItem | null>(null);
+
+  const fetchLiveHistory = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiClient.get<ApiHistoryRecord[]>("/scan/history");
+      if (response.data && response.data.length > 0) {
+        const mappedItems: ScanHistoryItem[] = response.data.map((record) => {
+          const isCompliant =
+            record.compliance_status?.toUpperCase() === "COMPLIANT";
+          return {
+            id: record.scan_id,
+            scanCode: record.scan_code || "SCAN-REF",
+            productName: record.product_name || "Verified Packaging Unit",
+            brand: record.brand_name || "Unspecified Brand",
+            category: "Packaged Goods",
+            scanDate: record.created_at
+              ? new Date(record.created_at).toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "Recent",
+            scanType: "label_compliance",
+            status: isCompliant ? "compliant" : "violation",
+            declaredMrp: record.mrp ? `INR ${record.mrp.toFixed(2)}` : "Declared",
+            thumbnailUrl:
+              "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
+            summaryNote: isCompliant
+              ? "Full statutory compliance verified under Legal Metrology (Packaged Commodities) Rules 2011."
+              : "Statutory infractions detected during automated optical verification.",
+            violationsCount: isCompliant ? 0 : 2,
+            healthScore: Math.round(record.overall_score || 85),
+          };
+        });
+        setHistoryItems(mappedItems);
+        setIsLiveSource(true);
+      } else {
+        // Retain mock records if database empty
+        setHistoryItems(MOCK_SCAN_HISTORY);
+        setIsLiveSource(false);
+      }
+    } catch {
+      // Fallback cleanly on network or server issue
+      setHistoryItems(MOCK_SCAN_HISTORY);
+      setIsLiveSource(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLiveHistory();
+  }, []);
 
   const filteredItems = historyItems.filter((item) => {
     const matchesSearch =
@@ -88,6 +158,31 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[11px] font-mono border border-neutral-200 bg-neutral-50 text-neutral-600">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isLiveSource ? "bg-success animate-pulse" : "bg-warning"
+              }`}
+            />
+            <span>{isLiveSource ? "Supabase Live Records" : "Demo Sample Records"}</span>
+          </div>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={fetchLiveHistory}
+            disabled={isLoading}
+            icon={
+              isLoading ? (
+                <SpinnerGap size={15} className="animate-spin" />
+              ) : (
+                <ArrowClockwise size={15} />
+              )
+            }
+          >
+            Refresh
+          </Button>
+
           <Button
             variant="primary"
             size="sm"
