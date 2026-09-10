@@ -1,237 +1,321 @@
-# PackDrashiti (SIH26034) Development Roadmap
+# PackDrashiti (SIH26034) Master Development Roadmap
 
-## 1. Executive Roadmap Overview & Engineering Tenets
+**Project Identifier**: SIH26034  
+**Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
+**Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
+**Document Classification**: Engineering Master Development Roadmap & Progress Tracking Specification  
+**Document Version**: 2.0.0 (Phase-Centric Architecture)  
 
-**Current State vs Production Target Gap Analysis**
-Currently, the PackDrashiti project consists of a React frontend and FastAPI backend skeleton. The production target requires a robust dual-audience architecture (Consumer vs Officer), complete with Supabase managed PostgreSQL persistence, Supabase native `pgvector` vector storage, Supabase Auth session security, zero-manual-step Python in-memory asynchronous caching (`cachetools` / `async-lru`), and a stateful LangGraph RAG workflow powered by a Parallel Dual-LLM engine (Gemini fallback chain: `gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite` and Groq fallback chain: `gpt-oss-120b` -> `gpt-oss-20b`).
+---
 
-**Dual-Audience Architecture Requirements**
-1. **Consumer Portal:** Focuses on sub-500ms latency health metrics, nutritional scanning, allergen detection, and simplified compliance indicators.
-2. **Officer Enforcement Portal:** Demands strict data integrity, chain-of-custody logging, complex aggregate queries, and automated statutory PDF generation (FORM LM-INSP-2011) for legal compliance.
+## 1. Executive Status & Progress Dashboard
 
-**Engineering Tenets**
-- Strict Type Safety: Shared types between TypeScript frontend, Supabase schemas, and FastAPI Pydantic models.
-- Zero Manual Infrastructure Overhead: Eliminate Redis in favor of zero-configuration in-memory async caching (`cachetools` / `async-lru`) and FastAPI native `BackgroundTasks`.
-- Parallel Dual-LLM Concurrency: Run Gemini and Groq fallback chains concurrently via `asyncio.gather()` for real-time consensus and zero hallucination.
-- Deterministic Legal Verification: 100% auditable mathematical logic for legal math (USP arithmetic, font calibration, contrast ratio); never delegate math to an LLM.
-- Stateless Backend: Core inference and rule parsing must be horizontally scalable and stateless.
-- Traceable Enforcement: All officer actions require immutable audit logs.
+### 1.1 Overall Implementation Status
 
-## 2. Phase Breakdown
+```
+[====================--------------------------------] 38% Overall Completion
+Total Defined Tasks: 66
+Completed Tasks:      25
+Pending Tasks:        41
+```
+
+### 1.2 Phase-by-Phase Progress Matrix
+
+| Phase | Title | Completed | Pending | Total | Completion % | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **Phase 1** | Environment & Project Scaffolding | 10 | 0 | 10 | 100% | Completed |
+| **Phase 2** | Database Modeling, Supabase Persistence & Auth Core | 3 | 5 | 8 | 38% | In Progress |
+| **Phase 3** | LangGraph Stateful RAG & Parallel Dual-LLM Pipeline | 0 | 10 | 10 | 0% | Pending |
+| **Phase 4** | Frontend Live Integration & Scanner Flow | 2 | 6 | 8 | 25% | Pending |
+| **Phase 5** | Consumer Health Engine & ICMR-NIN Table Parser | 3 | 4 | 7 | 43% | Pending |
+| **Phase 6** | Officer Enforcement, FORM LM-INSP-2011 PDF & Analytics | 4 | 5 | 9 | 44% | Pending |
+| **Phase 7** | Automated Testing Suites, Security Hardening & CI/CD | 3 | 5 | 8 | 38% | In Progress |
+| **Phase 8** | Accuracy Benchmarking, Performance Tuning & Final SIH Freeze | 0 | 6 | 6 | 0% | Pending |
+| **TOTAL** | **Full Engineering Lifecycle** | **25** | **41** | **66** | **38%** | **In Active Progress** |
+
+---
+
+## 2. Completed vs Pending Deliverables Audit
+
+### 2.1 Completed Deliverables (What Is Done)
+
+1. **Frontend Architecture & Scaffolding (Phase 1 & 2)**:
+   - React 19 + TypeScript 6 + Vite 8.2.2 development and build setup (`frontend/`).
+   - Tailwind CSS civic restrained color palette configuration (`frontend/tailwind.config.js`).
+   - Phosphor Icons integration across navigation, dashboard, and report views.
+   - Centralized Axios API client with request/response interceptors (`frontend/src/utils/apiClient.ts`).
+   - Supabase JavaScript client initialization with session storage (`frontend/src/utils/supabaseClient.ts`).
+   - Persistent authentication store built on Zustand (`frontend/src/store/authStore.ts`).
+   - TypeScript domain models matching database schema (`frontend/src/types/models.ts`).
+
+2. **Frontend User Interface & Views (Phase 4, 5 & 6 Prototype Pages)**:
+   - Consumer Scanner Page with annotated image overlays (`frontend/src/pages/consumer/ScannerPage.tsx`).
+   - Consumer Health Check Page with ICMR-NIN scoring cards (`frontend/src/pages/consumer/HealthCheckPage.tsx`).
+   - Consumer Product History & Audit Ledger (`frontend/src/pages/consumer/ProductHistoryPage.tsx`).
+   - Landing Page with feature showcases and compliance walkthroughs (`frontend/src/pages/consumer/LandingPage.tsx`).
+   - Officer Dashboard with district enforcement KPIs and compliance charts (`frontend/src/pages/officer/OfficerDashboardPage.tsx`).
+   - Officer Field Inspections Ledger with search and status filtering (`frontend/src/pages/officer/InspectionsPage.tsx`).
+   - Officer FORM LM-INSP-2011 Inspection Report Viewer (`frontend/src/pages/officer/ReportViewerPage.tsx`).
+   - Reusable atomic UI components: Badges, Buttons, Cards, Modals, Skeletons, Toasts, Charts.
+
+3. **Backend Application Core & Settings (Phase 1)**:
+   - FastAPI application instance scaffolded with CORS and router mounting (`backend/src/main.py`).
+   - Pydantic Settings management with environment variable validation (`backend/src/core/config.py`).
+   - Subsystem diagnostic health check endpoint (`backend/src/api/v1/endpoints/health.py`).
+   - Production Dockerfile for backend containerization (`backend/Dockerfile`).
+   - Environment configuration templates (`backend/.env.template`, `backend/.env.example`).
+   - Python dependencies configured for Supabase, LangGraph, LangChain, Google GenAI, and Groq (`backend/requirements.txt`).
+
+4. **Testing, CI/CD & Local Infrastructure (Phase 1 & 7)**:
+   - Pytest test suite for diagnostic health and settings validation (`backend/tests/test_health.py`).
+   - Docker Compose local environment specification for PostgreSQL 16 with pgvector and Adminer (`docker-compose.yml`).
+   - GitHub Actions CI workflow covering frontend lint/build and backend pytest (`.github/workflows/ci.yml`).
+
+---
+
+### 2.2 Pending Deliverables (What Needs To Be Done)
+
+1. **Database Persistence & Migrations (Phase 2)**:
+   - SQLAlchemy 2.0 ORM models in `backend/src/models/` for users, scans, declarations, violations, reports, and health audits.
+   - Alembic migration environment and initial schema generation.
+   - Connection to remote Supabase managed PostgreSQL instance and pgvector extension initialization.
+   - Supabase Auth JWT verification middleware in `backend/src/core/security.py`.
+   - In-memory asynchronous caching manager in `backend/src/core/cache.py` (`cachetools` / `async-lru`).
+
+2. **LangGraph Stateful RAG & Parallel Dual-LLM Pipeline (Phase 3)**:
+   - Multimodal VLM perception module with automated PaddleOCR fallback (`ai/src/pipeline/extractor.py`).
+   - Deterministic Python Rule Engine (`ai/src/rules/deterministic.py`): USP calculation, Rule 7 Table-I font calibration step function, Rule 9 contrast ratio, SI units verification.
+   - Supabase `pgvector` Statutory RAG indexing and semantic retrieval (`ai/src/rag/supabase_vector.py`).
+   - Parallel Dual-LLM fallback engine (`ai/src/llm/dual_engine.py`): Gemini chain (`gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite`) and Groq chain (`gpt-oss-120b` -> `gpt-oss-20b`) executed via `asyncio.gather()`.
+   - Stateful LangGraph workflow orchestrating tiers 1 through 4 (`ai/src/pipeline/langgraph_workflow.py`).
+
+3. **Backend API Endpoints (Phase 3, 4, 5, 6)**:
+   - `POST /api/v1/scan/upload` (multipart image ingestion and storage upload).
+   - `POST /api/v1/scan/analyze` (end-to-end LangGraph execution).
+   - `GET /api/v1/health/score/{scan_id}` (ICMR-NIN nutritional scoring endpoint).
+   - `GET /api/v1/rules/search` (pgvector semantic rule search).
+   - `POST /api/v1/violations/{id}/generate-notice` (formal statutory show-cause notice generation).
+   - `GET /api/v1/reports/pdf/{scan_id}` (WeasyPrint FORM LM-INSP-2011 PDF generator).
+   - `GET /api/v1/dashboard/metrics` (Officer aggregate statistics).
+
+4. **Frontend Live Integration (Phase 4 & 5)**:
+   - Connect live camera stream and canvas downsampling (< 2MB) in `frontend/src/components/scanner/Camera.tsx`.
+   - Replace static mock data in `frontend/src/pages/consumer/ScannerPage.tsx` with live API calls.
+   - Scanner finite state machine implementation (`frontend/src/store/scanMachine.ts`).
+   - Connect Supabase Auth login and registration modals to live authentication state.
+
+5. **Evaluation Benchmarks & Hardening (Phase 7 & 8)**:
+   - 50-SKU golden ground-truth evaluation benchmark script (`ai/tests/benchmark.py`).
+   - End-to-end integration and security test suites.
+   - PWA offline fallback caching verification.
+
+---
+
+## 3. Core Engineering Tenets
+
+1. **Deterministic Legal Verification**: Legal math (Unit Sale Price arithmetic, Rule 7 Table-I font step function calibration, Rule 9 contrast ratio, SI metric unit validation) is 100% computed by pure Python deterministic logic. An LLM must never be permitted to calculate statutory arithmetic.
+2. **Parallel Dual-LLM Consensus**: Google Gemini and Groq fallback chains run in parallel via `asyncio.gather()`. The fastest valid structured output is prioritized and validated against the deterministic rule engine to eliminate hallucinations.
+3. **Unified Supabase Architecture**: Supabase managed PostgreSQL 16 houses relational records, `auth.users`, and native `pgvector` embeddings (`vector(1536)`). No external vector database is used.
+4. **Zero-Manual-Step Infrastructure**: Redis is completely eliminated. Asynchronous caching and rate limiting are handled via Python in-memory async caches (`cachetools` / `async-lru`), and background tasks run on FastAPI native `BackgroundTasks`.
+5. **Strict Type Safety**: All data structures are shared 1-to-1 between TypeScript frontend interfaces, Pydantic schemas, and Supabase database models.
+
+---
+
+## 4. Phase-by-Phase Roadmap
 
 ### Phase 1: Environment & Project Scaffolding
-**Estimated Duration:** 2 Days | **Milestones:** Repository initialized, standard configs merged, Hello World deployed.
-**Entry Pre-requisites:** Git access, local dev tools installed.
+**Status:** Completed (10/10 Tasks Done)  
+**Duration:** 2 Days  
+**Milestones:** Repository initialized, standard configs merged, health endpoints verified.
 
-**Member 1 (Frontend Developer)**
-- [x] Initialize React 19 + TypeScript 6 via Vite in `frontend/`.
-- [x] Configure `frontend/tailwind.config.ts` and install Phosphor Icons.
-- [x] Install `@supabase/supabase-js` and initialize Supabase client in `frontend/src/utils/supabaseClient.ts`.
-- [x] Setup `frontend/src/utils/apiClient.ts` with Axios interceptors for Supabase JWT injection.
-- [x] Configure `frontend/src/store/authStore.ts` with Supabase session synchronization.
+#### Task Checklist
+- [x] **Frontend Core Scaffolding**: Initialize React 19 + TypeScript 6 via Vite in `frontend/`.
+- [x] **UI Styling & Design System**: Configure `frontend/tailwind.config.js` and install Phosphor Icons.
+- [x] **HTTP Client & Interceptors**: Setup `frontend/src/utils/apiClient.ts` with Axios interceptors for JWT token injection and error handling.
+- [x] **Supabase Client Setup**: Install `@supabase/supabase-js` and initialize client in `frontend/src/utils/supabaseClient.ts`.
+- [x] **Client Auth State**: Scaffold Zustand persistent store in `frontend/src/store/authStore.ts`.
+- [x] **Backend Project Scaffolding**: Scaffold FastAPI application in `backend/src/main.py`.
+- [x] **Environment Configuration**: Define environment templates in `backend/.env.template` and `backend/.env.example`.
+- [x] **Pydantic Settings**: Author `backend/src/core/config.py` with Supabase, cache, Gemini, and Groq fallback chain configurations.
+- [x] **Diagnostic Health Endpoint**: Implement comprehensive health check in `backend/src/api/v1/endpoints/health.py`.
+- [x] **Infrastructure & CI**: Scaffold `docker-compose.yml` for PostgreSQL 16 with pgvector, Author `.github/workflows/ci.yml`, author `backend/tests/test_health.py`.
 
-**Member 2 (Backend Developer)**
-- [x] Scaffold FastAPI project in `backend/src/main.py`.
-- [x] Define environment variables in `backend/.env.template` (Supabase, Gemini fallback chain, Groq API, cache TTL).
-- [x] Setup `backend/src/core/config.py` using Pydantic Settings for Supabase DB, pgvector, Auth, in-memory cache, and Dual-LLM fallback chains.
-- [x] Implement comprehensive diagnostic health endpoint in `backend/src/api/v1/endpoints/health.py`.
+#### Acceptance Criteria & Verification
+- Execution: `pytest backend/tests/test_health.py -v && cd frontend && npm run build`
+- Output: 4 of 4 tests pass; Vite builds production bundle in under 500ms with zero errors.
 
-**Member 3 (AI Engineer)**
-- [ ] Scaffold LangGraph stateful RAG workflow in `ai/src/pipeline/langgraph_workflow.py`.
-- [ ] Configure Primary Gemini fallback chain (`gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite`).
-- [ ] Configure Secondary Groq API fallback chain (`gpt-oss-120b` -> `gpt-oss-20b`).
-- [ ] Initialize Supabase `pgvector` database connection and HNSW cosine similarity query harness.
+---
 
-**Member 4 (Tester + DevOps Engineer)**
-- [x] Scaffold `docker-compose.yml` for local PostgreSQL 16 with pgvector and Adminer (zero Redis dependency).
-- [x] Create `.github/workflows/ci.yml` with linting and unit testing for frontend/backend.
-- [x] Author and verify backend health test suite in `backend/tests/test_health.py`.
+### Phase 2: Database Modeling, Supabase Persistence & Auth Core
+**Status:** In Progress (3/8 Tasks Done | 38% Complete)  
+**Duration:** 4 Days  
+**Milestones:** Database schemas created, migrations verified, Supabase Auth integrated.
 
-**Phase Verification Gate & Acceptance Criteria**
-- Execution: `pytest backend/tests/test_health.py -v && curl -X GET http://localhost:8000/api/v1/health`
-- Output: All tests pass; health payload reports `database: supabase_postgresql`, `vectordb: supabase_pgvector`, `auth: supabase_auth`, `cache: in_memory_async_lru`, `rag_framework: langgraph`.
+#### Task Checklist
+- [x] **Frontend Domain Interfaces**: Generate TypeScript interfaces in `frontend/src/types/models.ts` matching backend relational schemas.
+- [x] **Frontend Role Typing**: Define user roles and permission sets in `frontend/src/types/roles.ts`.
+- [x] **Frontend Session Sync**: Integrate Supabase Auth sign-out and session sync in `frontend/src/store/authStore.ts`.
+- [ ] **SQLAlchemy 2.0 ORM Models**: Define relational models in `backend/src/models/` (`users`, `product_scans`, `extracted_declarations`, `statutory_violations`, `compliance_reports`, `health_audits`).
+- [ ] **Alembic Migration Setup**: Configure `alembic/` and generate initial schema revision: `alembic revision --autogenerate -m "initial_schema"`.
+- [ ] **Supabase pgvector Activation**: Run migration on remote Supabase instance enabling `vector` extension and creating `statutory_knowledge_base` with HNSW cosine index.
+- [ ] **Supabase Auth JWT Middleware**: Implement token verification and role validation dependencies in `backend/src/core/security.py`.
+- [ ] **In-Memory Cache Manager**: Implement zero-manual-step in-memory async cache (`cachetools` / `async-lru`) in `backend/src/core/cache.py` for token denylisting and lookup tables.
 
-### Phase 2: Database Schemas, Migrations & Backend Core
-**Estimated Duration:** 4 Days | **Milestones:** Supabase migrations applied, CRUD endpoints for Users/Scans active.
-**Entry Pre-requisites:** Phase 1 complete, `database_schema.md` finalized.
+#### Acceptance Criteria & Verification
+- Execution: `alembic upgrade head && pytest backend/tests/test_db.py`
+- Output: 100% pass on model integrity, foreign key constraints, and Supabase pgvector connection.
 
-**Member 1 (Frontend Developer)**
-- [x] Generate TypeScript interfaces in `frontend/src/types/models.ts` matching backend schemas.
-- [x] Implement local state management (Zustand/Context) in `frontend/src/store/authStore.ts`.
-
-**Member 2 (Backend Developer)**
-- [ ] Define SQLAlchemy 2.0 models and Supabase client bindings in `backend/src/models/`.
-- [ ] Enable `pgvector` extension and configure `statutory_knowledge_base` with HNSW index in Supabase.
-- [ ] Implement Supabase Auth JWT verification middleware in `backend/src/core/security.py`.
-- [ ] Implement in-memory async LRU cache (`cachetools`) for token denylist and static lookup tables.
-
-**Member 3 (AI Engineer)**
-- [ ] Structure the Pydantic response schema mapping to `backend/src/schemas/ai_results.py`.
-- [ ] Prototype Deterministic Rule Engine logic in `ai/src/rules/deterministic.py`.
-
-**Member 4 (Tester + DevOps Engineer)**
-- [ ] Write Pytest fixtures for Supabase DB sessions in `backend/tests/conftest.py`.
-- [ ] Verify remote Supabase PostgreSQL instance and pgvector extension for staging.
-
-**Phase Verification Gate & Acceptance Criteria**
-- Execution: `pytest backend/tests/test_db.py`
-- Output: 100% pass on Supabase DB model validation, pgvector indexing, and relations.
+---
 
 ### Phase 3: LangGraph Stateful RAG & Parallel Dual-LLM Pipeline
-**Estimated Duration:** 6 Days | **Milestones:** VLM spatial perception, deterministic rules, Supabase pgvector RAG, and parallel LLMs active.
-**Entry Pre-requisites:** Supabase pgvector configured, Gemini API key, and Groq API key available.
+**Status:** Pending (0/10 Tasks Done | 0% Complete)  
+**Duration:** 6 Days  
+**Milestones:** Multimodal perception active, deterministic rule engine running, LangGraph state machine operational.
 
-**Member 1 (Frontend Developer)**
-- [ ] Build camera module in `frontend/src/components/Scanner/Camera.tsx`.
-- [ ] Implement canvas downsampling algorithm in `frontend/src/utils/imageProc.ts` to reduce payload size to < 2MB.
+#### Task Checklist
+- [ ] **Camera Ingestion Module**: Build camera capture interface in `frontend/src/components/scanner/Camera.tsx`.
+- [ ] **Client Image Downsampler**: Implement canvas compression algorithm in `frontend/src/utils/imageProc.ts` ensuring uploads remain < 2MB.
+- [ ] **Scan Ingestion Endpoint**: Implement `POST /api/v1/scan/upload` accepting multipart image files and storing to S3/Cloudflare R2/Supabase.
+- [ ] **Tier 1 Visual Perception**: Implement VLM spatial extraction with automated local PaddleOCR fallback in `ai/src/pipeline/extractor.py`.
+- [ ] **Tier 2 Rule Engine (Legal Math)**: Build deterministic Python rule verification module in `ai/src/rules/deterministic.py` (USP calculation, Rule 7 Table-I font calibration, Rule 9 contrast, SI units).
+- [ ] **Tier 3 Supabase pgvector RAG**: Implement statutory retrieval module in `ai/src/rag/supabase_vector.py` indexing Legal Metrology Act 2009 and PCR 2011.
+- [ ] **Tier 4 Parallel Dual-LLM Engine**: Implement `ai/src/llm/dual_engine.py` orchestrating Gemini fallback chain and Groq fallback chain via `asyncio.gather()`.
+- [ ] **LangGraph Workflow Coordinator**: Implement stateful graph in `ai/src/pipeline/langgraph_workflow.py` linking perception, rules, retrieval, and synthesis.
+- [ ] **Scan Analysis Endpoint**: Implement `POST /api/v1/scan/analyze` triggering the LangGraph workflow and returning structured compliance results.
+- [ ] **AI Benchmark Harness**: Create evaluation script in `ai/tests/benchmark.py` validating extraction against 50 golden benchmark SKUs.
 
-**Member 2 (Backend Developer)**
-- [ ] Create `POST /api/v1/scans/analyze` endpoint accepting multipart/form-data.
-- [ ] Implement Cloudflare R2 / S3 / Supabase Storage upload function in `backend/src/services/storage.py`.
-
-**Member 3 (AI Engineer)**
-- [ ] Tier 1: Implement Multimodal VLM visual perception with automated PaddleOCR fallback.
-- [ ] Tier 2: Build Deterministic Python Rule Engine for legal math in `ai/src/rules/deterministic.py`.
-- [ ] Tier 3: Implement LangGraph stateful RAG workflow querying Supabase pgvector in `ai/src/rag/supabase_vector.py`.
-- [ ] Tier 4: Implement Parallel Dual-LLM execution via `asyncio.gather()` orchestrating Gemini and Groq fallback chains with consensus validation.
-
-**Member 4 (Tester + DevOps Engineer)**
-- [ ] Create AI benchmark runner script `ai/tests/benchmark.py` verifying precision/recall against rule logic.
-- [ ] Containerize AI pipeline in `backend/Dockerfile`.
-
-**Phase Verification Gate & Acceptance Criteria**
+#### Acceptance Criteria & Verification
 - Execution: `python ai/tests/benchmark.py`
-- Output: Strict deterministic rule passes without LLM math errors, parallel LLM execution latency < 2.5s, 0 hallucinations.
+- Output: 100% mathematical accuracy on USP and font sizing; parallel LLM consensus latency < 2.5 seconds; 0 hallucinations.
 
-### Phase 4: Frontend API Integration & Scanner Flow Refinement
-**Estimated Duration:** 4 Days | **Milestones:** Real-time scanning feedback loop completed without mock data.
-**Entry Pre-requisites:** `POST /api/v1/scans/analyze` endpoint deployed to staging.
+---
 
-**Member 1 (Frontend Developer)**
-- [ ] Replace `frontend/src/data/mock.ts` with API calls in `frontend/src/pages/ConsumerScan.tsx`.
-- [ ] Build finite state machine for scanner flow (Idle, Capturing, Uploading, Processing, Complete) in `frontend/src/store/scanMachine.ts`.
-- [ ] Connect Supabase Auth login and registration modals with persistent token refresh.
+### Phase 4: Frontend Live Integration & Scanner Flow
+**Status:** Pending (2/8 Tasks Done | 25% Complete)  
+**Duration:** 4 Days  
+**Milestones:** Mock data replaced by live API endpoints, end-to-end scanner flow operational.
 
-**Member 2 (Backend Developer)**
-- [ ] Optimize response latency on inference endpoint using in-memory async caching (`async-lru`).
-- [ ] Implement rate limiting middleware in `backend/src/core/middleware.py`.
+#### Task Checklist
+- [x] **Scanner View & Overlay Components**: Build scanner interface with bounding box display in `frontend/src/pages/consumer/ScannerPage.tsx`.
+- [x] **Annotated Image Viewer**: Author bounding box and polygon rendering component in `frontend/src/components/scanner/AnnotatedImage.tsx`.
+- [ ] **Scanner Finite State Machine**: Implement state machine (Idle, Capturing, Compressing, Uploading, Processing, Complete, Error) in `frontend/src/store/scanMachine.ts`.
+- [ ] **Live API Integration (Consumer Scan)**: Connect `frontend/src/pages/consumer/ScannerPage.tsx` to `POST /api/v1/scan/analyze`.
+- [ ] **Auth Modal Integration**: Wire login and registration forms to Supabase Auth client with session token storage.
+- [ ] **Scan History Live Integration**: Connect `frontend/src/pages/consumer/ProductHistoryPage.tsx` to `GET /api/v1/scan/history`.
+- [ ] **Rate Limiting Handling**: Add UI notifications and cooldown timers for HTTP 429 rate limit responses.
+- [ ] **Playwright E2E Scanner Tests**: Author end-to-end browser test in `frontend/e2e/scan_flow.spec.ts`.
 
-**Member 3 (AI Engineer)**
-- [ ] Handle edge cases (motion blur, low light) based on frontend staging feedback.
-- [ ] Deliver fallback heuristic rules to `backend/src/services/rules_engine.py`.
-
-**Member 4 (Tester + DevOps Engineer)**
-- [ ] Write Playwright E2E tests for the scanning flow in `frontend/e2e/scan_flow.spec.ts`.
-- [ ] Set up Vercel deployment pipeline for frontend.
-
-**Phase Verification Gate & Acceptance Criteria**
+#### Acceptance Criteria & Verification
 - Execution: `npx playwright test e2e/scan_flow.spec.ts`
-- Output: Successful mock-camera upload and results rendering.
+- Output: Image upload, state machine transitions, and result rendering pass with zero mock data.
 
-### Phase 5: Consumer Health Engine & Nutrition Table Parser
-**Estimated Duration:** 5 Days | **Milestones:** Nutritional scoring and allergen warnings active.
-**Entry Pre-requisites:** OCR engine successfully reading tabular data.
+---
 
-**Member 1 (Frontend Developer)**
-- [ ] Develop `frontend/src/components/Results/HealthScoreCard.tsx`.
-- [ ] Implement dynamic allergen highlighting in `frontend/src/components/Results/IngredientList.tsx`.
+### Phase 5: Consumer Health Engine & ICMR-NIN Table Parser
+**Status:** Pending (3/7 Tasks Done | 43% Complete)  
+**Duration:** 5 Days  
+**Milestones:** Tabular nutrition parsing active, ICMR-NIN 2024 dietary scoring operational.
 
-**Member 2 (Backend Developer)**
-- [ ] Integrate ICMR-NIN nutrition standards database in Supabase PostgreSQL.
-- [ ] Create `GET /api/v1/health/score/{scan_id}` endpoint in `backend/src/api/health.py`.
+#### Task Checklist
+- [x] **Health Check UI View**: Implement consumer health page in `frontend/src/pages/consumer/HealthCheckPage.tsx`.
+- [x] **Nutritional Breakdown Card**: Implement nutrient row widget in `frontend/src/components/health/NutrientRow.tsx`.
+- [x] **Dietary Advisory UI**: Author advisory warning component in `frontend/src/components/health/DietaryAdvisory.tsx`.
+- [ ] **Tabular Nutrition Extractor**: Author OCR/VLM tabular data parser in `ai/src/rules/nutrition_parser.py` converting nutrition panels to structured JSON.
+- [ ] **ICMR-NIN 2024 Scoring Engine**: Implement nutritional scoring algorithms and High-Fat-Sugar-Salt (HFSS) thresholds in `backend/src/services/health_engine.py`.
+- [ ] **Health Audit API Endpoint**: Implement `GET /api/v1/health/score/{scan_id}` returning health scores, nutrient breakdown, and contraindications.
+- [ ] **Health Scoring Test Suite**: Add unit tests in `backend/tests/test_scoring.py` verifying nutrition calculations against reference standards.
 
-**Member 3 (AI Engineer)**
-- [ ] Build structural table parser for nutrition facts in `ai/src/rules/nutrition_parser.py`.
-- [ ] Map extracted text to structured JSON schema matching ICMR-NIN format.
-
-**Member 4 (Tester + DevOps Engineer)**
-- [ ] Add integration tests for scoring logic in `backend/tests/test_scoring.py`.
-
-**Phase Verification Gate & Acceptance Criteria**
+#### Acceptance Criteria & Verification
 - Execution: `pytest backend/tests/test_scoring.py`
-- Output: Accurate scoring validation against known good manual calculations.
+- Output: 100% agreement between automated health scores and benchmark manual calculations.
 
-### Phase 6: Officer Enforcement, FORM LM-INSP-2011 PDF Generator & Dashboard Aggregates
-**Estimated Duration:** 6 Days | **Milestones:** Officer dashboard live, PDF generation working.
-**Entry Pre-requisites:** Supabase Auth RBAC operational, substantial scan data available.
+---
 
-**Member 1 (Frontend Developer)**
-- [ ] Build `frontend/src/pages/OfficerDashboard.tsx` with aggregate charts.
-- [ ] Implement print CSS for reports in `frontend/src/styles/print.css`.
+### Phase 6: Officer Enforcement, FORM LM-INSP-2011 PDF & Analytics
+**Status:** Pending (4/9 Tasks Done | 44% Complete)  
+**Duration:** 6 Days  
+**Milestones:** Enforcement dashboard live, automated legal PDF generation working.
 
-**Member 2 (Backend Developer)**
-- [ ] Create aggregate statistics endpoints in `backend/src/api/admin.py`.
-- [ ] Implement WeasyPrint PDF generator in `backend/src/services/pdf_gen.py` outputting FORM LM-INSP-2011.
+#### Task Checklist
+- [x] **Officer Dashboard UI**: Build officer overview with KPI cards in `frontend/src/pages/officer/OfficerDashboardPage.tsx`.
+- [x] **Inspections Ledger UI**: Implement search and filter table in `frontend/src/pages/officer/InspectionsPage.tsx`.
+- [x] **Report Viewer UI**: Build docket viewer interface in `frontend/src/pages/officer/ReportViewerPage.tsx`.
+- [x] **Violation Card Widget**: Implement legal clause citation display in `frontend/src/components/reports/ViolationCard.tsx`.
+- [ ] **Aggregate Analytics Endpoints**: Implement `GET /api/v1/dashboard/metrics` and `GET /api/v1/dashboard/activity` in `backend/src/api/v1/endpoints/dashboard.py`.
+- [ ] **WeasyPrint PDF Service**: Implement statutory inspection certificate generator in `backend/src/services/pdf_generator.py` formatting FORM LM-INSP-2011.
+- [ ] **PDF Export API Endpoint**: Implement `GET /api/v1/reports/pdf/{scan_id}` streaming printable PDF documents.
+- [ ] **Statutory Notice Draft Endpoint**: Implement `POST /api/v1/violations/{id}/generate-notice` utilizing LangGraph RAG synthesis to generate formal Section 36(1) notices.
+- [ ] **Print CSS Styling**: Author optimized print stylesheet in `frontend/src/styles/print.css`.
 
-**Member 3 (AI Engineer)**
-- [ ] Implement non-compliance classification model outputting exact legal clauses violated in `ai/src/rules/compliance_checker.py`.
-- [ ] Connect LangGraph statutory RAG node to draft formal legal notices citing Legal Metrology Act 2009 sections.
+#### Acceptance Criteria & Verification
+- Execution: `curl -X GET http://localhost:8000/api/v1/reports/pdf/{scan_id} -o test_docket.pdf`
+- Output: Valid PDF conforming to FORM LM-INSP-2011 formatting, embedding product imagery and statutory citations.
 
-**Member 4 (Tester + DevOps Engineer)**
-- [ ] Validate PDF outputs against legal format requirements.
-- [ ] Write DB query performance tests for aggregate endpoints.
+---
 
-**Phase Verification Gate & Acceptance Criteria**
-- Execution: `curl -X GET http://localhost:8000/api/v1/reports/pdf/123 -o report.pdf`
-- Output: Valid PDF file conforming to FORM LM-INSP-2011 formatting rules.
+### Phase 7: Automated Testing Suites, Security Hardening & CI/CD
+**Status:** In Progress (3/8 Tasks Done | 38% Complete)  
+**Duration:** 3 Days  
+**Milestones:** Full test coverage, security audit passed, automated cloud deployment active.
 
-### Phase 7: Automated Testing Suites, Security Hardening & CI/CD Pipelines
-**Estimated Duration:** 3 Days | **Milestones:** Full test coverage, secure deployment, zero known vulnerabilities.
-**Entry Pre-requisites:** All core features functionally complete.
+#### Task Checklist
+- [x] **Backend Health Test**: Diagnostic tests verified in `backend/tests/test_health.py`.
+- [x] **Frontend Oxlint Checks**: Static lint analysis passing with 0 errors across 46 modules.
+- [x] **Continuous Integration Pipeline**: GitHub Actions workflow running lint and unit tests (`.github/workflows/ci.yml`).
+- [ ] **Database & Endpoint Test Suite**: Comprehensive tests for all REST endpoints in `backend/tests/test_api.py`.
+- [ ] **Input Sanitization & CSP**: Enforce Content Security Policy in `frontend/index.html` and Pydantic sanitization filters in backend schemas.
+- [ ] **In-Memory Rate Limiting Verification**: Verify token bucket sliding-window rate limiting on public endpoints.
+- [ ] **Dependency Security Audit**: Execute `npm audit` and `pip-audit` to confirm zero critical vulnerabilities.
+- [ ] **Cloud Deployment Configurations**: Configure automated staging deployment to Vercel (Frontend) and Render/Railway/Supabase (Backend).
 
-**Member 1 (Frontend Developer)**
-- [ ] Sanitize all user inputs and outputs (XSS prevention).
-- [ ] Ensure strict Content Security Policy (CSP) in `frontend/index.html`.
+#### Acceptance Criteria & Verification
+- Execution: Full GitHub Actions run on `main` branch.
+- Output: All matrix checks green; zero critical security warnings.
 
-**Member 2 (Backend Developer)**
-- [ ] Audit Supabase queries and API routes for injection flaws.
-- [ ] Verify Supabase JWT expiration, role claim validation, and secret management.
-
-**Member 3 (AI Engineer)**
-- [ ] Harden API boundaries to prevent adversarial image attacks (excessive resolution handling).
-
-**Member 4 (Tester + DevOps Engineer)**
-- [ ] Finalize GitHub Actions CI/CD in `.github/workflows/main.yml` covering lint, test, build, and deploy.
-- [ ] Configure Render/Railway/Supabase deployments for the FastAPI backend and database.
-
-**Phase Verification Gate & Acceptance Criteria**
-- Execution: CI/CD Pipeline Run on GitHub.
-- Output: Green checkmarks on all matrix jobs, zero critical security alerts in dependabot.
+---
 
 ### Phase 8: Accuracy Benchmarking, Performance Tuning & Final SIH Freeze
-**Estimated Duration:** 2 Days | **Milestones:** SIH demo ready, offline mode verified.
-**Entry Pre-requisites:** Application deployed to production domains.
+**Status:** Pending (0/6 Tasks Done | 0% Complete)  
+**Duration:** 2 Days  
+**Milestones:** SIH demo dry run validated, offline contingency verified, code freeze.
 
-**Member 1 (Frontend Developer)**
-- [ ] Bundle service workers for basic PWA offline fallback in `frontend/src/sw.ts`.
-- [ ] Verify UI rendering across target mobile resolutions.
+#### Task Checklist
+- [ ] **50-SKU Benchmark Evaluation**: Execute evaluation benchmark against the 50 ground-truth physical commodity samples and document metrics.
+- [ ] **Response Latency Tuning**: Ensure sub-2.5s end-to-end response on full scanning pipeline using in-memory async caching.
+- [ ] **PWA Offline Contingency**: Configure service worker in `frontend/src/sw.ts` for offline presentation mode.
+- [ ] **Physical Packaging Samples Prep**: Procure and test 5 live physical commodity packaging samples (Bournvita, Maggi, Whole Almonds, plus compliant/non-compliant edge cases).
+- [ ] **SIH Jury Presentation Dry Run**: Conduct dry run of 5-minute inspector and consumer demonstration flow.
+- [ ] **Repository & Documentation Freeze**: Finalize all markdown documents, tag release commit `v1.0.0`, and backup database state.
 
-**Member 2 (Backend Developer)**
-- [ ] Implement zero-manual-step in-memory caching layer (`cachetools` / `async-lru`) for static lookup tables.
-- [ ] Tune Supabase PostgreSQL connection pooling settings.
+#### Acceptance Criteria & Verification
+- Execution: 5-product live scan dry run with jury script.
+- Output: Instantaneous UI rendering, 100% legal math accuracy, zero unhandled errors.
 
-**Member 3 (AI Engineer)**
-- [ ] Freeze prompt templates, LangGraph nodes, and rule parameters.
-- [ ] Run final 50-SKU benchmark and document metrics for judges.
+---
 
-**Member 4 (Tester + DevOps Engineer)**
-- [ ] Perform load testing on deployed staging environment.
-- [ ] Backup final Supabase PostgreSQL state.
+## 5. Immediate Next Priority Tasks
 
-**Phase Verification Gate & Acceptance Criteria**
-- Execution: Offline loading test and full 5-product demo dry run.
-- Output: Smooth presentation sequence without crashes.
+To advance the project toward production readiness, the immediate development sequence is:
 
-## 3. Cross-Team Integration Protocol & Hand-off Contracts
+1. **Implement Backend Models & Supabase Migration (Phase 2)**:
+   - Create SQLAlchemy 2.0 models in `backend/src/models/`.
+   - Setup Alembic and apply migrations to remote Supabase instance.
+   - Author Supabase Auth JWT verification in `backend/src/core/security.py`.
+2. **Implement LangGraph RAG & Parallel Dual-LLM Pipeline (Phase 3)**:
+   - Author `ai/src/rules/deterministic.py` for legal math (USP, Rule 7 font calibration, Rule 9 contrast).
+   - Implement Supabase `pgvector` retrieval node.
+   - Implement Parallel Dual-LLM dispatcher (`asyncio.gather()` between Gemini and Groq).
+   - Wire LangGraph workflow in `ai/src/pipeline/langgraph_workflow.py`.
+3. **Connect Frontend Scanner to Live Backend API (Phase 4)**:
+   - Implement `POST /api/v1/scan/upload` and `analyze`.
+   - Replace mock data in `frontend/src/pages/consumer/ScannerPage.tsx`.
 
-- **AI to Backend:** Member 3 delivers inference logic as a Python module in the shared `backend/src/services/ai/` directory or as a separate internal microservice API. Interface schema defined via Pydantic in `backend/src/schemas/ml.py`.
-- **Backend to Frontend:** Member 2 maintains strict OpenAPI specs available at `/docs`. Member 1 generates frontend types directly from the OpenAPI `openapi.json` file.
-- **Merge & Deployment:** All PRs must target the `main` branch and require review from at least one other member. Member 4's GitHub Actions act as the ultimate gatekeeper, preventing merges that fail tests or decrease coverage below 80%. Staging deployments happen automatically on push to `main`.
+---
 
-## 4. SIH Evaluation Readiness Checklist
+## 6. SIH Evaluation Readiness Checklist
 
-- [ ] **5 Live Demo Test Commodities:** Procure physical samples representing clear passes, clear failures, and marginal edge cases.
-- [ ] **Offline Contingency Mode:** Prepare a pre-recorded video of the entire flow. Run a local offline stack via `docker-compose` as a backup.
-- [ ] **Judge Walkthrough Script:** Documented narrative flow highlighting technical complexity (OCR -> Rules -> DB -> UI) and societal impact.
-- [ ] **Architecture Diagram:** Printed and digital high-level system overview.
-- [ ] **Performance Metrics Summary:** 1-pager on latency, OCR accuracy, and rule parsing precision.
+- [ ] **5 Physical Packaging Commodities**: Procured samples representing clear violations, full compliance, and dual MRP tampering.
+- [ ] **Offline Contingency Backup**: Pre-recorded walkthrough video and offline local Docker stack.
+- [ ] **Judge Presentation Script**: Step-by-step 5-minute presentation script emphasizing societal impact and deterministic legal math.
+- [ ] **High-Level System Architecture Diagram**: Printable and digital architecture visual.
+- [ ] **1-Page Performance & Accuracy Sheet**: Summary of OCR accuracy, rule precision, and sub-2.5s latency metrics.
