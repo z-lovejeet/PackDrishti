@@ -27,11 +27,11 @@ Pending Tasks:        26
 | **Phase 2** | Database Modeling, Supabase Persistence & Auth Core | 8 | 0 | 8 | 100% | Completed |
 | **Phase 3** | LangGraph Stateful RAG & Parallel Dual-LLM Pipeline | 10 | 0 | 10 | 100% | Completed |
 | **Phase 4** | Frontend Live Integration & Scanner Flow | 8 | 0 | 8 | 100% | Completed |
-| **Phase 5** | Consumer Health Engine & ICMR-NIN Table Parser | 3 | 4 | 7 | 43% | Pending |
+| **Phase 5** | Consumer Health Engine & ICMR-NIN Table Parser | 7 | 0 | 7 | 100% | Completed |
 | **Phase 6** | Officer Enforcement, FORM LM-INSP-2011 PDF & Analytics | 4 | 5 | 9 | 44% | Pending |
 | **Phase 7** | Automated Testing Suites, Security Hardening & CI/CD | 3 | 5 | 8 | 38% | In Progress |
 | **Phase 8** | Accuracy Benchmarking, Performance Tuning & Final SIH Freeze | 0 | 6 | 6 | 0% | Pending |
-| **TOTAL** | **Full Engineering Lifecycle** | **46** | **20** | **66** | **70%** | **In Active Progress** |
+| **TOTAL** | **Full Engineering Lifecycle** | **50** | **16** | **66** | **76%** | **In Active Progress** |
 
 ---
 
@@ -215,7 +215,7 @@ Pending Tasks:        26
 ---
 
 ### Phase 5: Consumer Health Engine & ICMR-NIN Table Parser
-**Status:** Pending (3/7 Tasks Done | 43% Complete)  
+**Status:** Completed (7/7 Tasks Done | 100% Complete)  
 **Duration:** 5 Days  
 **Milestones:** Tabular nutrition parsing active, ICMR-NIN 2024 dietary scoring operational.
 
@@ -223,10 +223,10 @@ Pending Tasks:        26
 - [x] **Health Check UI View**: Implement consumer health page in `frontend/src/pages/consumer/HealthCheckPage.tsx`.
 - [x] **Nutritional Breakdown Card**: Implement nutrient row widget in `frontend/src/components/health/NutrientRow.tsx`.
 - [x] **Dietary Advisory UI**: Author advisory warning component in `frontend/src/components/health/DietaryAdvisory.tsx`.
-- [ ] **Tabular Nutrition Extractor**: Author OCR/VLM tabular data parser in `ai/src/rules/nutrition_parser.py` converting nutrition panels to structured JSON.
-- [ ] **ICMR-NIN 2024 Scoring Engine**: Implement nutritional scoring algorithms and High-Fat-Sugar-Salt (HFSS) thresholds in `backend/src/services/health_engine.py`.
-- [ ] **Health Audit API Endpoint**: Implement `GET /api/v1/health/score/{scan_id}` returning health scores, nutrient breakdown, and contraindications.
-- [ ] **Health Scoring Test Suite**: Add unit tests in `backend/tests/test_scoring.py` verifying nutrition calculations against reference standards.
+- [x] **Tabular Nutrition Extractor**: Author OCR/VLM tabular data parser in `ai/src/rules/nutrition_parser.py` converting nutrition panels to structured JSON.
+- [x] **ICMR-NIN 2024 Scoring Engine**: Implement nutritional scoring algorithms and High-Fat-Sugar-Salt (HFSS) thresholds in `backend/src/services/health_engine.py`.
+- [x] **Health Audit API Endpoint**: Implement `GET /api/v1/health/score/{scan_id}` returning health scores, nutrient breakdown, and contraindications.
+- [x] **Health Scoring Test Suite**: Add unit tests in `backend/tests/test_scoring.py` verifying nutrition calculations against reference standards.
 
 #### Acceptance Criteria & Verification
 - Execution: `pytest backend/tests/test_scoring.py`

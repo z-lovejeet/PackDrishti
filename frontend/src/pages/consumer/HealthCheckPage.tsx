@@ -13,11 +13,13 @@ import {
   Sparkle,
   ArrowClockwise,
   Info,
-  Scales
+  Scales,
+  SpinnerGap
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { BENCHMARK_HEALTH_PRODUCTS, ProductHealthAudit } from '../../data/mockHealthData';
+import { apiClient } from '../../utils/apiClient';
 
 export const HealthCheckPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'upload' | 'benchmarks'>('upload');
@@ -25,8 +27,11 @@ export const HealthCheckPage: React.FC = () => {
   // Dual Image Upload States
   const [frontImageSrc, setFrontImageSrc] = useState<string | null>(null);
   const [frontFileName, setFrontFileName] = useState<string>('');
+  const [frontRawFile, setFrontRawFile] = useState<File | null>(null);
+
   const [backImageSrc, setBackImageSrc] = useState<string | null>(null);
   const [backFileName, setBackFileName] = useState<string>('');
+  const [backRawFile, setBackRawFile] = useState<File | null>(null);
 
   const [isDragOverFront, setIsDragOverFront] = useState<boolean>(false);
   const [isDragOverBack, setIsDragOverBack] = useState<boolean>(false);
@@ -34,6 +39,8 @@ export const HealthCheckPage: React.FC = () => {
   // Analysis State
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisStep, setAnalysisStep] = useState<number>(0);
+  const [liveAuditResult, setLiveAuditResult] = useState<ProductHealthAudit | null>(null);
+  const [isLiveSource, setIsLiveSource] = useState<boolean>(false);
 
   // Active Audit Selection
   const [selectedBenchmarkId, setSelectedBenchmarkId] = useState<string | null>(null);
@@ -46,7 +53,9 @@ export const HealthCheckPage: React.FC = () => {
   // Active Audit Data Resolution
   let currentAudit: ProductHealthAudit | null = null;
 
-  if (activeTab === 'upload' && frontImageSrc && backImageSrc) {
+  if (activeTab === 'upload' && liveAuditResult) {
+    currentAudit = liveAuditResult;
+  } else if (activeTab === 'upload' && frontImageSrc && backImageSrc) {
     const base = BENCHMARK_HEALTH_PRODUCTS[0];
     currentAudit = {
       ...base,
@@ -61,6 +70,7 @@ export const HealthCheckPage: React.FC = () => {
 
   const handleFrontFile = (file: File) => {
     if (!file) return;
+    setFrontRawFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       setFrontImageSrc(e.target?.result as string);
@@ -71,6 +81,7 @@ export const HealthCheckPage: React.FC = () => {
 
   const handleBackFile = (file: File) => {
     if (!file) return;
+    setBackRawFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       setBackImageSrc(e.target?.result as string);
@@ -79,21 +90,130 @@ export const HealthCheckPage: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const runDualScanAudit = () => {
+  const runDualScanAudit = async () => {
     setIsAnalyzing(true);
     setAnalysisStep(1);
-    setTimeout(() => setAnalysisStep(2), 400);
-    setTimeout(() => setAnalysisStep(3), 800);
-    setTimeout(() => {
+
+    const timer1 = setTimeout(() => setAnalysisStep(2), 400);
+    const timer2 = setTimeout(() => setAnalysisStep(3), 800);
+
+    try {
+      const formData = new FormData();
+      if (frontRawFile) {
+        formData.append('front_image', frontRawFile);
+      } else {
+        formData.append(
+          'front_image',
+          new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: 'image/jpeg' }),
+          frontFileName || 'front.jpg'
+        );
+      }
+
+      if (backRawFile) {
+        formData.append('back_image', backRawFile);
+      } else {
+        formData.append(
+          'back_image',
+          new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: 'image/jpeg' }),
+          backFileName || 'back.jpg'
+        );
+      }
+
+      formData.append(
+        'product_name',
+        frontFileName ? frontFileName.replace(/\.[^/.]+$/, '') : 'Packaged Commodity'
+      );
+      formData.append('brand', 'Packaged Foods Ltd.');
+      formData.append('serving_size_g', '100.0');
+
+      const response = await apiClient.post('/health/analyze', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (response.data && response.data.data) {
+        const apiData = response.data.data;
+        const mappedAudit: ProductHealthAudit = {
+          id: apiData.audit_id,
+          commodityName: apiData.product_name || 'Verified Commodity',
+          brandName: apiData.brand || 'Packaged Foods',
+          category: 'Packaged Food Commodity',
+          servingSize: apiData.serving_size || '100 g',
+          netQuantity: 'Standard Pack',
+          mrp: 'Declared on Back Panel',
+          pricePer100g: 'Standard Basis',
+          priceRating: 'Fair Market Rate',
+          priceAnalysis:
+            apiData.dietary_summary ||
+            'Audited against ICMR-NIN 2024 Dietary Guidelines for Indians.',
+          overallRating: apiData.score_band as any,
+          ratingScore: Math.round(apiData.health_score),
+          frontImageUrl:
+            frontImageSrc ||
+            'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80',
+          backImageUrl:
+            backImageSrc ||
+            'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80',
+          badges: (apiData.badges || []).map((b: any) => ({
+            label: b.badge,
+            type:
+              b.severity === 'danger'
+                ? 'danger'
+                : b.severity === 'good'
+                ? 'good'
+                : 'warning',
+          })),
+          nutrients: (apiData.nutrients || []).map((n: any) => ({
+            name: n.name,
+            valuePer100g: n.value,
+            valuePerServe: Math.round(n.value * 0.2 * 10) / 10,
+            unit: n.unit,
+            icmrDailyLimit: `${n.icmr_limit} ${n.unit}`,
+            level: n.threshold,
+            assessment: n.assessment,
+          })),
+          whoCanConsume: apiData.dietary_advisory?.who_can_consume || [],
+          whoShouldAvoid: apiData.dietary_advisory?.who_should_avoid || [],
+          healthierAlternatives: (
+            apiData.dietary_advisory?.healthier_alternatives || []
+          ).map(
+            (a: any) =>
+              `${a.alternative_name}: ${a.swap_advantage} (${a.calorie_difference})`
+          ),
+          dietarySummary: apiData.dietary_summary || '',
+        };
+        setLiveAuditResult(mappedAudit);
+        setIsLiveSource(true);
+      }
+    } catch {
+      // Graceful fallback to benchmark record on offline/demo
+      const base = BENCHMARK_HEALTH_PRODUCTS[0];
+      setLiveAuditResult({
+        ...base,
+        commodityName: frontFileName
+          ? `Uploaded Specimen (${frontFileName.replace(/\.[^/.]+$/, '')})`
+          : 'User Uploaded Commodity',
+        frontImageUrl: frontImageSrc || base.frontImageUrl,
+        backImageUrl: backImageSrc || base.backImageUrl,
+        priceAnalysis:
+          'Calculated Unit Sale Price based on back-panel declared MRP and net contents.',
+      });
+      setIsLiveSource(false);
+    } finally {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
       setIsAnalyzing(false);
-    }, 1200);
+    }
   };
 
   const handleResetUploads = () => {
     setFrontImageSrc(null);
     setFrontFileName('');
+    setFrontRawFile(null);
     setBackImageSrc(null);
     setBackFileName('');
+    setBackRawFile(null);
+    setLiveAuditResult(null);
+    setIsLiveSource(false);
     setSelectedBenchmarkId(null);
   };
 
@@ -119,14 +239,26 @@ export const HealthCheckPage: React.FC = () => {
         </div>
 
         {(frontImageSrc || backImageSrc || currentAudit) && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleResetUploads}
-            icon={<ArrowClockwise size={15} />}
-          >
-            Reset Health Scanner
-          </Button>
+          <div className="flex items-center gap-2">
+            {currentAudit && (
+              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] text-[11px] font-mono border border-neutral-200 bg-neutral-50 text-neutral-600">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isLiveSource ? "bg-success animate-pulse" : "bg-primary"
+                  }`}
+                />
+                <span>{isLiveSource ? "Live ICMR-NIN Analysis" : "Benchmark Evaluation Mode"}</span>
+              </span>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetUploads}
+              icon={<ArrowClockwise size={15} />}
+            >
+              Reset Health Scanner
+            </Button>
+          </div>
         )}
       </div>
 
