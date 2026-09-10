@@ -72,6 +72,23 @@ async def root():
 # Mount API version 1 router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+from fastapi.responses import RedirectResponse
+
+@app.get("/docs", include_in_schema=False)
+async def redirect_docs():
+    """
+    Redirect root /docs to API v1 docs endpoint.
+    """
+    return RedirectResponse(url=f"{settings.API_V1_STR}/docs")
+
+@app.get("/redoc", include_in_schema=False)
+async def redirect_redoc():
+    """
+    Redirect root /redoc to API v1 redoc endpoint.
+    """
+    return RedirectResponse(url=f"{settings.API_V1_STR}/redoc")
+
+
 if __name__ == "__main__":
     import uvicorn
 

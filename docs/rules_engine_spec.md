@@ -20,7 +20,22 @@ Enforcement of these provisions historically depended upon physical inspection b
 The PackDrashiti statutory verification engine operates within a strict four-tier architecture designed to eliminate hallucinations, enforce mathematical determinism, and ground all legal actions in statutory law:
 
 - **Tier 1: Multimodal VLM & High-Performance OCR (Perception & Spatial Token Stream)**
-  High-accuracy extraction combining Multimodal Vision-Language Models (Google Gemini 1.5 Flash / OpenAI GPT-4o-mini) with structured Pydantic schemas, supplemented by PaddleOCR for low-latency edge/fallback processing. Extracts text tokens, bounding boxes `[ymin, xmin, ymax, xmax]`, and confidence metrics.
+  High-accuracy extraction combining Multimodal Vision-Language Models (Google Gemini 1.5 Flash) with structured Pydantic schemas, supplemented by PaddleOCR for low-latency edge/fallback processing. Extracts text tokens, bounding boxes `[ymin, xmin, ymax, xmax]`, and confidence metrics.
+
+| Layer | Component | Core Technology |
+| :--- | :--- | :--- |
+| **Tier 1** | Spatial Token & Bounding Box Extraction | Multimodal VLM (Google Gemini 1.5 Flash) + PaddleOCR local fallback |
+| **Tier 2** | Legal Mathematics Verification Engine | Deterministic Python Rule Engine (Zero-LLM Math Computation) |
+| **Tier 3** | Statutory RAG & Case Precedent Retrieval | PostgreSQL `pgvector` HNSW Cosine Similarity Search |
+| **Tier 4** | Consumer Advisory & Notice Synthesizer | Stateful LangGraph Dual-LLM Pipeline (Gemini + Groq) |
+
+| Component | Target Accuracy / Performance Metric |
+| :--- | :--- |
+| Tier 1 OCR / VLM Perception | CER <= 5%, WER <= 8%, Bounding Box IoU >= 0.70 |
+| Tier 2 Legal Math Rule Engine | 100.00% Verification Accuracy (0.00% Math Error Tolerance) |
+| Tier 3 Statutory RAG Engine | MRR >= 0.85, Context Recall >= 90%, Hit Rate @ 3 >= 92% |
+| Tier 4 Synthesis & Notice Generation | Valid Pydantic JSON Rate = 100.00%, Zero Legal Math Calculations |
+
 - **Tier 2: Deterministic Python Rule Engine (Mathematical & Statutory Adjudication)**
   100% deterministic, auditable code. Never let an LLM perform statutory math or font calculations! Implements Rule 6(1) mandatory declaration parsing, Rule 6(1)(e) Unit Sale Price arithmetic, Rule 7 Table-I font calibration step functions, Rule 9 WCAG 2.1 contrast formulas, and Rule 13 SI metric unit validation.
 - **Tier 3: Statutory Legal RAG (pgvector Semantic Search & Precedent Citation)**

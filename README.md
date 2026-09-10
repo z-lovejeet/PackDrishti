@@ -41,7 +41,7 @@ This repository is structured as a monorepo containing frontend client applicati
 |   |-- schemas/                  # Pydantic v2 validation contracts
 |   `-- services/                 # Compliance checker, PDF generator, storage service
 |-- ai/                           # Modern AI pipeline (OCR + VLM + Rules Engine + RAG)
-|   |-- vlm_extractor.py          # Multimodal VLM (Gemini/GPT-4o-mini) & PaddleOCR structured extraction
+|   |-- vlm_extractor.py          # Multimodal VLM (Gemini 1.5 Flash) & PaddleOCR structured extraction
 |   |-- rules_engine.py           # Deterministic Python validation (USP math, SI units, Rule 7 Table-I)
 |   |-- statutory_rag.py          # PostgreSQL pgvector semantic search over Legal Metrology Acts
 |   |-- contrast_analyzer.py      # Rule 9 WCAG 2.1 color contrast calculator
