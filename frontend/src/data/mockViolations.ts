@@ -15,7 +15,7 @@ export const MOCK_VIOLATIONS: ViolationRecord[] = [
     assignedOfficer: 'Sh. Rajesh Kumar Sharma',
     location: 'Sadar Bazaar, Delhi',
     timeline: [
-      { date: '15-Aug-2026 14:35', action: 'Violation Detected & Verified by MetroScan', by: 'Sh. Rajesh Kumar Sharma', note: 'Automated scan detected USP omission and 1.9mm font height on 148 cm² PDP.' },
+      { date: '15-Aug-2026 14:35', action: 'Violation Detected & Verified by PackDrashiti', by: 'Sh. Rajesh Kumar Sharma', note: 'Automated scan detected USP omission and 1.9mm font height on 148 cm² PDP.' },
       { date: '16-Aug-2026 10:00', action: 'Field Inspection Case File Created', by: 'Sh. Rajesh Kumar Sharma' },
       { date: '18-Aug-2026 11:30', action: 'Show Cause Notice Issued under Sec 36(1)', by: 'State Controller of Legal Metrology, Delhi', note: 'Notice Ref: DL/LM/2026/SCN-881' }
     ]
@@ -34,7 +34,7 @@ export const MOCK_VIOLATIONS: ViolationRecord[] = [
     assignedOfficer: 'Sh. Rajesh Kumar Sharma',
     location: 'Karol Bagh, Delhi',
     timeline: [
-      { date: '11-Aug-2026 10:20', action: 'Detected via MetroScan mobile field scanner', by: 'Sh. Rajesh Kumar Sharma' },
+      { date: '11-Aug-2026 10:20', action: 'Detected via PackDrashiti mobile field scanner', by: 'Sh. Rajesh Kumar Sharma' },
       { date: '12-Aug-2026 15:00', action: 'Assigned to Legal Metrology Officer Zone-1 for hearing', by: 'Superintendent LMO' }
     ]
   },

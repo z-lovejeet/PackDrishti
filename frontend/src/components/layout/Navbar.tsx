@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">MetroScan</span>
+              <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">PackDrashiti</span>
               <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary-light text-primary border border-primary-border">
                 LMPC 2011
               </span>

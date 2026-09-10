@@ -1,9 +1,9 @@
-# MetroScan (SIH26034) Development Roadmap
+# PackDrashiti (SIH26034) Development Roadmap
 
 ## 1. Executive Roadmap Overview & Engineering Tenets
 
 **Current State vs Production Target Gap Analysis**
-Currently, the MetroScan project consists of a React frontend prototype utilizing mock data. The production target requires a robust dual-audience architecture (Consumer vs Officer), complete with an integrated FastAPI backend, a 4-tier hybrid AI pipeline, and PostgreSQL persistence. The gap involves migrating away from static `frontend/src/data/mock.ts` stubs to live API endpoints, implementing role-based access control (RBAC), setting up real-time AI processing for packaging rule verification, and deploying automated CI/CD pipelines.
+Currently, the PackDrashiti project consists of a React frontend prototype utilizing mock data. The production target requires a robust dual-audience architecture (Consumer vs Officer), complete with an integrated FastAPI backend, a 4-tier hybrid AI pipeline, and PostgreSQL persistence. The gap involves migrating away from static `frontend/src/data/mock.ts` stubs to live API endpoints, implementing role-based access control (RBAC), setting up real-time AI processing for packaging rule verification, and deploying automated CI/CD pipelines.
 
 **Dual-Audience Architecture Requirements**
 1. **Consumer Portal:** Focuses on sub-500ms latency health metrics, nutritional scanning, allergen detection, and simplified compliance indicators.

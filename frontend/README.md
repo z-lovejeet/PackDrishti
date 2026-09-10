@@ -1,4 +1,4 @@
-# MetroScan — Legal Metrology Compliance Checking System
+# PackDrashiti — Legal Metrology Compliance Checking System
 ### Ministry of Consumer Affairs, Food & Public Distribution • Smart India Hackathon (SIH26034)
 
 A streamlined, humanized software system developed under the **Legal Metrology (Packaged Commodities) Rules, 2011** to check statutory packaging declarations, enforce metric unit standards, and cross-reference official registered commodity datasets.

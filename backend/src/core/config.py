@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """
-    MetroScan Application Configuration Settings.
+    PackDrashiti Application Configuration Settings.
     Utilizes Pydantic BaseSettings for strict environment variable parsing and validation.
     """
 
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     )
 
     # Application Runtime Settings
-    APP_NAME: str = "MetroScan"
+    APP_NAME: str = "PackDrashiti"
     APP_ENV: str = "development"
     DEBUG: bool = True
     PORT: int = 8000
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     # Database Configuration (PostgreSQL with pgvector)
     DATABASE_URL: str = (
-        "postgresql://metroscan_user:metroscan_pass@localhost:5432/metroscan_db"
+        "postgresql://packdrashiti_user:packdrashiti_pass@localhost:5432/packdrashiti_db"
     )
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20

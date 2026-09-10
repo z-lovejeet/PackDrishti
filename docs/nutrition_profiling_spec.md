@@ -1,10 +1,10 @@
 # ICMR-NIN 2024 Nutritional Benchmark and Health Engine Specification
 
-**Document Identifier**: SPEC-METROSCAN-NUTRI-2024  
-**Project**: MetroScan (SIH26034)  
+**Document Identifier**: SPEC-PACKDRASHITI-NUTRI-2024  
+**Project**: PackDrashiti (SIH26034)  
 **Classification**: Technical Architecture & Algorithmic Specification  
 **Governing Authorities**: ICMR - National Institute of Nutrition (NIN) Guidelines (May 2024), FSSAI Labelling & Display Regulations (2020), WHO SEAR Nutrient Profile Model  
-**Author**: MetroScan Core Engineering & Nutritional Metrology Team  
+**Author**: PackDrashiti Core Engineering & Nutritional Metrology Team  
 **Status**: Approved for Implementation  
 **Target Files**: 
 - Specification: `/Users/lovejeetsingh1/Documents/SIH/docs/nutrition_profiling_spec.md`
@@ -18,7 +18,7 @@
 ## 1. Document Header and Purpose
 
 ### 1.1 Executive Summary
-MetroScan (SIH26034) provides an automated regulatory compliance verification and nutritional safety auditing platform. While statutory metrology modules enforce compliance with the Legal Metrology (Packaged Commodities) Rules, 2011, the Nutritional Profiling Engine protects consumer public health. 
+PackDrashiti (SIH26034) provides an automated regulatory compliance verification and nutritional safety auditing platform. While statutory metrology modules enforce compliance with the Legal Metrology (Packaged Commodities) Rules, 2011, the Nutritional Profiling Engine protects consumer public health. 
 
 This specification codifies the operational rules, computer vision extraction schemas, mathematical scoring formulations, and diagnostic heuristics required to evaluate packaged food and beverage products against the ICMR-NIN 2024 Dietary Guidelines for Indians and WHO thresholds. The primary goal is automated detection of High-Fat-Sugar-Salt (HFSS) formulations, computation of a standardized 0-100 Health Score, generation of automated advisory badges, clinical contraindication screening, and recommendation of whole-food alternatives.
 
@@ -216,7 +216,7 @@ Calculated against a standard reference Indian adult diet (2,000 kcal/day; Refer
 ## 4. Health Score Calculation Algorithm (0 to 100 Scale)
 
 ### 4.1 Theoretical Formulation
-The MetroScan Composite Health Score (denoted as H, where H in [0, 100]) assesses nutritional quality on an integer scale. A product starts with a baseline allocation of 100 points, representative of an unadulterated whole food. Penalties are deducted for excess negative nutrients (added sugar, sodium, saturated fat, trans fat), and credits are awarded for positive nutrient density (dietary fiber, protein).
+The PackDrashiti Composite Health Score (denoted as H, where H in [0, 100]) assesses nutritional quality on an integer scale. A product starts with a baseline allocation of 100 points, representative of an unadulterated whole food. Penalties are deducted for excess negative nutrients (added sugar, sodium, saturated fat, trans fat), and credits are awarded for positive nutrient density (dietary fiber, protein).
 
 The raw mathematical formulation is defined as:
 
@@ -430,7 +430,7 @@ Under ICMR-NIN 2024 guidelines, foods high in specific metabolic drivers must be
 ## 7. Healthier Alternatives Recommendation Engine
 
 ### 7.1 Algorithmic Substitution Heuristics
-When a consumer scans an ultra-processed or HFSS item, MetroScan executes a multi-attribute recommendation query to suggest culturally appropriate, healthier alternatives:
+When a consumer scans an ultra-processed or HFSS item, PackDrashiti executes a multi-attribute recommendation query to suggest culturally appropriate, healthier alternatives:
 
 1. **Taxonomic Category Equivalence**: The system maps the query product to its functional dietary slot (e.g., "Breakfast Drink", "Convenience Meal", "Savory Crunch Snack", "Sweet Confectionery").
 2. **Nutrient Differential Verification**: An alternative is admissible if and only if:
@@ -531,7 +531,7 @@ The following production-ready Python class specifies the mathematical operation
 
 ```python
 # File reference: /Users/lovejeetsingh1/Documents/SIH/ml/nutrition_engine.py
-# Reference Specification: SPEC-METROSCAN-NUTRI-2024
+# Reference Specification: SPEC-PACKDRASHITI-NUTRI-2024
 
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Tuple
@@ -571,7 +571,7 @@ class HealthAuditResult:
 class ICMRNutritionProfilingEngine:
     """
     ICMR-NIN 2024 and WHO SEAR Nutritional Profiling & Health Scoring Engine.
-    Implements SPEC-METROSCAN-NUTRI-2024.
+    Implements SPEC-PACKDRASHITI-NUTRI-2024.
     """
 
     ICMR_THRESHOLDS = {
@@ -761,7 +761,7 @@ class ICMRNutritionProfilingEngine:
 ## 9. Verification and Test Protocol
 
 ### 9.1 Unit Test Coverage Checklist
-Any software build of the MetroScan engine must execute the following automated unit tests prior to deployment:
+Any software build of the PackDrashiti engine must execute the following automated unit tests prior to deployment:
 - [x] **Test 1: Normalization Invariant**: Verify that a product declaring 6.4g sugar per 20g serve produces exactly 32.0g per 100g.
 - [x] **Test 2: Mass Conservation Invariant**: Verify parser rejection if `saturated_fat + trans_fat > total_fat`.
 - [x] **Test 3: Trans Fat Immediate Penalty**: Verify that setting `trans_fat = 0.1g` produces an instant 30-point deduction.

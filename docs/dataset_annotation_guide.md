@@ -1,4 +1,4 @@
-# MetroScan: Packaging Dataset Collection and Annotation Guide
+# PackDrashiti: Packaging Dataset Collection and Annotation Guide
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
 **Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
@@ -11,7 +11,7 @@
 ## 1. Document Header and Technical Objective
 
 ### 1.1 Objective: Golden Ground-Truth Evaluation Benchmark Philosophy
-This document defines the technical protocol for creating, standardizing, and annotating the official benchmark ground truth dataset for the MetroScan regulatory compliance platform. In alignment with the modern AI architecture (Multimodal Vision-Language Models + Deterministic Python Rule Engine + Statutory RAG), custom computer vision models are not trained from scratch. Instead, this dataset serves strictly as an immutable, physically verified **50-SKU Golden Ground-Truth Evaluation Benchmark** across representative retail categories in India.
+This document defines the technical protocol for creating, standardizing, and annotating the official benchmark ground truth dataset for the PackDrashiti regulatory compliance platform. In alignment with the modern AI architecture (Multimodal Vision-Language Models + Deterministic Python Rule Engine + Statutory RAG), custom computer vision models are not trained from scratch. Instead, this dataset serves strictly as an immutable, physically verified **50-SKU Golden Ground-Truth Evaluation Benchmark** across representative retail categories in India.
 
 This golden benchmark serves as the absolute scientific baseline for:
 1. Evaluating Multimodal VLM (Gemini 1.5 Flash / GPT-4o-mini) and OCR (PaddleOCR) extraction accuracy (Character Error Rate [CER <= 5%] and Word Error Rate [WER <= 8%]) across varied packaging substrates, fonts, and print methods (rotogravure, flexography, thermal inkjet, offset lithography).
@@ -231,14 +231,14 @@ Every annotation entity class is derived directly from statutory mandates codifi
 ## 5. Bounding Box and Polygon Annotation Schema (JSON)
 
 ### 5.1 Schema Design Specifications
-The MetroScan annotation format uses JSON schema version 1.2.0. The schema captures full spatial polygons (minimum 4 vertices, arbitrary N vertices for curved surfaces), normalized bounding boxes (0-100 percentage coordinates), exact OCR transcripts, measured physical letter heights, and statutory compliance status.
+The PackDrashiti annotation format uses JSON schema version 1.2.0. The schema captures full spatial polygons (minimum 4 vertices, arbitrary N vertices for curved surfaces), normalized bounding boxes (0-100 percentage coordinates), exact OCR transcripts, measured physical letter heights, and statutory compliance status.
 
 ### 5.2 Official JSON Ground Truth Schema
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "MetroScanPackagingAnnotation",
+  "title": "PackDrashitiPackagingAnnotation",
   "type": "object",
   "required": [
     "schema_version",
@@ -886,13 +886,13 @@ Data annotators may utilize Labelme, CVAT (Computer Vision Annotation Tool), or 
    - In the description field, input the exact transcribed string including punctuation and symbols.
 
 #### 6.1.2 CVAT Protocol
-1. Create a Project named `MetroScan_GroundTruth_Benchmark`.
+1. Create a Project named `PackDrashiti_GroundTruth_Benchmark`.
 2. Add labels corresponding to the 19 classes with `Polygon` and `Attribute: transcribed_text (text)`.
 3. Upload raw high-resolution images from `ml/test_data/images/`.
 4. Export task annotations using the `CVAT for images 1.1` format or `COCO 1.0`.
 
 ### 6.2 Coordinate Normalization to Frontend [x, y, width, height] (0-100 Scale)
-The MetroScan web frontend canvas renders bounding boxes using percentage coordinates:
+The PackDrashiti web frontend canvas renders bounding boxes using percentage coordinates:
 - X_norm = (X_min / W_img) * 100
 - Y_norm = (Y_min / H_img) * 100
 - W_norm = ((X_max - X_min) / W_img) * 100
@@ -901,13 +901,13 @@ The MetroScan web frontend canvas renders bounding boxes using percentage coordi
 All coordinates must be rounded to two decimal places.
 
 ### 6.3 Automated Conversion Script
-The following Python script converts Labelme raw JSON files into the certified MetroScan schema, computes normalized bounding boxes, and generates test suite manifests.
+The following Python script converts Labelme raw JSON files into the certified PackDrashiti schema, computes normalized bounding boxes, and generates test suite manifests.
 
 ```python
 #!/usr/bin/env python3
 """
-Convert Labelme annotations to MetroScan Ground Truth Schema (v1.2.0).
-Location: ml/scripts/convert_labelme_to_metroscan.py
+Convert Labelme annotations to PackDrashiti Ground Truth Schema (v1.2.0).
+Location: ml/scripts/convert_labelme_to_packdrashiti.py
 """
 
 import os
@@ -1014,7 +1014,7 @@ def convert_labelme_file(input_path: str, output_path: str, metadata: Dict[str, 
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: python convert_labelme_to_metroscan.py <input_labelme.json> <output_metroscan.json>")
+        print("Usage: python convert_labelme_to_packdrashiti.py <input_labelme.json> <output_packdrashiti.json>")
         sys.exit(1)
     convert_labelme_file(sys.argv[1], sys.argv[2], {})
 ```
@@ -1111,7 +1111,7 @@ The automated validator `ml/scripts/validate_dataset.py` parses all annotation J
 ```python
 #!/usr/bin/env python3
 """
-Dataset Validation Script for MetroScan Benchmark Annotations
+Dataset Validation Script for PackDrashiti Benchmark Annotations
 Location: ml/scripts/validate_dataset.py
 """
 

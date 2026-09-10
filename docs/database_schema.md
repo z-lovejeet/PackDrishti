@@ -1,4 +1,4 @@
-# MetroScan: Production Database Schema & Migration Specification
+# PackDrashiti: Production Database Schema & Migration Specification
 
 **Project Identifier**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
@@ -14,7 +14,7 @@
 ## 1. Document Header & Purpose
 
 ### 1.1 System Context & Architectural Scope
-MetroScan is an automated statutory compliance verification and consumer nutritional auditing platform designed for enforcement authorities (Legal Metrology Inspectors) and Indian retail consumers. The persistence tier must guarantee absolute ACID compliance, tamper-evident auditability, rapid spatial and text query retrieval, and strict referential integrity for statutory violation dockets that may be used in judicial proceedings under Section 36(1) of the Legal Metrology Act, 2009.
+PackDrashiti is an automated statutory compliance verification and consumer nutritional auditing platform designed for enforcement authorities (Legal Metrology Inspectors) and Indian retail consumers. The persistence tier must guarantee absolute ACID compliance, tamper-evident auditability, rapid spatial and text query retrieval, and strict referential integrity for statutory violation dockets that may be used in judicial proceedings under Section 36(1) of the Legal Metrology Act, 2009.
 
 This specification provides the production-grade PostgreSQL 16 database definition, covering:
 1. Enumerated types and domains for role-based access control, compliance classification, and report types.
@@ -39,7 +39,7 @@ This specification provides the production-grade PostgreSQL 16 database definiti
 
 ```
 +-----------------------------------------------------------------------------------------+
-|                                    METROSCAN RELATIONAL ERD                             |
+|                                    PACKDRASHITI RELATIONAL ERD                             |
 +-----------------------------------------------------------------------------------------+
 
        +----------------------------------------------------+
@@ -194,7 +194,7 @@ CREATE TYPE violation_record_status AS ENUM (
 
 ```sql
 -- ============================================================================
--- METROSCAN (SIH26034) RELATIONAL SCHEMA SPECIFICATION
+-- PACKDRASHITI (SIH26034) RELATIONAL SCHEMA SPECIFICATION
 -- Target Database: PostgreSQL 16+
 -- Encoding: UTF-8
 -- Collation: en_US.UTF-8
@@ -716,7 +716,7 @@ The following deterministic SQL statements populate the database with authentica
 
 ```sql
 -- ============================================================================
--- METROSCAN DETERMINISTIC SEED SCRIPT
+-- PACKDRASHITI DETERMINISTIC SEED SCRIPT
 -- ============================================================================
 
 BEGIN;
@@ -868,7 +868,7 @@ INSERT INTO violation_records (
     '[
         {
             "timestamp": "2026-08-15T11:20:00Z",
-            "action": "Violation Detected & Calibrated by MetroScan",
+            "action": "Violation Detected & Calibrated by PackDrashiti",
             "by": "Sh. Rajesh Kumar Sharma",
             "note": "Automated scan flagged 2.15mm numeral height on 215 cm² PDP."
         },
@@ -1077,7 +1077,7 @@ INSERT INTO violation_records (
     '[
         {
             "timestamp": "2026-08-10T18:25:00Z",
-            "action": "Detected via MetroScan Mobile Field Scanner",
+            "action": "Detected via PackDrashiti Mobile Field Scanner",
             "by": "Sh. Rajesh Kumar Sharma"
         },
         {
@@ -1379,7 +1379,7 @@ INSERT INTO compliance_reports (
     3,
     1,
     2,
-    'https://storage.metroscan.gov.in/reports/REP-2026-DL-0012.pdf',
+    'https://storage.packdrashiti.gov.in/reports/REP-2026-DL-0012.pdf',
     '2026-08-16 12:00:00+00'
 );
 
@@ -1393,7 +1393,7 @@ For automated developer onboarding and continuous integration (CI) environments,
 
 ```python
 #!/usr/bin/env python3
-"""Database Seeding Utility for MetroScan (SIH26034)
+"""Database Seeding Utility for PackDrashiti (SIH26034)
 
 Populates PostgreSQL with authorized test officers, retail consumers,
 and statutory benchmark packaging scans (Bournvita, Maggi, and California Almonds).
@@ -1406,7 +1406,7 @@ from decimal import Decimal
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy import select
 
-# Model imports from MetroScan backend domain
+# Model imports from PackDrashiti backend domain
 from app.core.config import settings
 from app.models.users import User, UserRole
 from app.models.product_scans import ProductScan, ComplianceStatus
@@ -1434,7 +1434,7 @@ ALMONDS_SCAN_ID = uuid.UUID("28eebc99-9c0b-4ef8-bb6d-6bb9bd380299")
 ALMONDS_HEALTH_ID = uuid.UUID("39eebc99-9c0b-4ef8-bb6d-6bb9bd3803aa")
 
 async def seed_database():
-    print("[INFO] Initiating MetroScan database seeding routine...")
+    print("[INFO] Initiating PackDrashiti database seeding routine...")
     async with AsyncSessionLocal() as session:
         async with session.begin():
             # Check if database is already seeded
@@ -1514,7 +1514,7 @@ async def seed_database():
                 status="Notice Issued",
                 assigned_officer_id=OFFICER_ID,
                 timeline_json=[
-                    {"timestamp": "2026-08-15T11:20:00Z", "action": "Violation Detected & Calibrated by MetroScan", "by": "Sh. Rajesh Kumar Sharma"},
+                    {"timestamp": "2026-08-15T11:20:00Z", "action": "Violation Detected & Calibrated by PackDrashiti", "by": "Sh. Rajesh Kumar Sharma"},
                     {"timestamp": "2026-08-16T10:00:00Z", "action": "Field Inspection Case Dossier Created", "by": "Sh. Rajesh Kumar Sharma"},
                     {"timestamp": "2026-08-18T11:30:00Z", "action": "Show Cause Notice Issued under Sec 36(1)", "by": "Controller of LM, Delhi NCT"}
                 ],
@@ -1550,7 +1550,7 @@ async def seed_database():
             print("[INFO] Inserted benchmark scans, statutory violations, health audits, and history entries.")
 
     await engine.dispose()
-    print("[INFO] MetroScan database seeding complete.")
+    print("[INFO] PackDrashiti database seeding complete.")
 
 if __name__ == "__main__":
     asyncio.run(seed_database())
@@ -1659,7 +1659,7 @@ else:
 ### 7.3 Complete Initial Migration Script (`20260910_0001_initial_schema.py`)
 
 ```python
-"""create initial schema for metroscan
+"""create initial schema for packdrashiti
 
 Revision ID: 20260910_0001
 Revises: 

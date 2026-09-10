@@ -1,4 +1,4 @@
-name: MetroScan CI
+name: PackDrashiti CI
 
 on:
   push:

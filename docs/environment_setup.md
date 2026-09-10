@@ -1,4 +1,4 @@
-# MetroScan: Environment Configuration & Secrets Management Guide
+# PackDrashiti: Environment Configuration & Secrets Management Guide
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
 **Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
@@ -11,7 +11,7 @@
 ## 1. Document Purpose and Scope
 
 ### 1.1 Objective
-This document defines the standardized environment configuration, runtime prerequisites, secrets management architecture, and local orchestration protocols for the **MetroScan** automated compliance verification platform. 
+This document defines the standardized environment configuration, runtime prerequisites, secrets management architecture, and local orchestration protocols for the **PackDrashiti** automated compliance verification platform. 
 
 Adherence to this guide ensures deterministic, reproducible runtime behavior across:
 - **Local Development**: Developer workstations (macOS Apple Silicon/Intel, Linux Ubuntu/Debian, Windows WSL2).
@@ -20,7 +20,7 @@ Adherence to this guide ensures deterministic, reproducible runtime behavior acr
 - **Production**: High-availability cloud deployment architectures with zero secret leakage and strict access boundaries.
 
 ### 1.2 Architectural Boundaries
-The MetroScan platform comprises three primary sub-systems governed by this environment standard:
+The PackDrashiti platform comprises three primary sub-systems governed by this environment standard:
 1. **Client Single Page Application (SPA)**: React 19 + TypeScript + Vite + Tailwind CSS (`/frontend`).
 2. **Core Application Service**: Python 3.11+ FastAPI backend with SQLAlchemy 2.0 ORM, Alembic migrations, and Pydantic v2 schemas (`/backend`).
 3. **Computer Vision & Inference Pipeline**: Optical Character Recognition (PaddleOCR / Tesseract), font letter height estimator (Rule 7 Table-I), and ICMR-NIN nutritional table parser (`/ml`).
@@ -73,7 +73,7 @@ Execute the Linux (Ubuntu) package commands inside a WSL2 Ubuntu 22.04+ distribu
 
 ## 3. Monorepo Directory Topology
 
-MetroScan employs a unified monorepo structure. Environment configurations are scoped at the component boundary to prevent accidental leaks of backend service credentials into client-facing bundles.
+PackDrashiti employs a unified monorepo structure. Environment configurations are scoped at the component boundary to prevent accidental leaks of backend service credentials into client-facing bundles.
 
 ```
 /Users/lovejeetsingh1/Documents/SIH/
@@ -143,13 +143,13 @@ In client applications built with Vite, only environment variables prefixed with
 #### File: `/Users/lovejeetsingh1/Documents/SIH/frontend/.env.example`
 ```dotenv
 # ==============================================================================
-# MetroScan Frontend Client Environment Configuration Template
+# PackDrashiti Frontend Client Environment Configuration Template
 # Project ID: SIH26034
 # ==============================================================================
 
 # Base URL for the Backend REST API
 # In local development: http://localhost:8000/api/v1
-# In production: https://api.metroscan.gov.in/api/v1 or relative /api/v1 (behind reverse proxy)
+# In production: https://api.packdrashiti.gov.in/api/v1 or relative /api/v1 (behind reverse proxy)
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 
 # Target application runtime environment
@@ -162,7 +162,7 @@ VITE_APP_ENV=development
 VITE_ENABLE_MOCK_DATA=false
 
 # Application Display Title
-VITE_APP_TITLE=MetroScan - Legal Metrology Compliance Engine
+VITE_APP_TITLE=PackDrashiti - Legal Metrology Compliance Engine
 
 # Optional: Map / Analytics Service Configurations (if enabled for field officer geolocation)
 VITE_MAP_TILES_PROVIDER=osm
@@ -175,7 +175,7 @@ VITE_MAP_TILES_PROVIDER=osm
 | `VITE_API_BASE_URL` | String (URL) | Valid HTTP/HTTPS URI | `http://localhost:8000/api/v1` | Target endpoint for all axios/fetch client requests. Must include version prefix `/api/v1`. Publicly visible in browser bundle. |
 | `VITE_APP_ENV` | String | `development`, `staging`, `production` | `development` | Dictates logging verbosity, React Error Boundary behavior, and UI environment banner. |
 | `VITE_ENABLE_MOCK_DATA` | Boolean | `true`, `false` | `false` | Controls whether the frontend uses static JSON mock fallbacks for offline demo presentations or live API responses. |
-| `VITE_APP_TITLE` | String | Alphanumeric string | `MetroScan` | Browser document title and top navigation bar display branding. |
+| `VITE_APP_TITLE` | String | Alphanumeric string | `PackDrashiti` | Browser document title and top navigation bar display branding. |
 | `VITE_MAP_TILES_PROVIDER` | String | `osm`, `carto` | `osm` | Provider identifier for map rendering in the Officer Inspection cluster view. |
 
 ---
@@ -187,7 +187,7 @@ The backend service utilizes Pydantic `BaseSettings` for type-safe environment v
 #### File: `/Users/lovejeetsingh1/Documents/SIH/backend/.env.example`
 ```dotenv
 # ==============================================================================
-# MetroScan Backend Core Service Environment Configuration Template
+# PackDrashiti Backend Core Service Environment Configuration Template
 # Project ID: SIH26034
 # ==============================================================================
 
@@ -204,7 +204,7 @@ HOST=0.0.0.0
 # ------------------------------------------------------------------------------
 # Standard Connection URI Format:
 # postgresql://<username>:<password>@<host>:<port>/<database_name>
-DATABASE_URL=postgresql://metroscan_user:metroscan_pass@localhost:5432/metroscan_db
+DATABASE_URL=postgresql://packdrashiti_user:packdrashiti_pass@localhost:5432/packdrashiti_db
 
 # Connection Pool Configurations
 DATABASE_POOL_SIZE=10
@@ -297,7 +297,7 @@ VECTOR_DIMENSION=1536
 
 ## 5. Docker Compose Infrastructure Configuration
 
-To eliminate local environment discrepancy ("it works on my machine"), MetroScan provides a validated Docker Compose infrastructure configuration containing a dedicated PostgreSQL 16 container, automated healthchecks, volume persistence, and an optional database administration utility.
+To eliminate local environment discrepancy ("it works on my machine"), PackDrashiti provides a validated Docker Compose infrastructure configuration containing a dedicated PostgreSQL 16 container, automated healthchecks, volume persistence, and an optional database administration utility.
 
 ### 5.1 Docker Compose Specification File (`docker-compose.yml`)
 
@@ -310,52 +310,52 @@ services:
   # ----------------------------------------------------------------------------
   # PostgreSQL 16 Relational Database Engine
   # ----------------------------------------------------------------------------
-  metroscan-db:
+  packdrashiti-db:
     image: pgvector/pgvector:pg16
-    container_name: metroscan-postgres
+    container_name: packdrashiti-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-metroscan_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-metroscan_pass}
-      POSTGRES_DB: ${POSTGRES_DB:-metroscan_db}
+      POSTGRES_USER: ${POSTGRES_USER:-packdrashiti_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-packdrashiti_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-packdrashiti_db}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
-      - metroscan_postgres_data:/var/lib/postgresql/data
+      - packdrashiti_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-metroscan_user} -d $${POSTGRES_DB:-metroscan_db}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-packdrashiti_user} -d $${POSTGRES_DB:-packdrashiti_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - metroscan-network
+      - packdrashiti-network
 
   # ----------------------------------------------------------------------------
   # Optional Database GUI Administration (Adminer)
   # Accessible via http://localhost:8080
   # ----------------------------------------------------------------------------
-  metroscan-adminer:
+  packdrashiti-adminer:
     image: adminer:latest
-    container_name: metroscan-adminer
+    container_name: packdrashiti-adminer
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
-      ADMINER_DEFAULT_SERVER: metroscan-db
+      ADMINER_DEFAULT_SERVER: packdrashiti-db
     depends_on:
-      metroscan-db:
+      packdrashiti-db:
         condition: service_healthy
     networks:
-      - metroscan-network
+      - packdrashiti-network
 
 volumes:
-  metroscan_postgres_data:
+  packdrashiti_postgres_data:
     driver: local
 
 networks:
-  metroscan-network:
+  packdrashiti-network:
     driver: bridge
 ```
 
@@ -363,16 +363,16 @@ networks:
 
 ```bash
 # Start PostgreSQL in the background
-docker compose up -d metroscan-db
+docker compose up -d packdrashiti-db
 
 # Check status and verify container health
 docker compose ps
 
 # View database live logs
-docker compose logs -f metroscan-db
+docker compose logs -f packdrashiti-db
 
 # Access interactive PostgreSQL shell inside container
-docker exec -it metroscan-postgres psql -U metroscan_user -d metroscan_db
+docker exec -it packdrashiti-postgres psql -U packdrashiti_user -d packdrashiti_db
 
 # Stop services without deleting database volume
 docker compose down
@@ -393,12 +393,12 @@ Follow this sequential sequence to bootstrap an operational development environm
 Ensure Docker Desktop or Docker Engine is running on your machine:
 ```bash
 cd /Users/lovejeetsingh1/Documents/SIH
-docker compose up -d metroscan-db
+docker compose up -d packdrashiti-db
 ```
 Verify the container is healthy:
 ```bash
 docker compose ps
-# Expected output: metroscan-postgres ... (healthy)
+# Expected output: packdrashiti-postgres ... (healthy)
 ```
 
 #### Option B: Native macOS PostgreSQL (Homebrew)
@@ -407,9 +407,9 @@ brew install postgresql@16
 brew services start postgresql@16
 
 # Create database and application user
-psql postgres -c "CREATE USER metroscan_user WITH PASSWORD 'metroscan_pass';"
-psql postgres -c "CREATE DATABASE metroscan_db OWNER metroscan_user;"
-psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE metroscan_db TO metroscan_user;"
+psql postgres -c "CREATE USER packdrashiti_user WITH PASSWORD 'packdrashiti_pass';"
+psql postgres -c "CREATE DATABASE packdrashiti_db OWNER packdrashiti_user;"
+psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE packdrashiti_db TO packdrashiti_user;"
 ```
 
 ---
@@ -489,7 +489,7 @@ Ensure `VITE_API_BASE_URL` points to your running FastAPI backend:
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 VITE_APP_ENV=development
 VITE_ENABLE_MOCK_DATA=false
-VITE_APP_TITLE=MetroScan
+VITE_APP_TITLE=PackDrashiti
 ```
 
 #### Step 3: Run Code Quality Checks
@@ -506,7 +506,7 @@ npx tsc --noEmit
 ```bash
 npm run dev
 ```
-The application will bind to `http://localhost:5173`. Open this URL in Google Chrome or Safari to interact with the MetroScan platform.
+The application will bind to `http://localhost:5173`. Open this URL in Google Chrome or Safari to interact with the PackDrashiti platform.
 
 ---
 
@@ -576,7 +576,7 @@ When deploying the FastAPI backend to PaaS providers (e.g. Railway or Render):
   - `DEBUG`: `false`
   - `DATABASE_URL`: Set to the managed PostgreSQL connection string provided by the cloud provider.
   - `JWT_SECRET_KEY`: Set to a newly generated 64-character hex key.
-  - `CORS_ORIGINS`: Set to your production frontend domain (e.g. `https://metroscan.gov.in`).
+  - `CORS_ORIGINS`: Set to your production frontend domain (e.g. `https://packdrashiti.gov.in`).
 
 #### 7.3.2 Supabase Database Connection Guidelines
 When utilizing Supabase as the managed PostgreSQL backend:
@@ -627,10 +627,10 @@ In the event that an active secret (such as `JWT_SECRET_KEY` or `DATABASE_URL`) 
 |---|---|---|---|---|
 | Frontend Vite Server | `5173` | HTTP | None | Host Machine / Browser |
 | Backend FastAPI Server | `8000` | HTTP | None | Host Machine / Frontend |
-| PostgreSQL Database | `5432` | TCP / PostgreSQL | `metroscan_user` / `metroscan_pass` | Backend / Docker Bridge |
-| Adminer Database GUI | `8080` | HTTP | (Connects to metroscan-db:5432) | Host Machine / Browser |
+| PostgreSQL Database | `5432` | TCP / PostgreSQL | `packdrashiti_user` / `packdrashiti_pass` | Backend / Docker Bridge |
+| Adminer Database GUI | `8080` | HTTP | (Connects to packdrashiti-db:5432) | Host Machine / Browser |
 | Backend OpenAPI Docs | `8000/docs` | HTTP | None | Host Machine / Browser |
 
 ---
-**MetroScan Engineering Team (SIH26034)**  
+**PackDrashiti Engineering Team (SIH26034)**  
 *Approved for Implementation and Evaluation Standardization*\n

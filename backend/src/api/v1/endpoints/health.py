@@ -7,7 +7,7 @@ router = APIRouter()
 @router.get("", summary="Subsystem Health Check")
 async def health_check():
     """
-    Returns detailed health and operational readiness status of the MetroScan API service.
+    Returns detailed health and operational readiness status of the PackDrashiti API service.
     """
     return {
         "status": "ok",

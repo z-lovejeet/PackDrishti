@@ -1,4 +1,4 @@
-# MetroScan Frontend State and Page Navigation Flow Map
+# PackDrashiti Frontend State and Page Navigation Flow Map
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
 **Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
@@ -10,7 +10,7 @@
 ## 1. Document Header & Frontend Architecture Overview
 
 ### 1.1 Technical Stack Specification
-The MetroScan frontend is engineered as a high-performance, single-page application (SPA) designed to operate reliably in both high-bandwidth administrative offices and network-constrained field inspection environments.
+The PackDrashiti frontend is engineered as a high-performance, single-page application (SPA) designed to operate reliably in both high-bandwidth administrative offices and network-constrained field inspection environments.
 
 | Layer | Technology | Version | Purpose & Rationale |
 |---|---|---|---|
@@ -22,7 +22,7 @@ The MetroScan frontend is engineered as a high-performance, single-page applicat
 | State Management | React Native Hooks | Built-in | Centralized single-state pattern in App.tsx; zero external state library bloat |
 
 ### 1.2 Zero-Bloat Architecture Rationale
-MetroScan intentionally excludes third-party global state containers (such as Redux Toolkit, MobX, or Zustand) and heavy routing engines (such as React Router v6 or TanStack Router). The technical decisions behind this lightweight architecture include:
+PackDrashiti intentionally excludes third-party global state containers (such as Redux Toolkit, MobX, or Zustand) and heavy routing engines (such as React Router v6 or TanStack Router). The technical decisions behind this lightweight architecture include:
 1. **Zero External Routing Bloat**: The application runs as an authoritative regulatory kiosk and field workstation. Navigation is strictly categorical (`landing`, `scanner`, `health`, `history`, `dashboard`, `inspections`, `reports`). Managing active routes via top-level string literal union states in `App.tsx` eliminates client-side routing bundle weight (saving >45KB minified), eliminates nested route context overhead, and prevents routing state desynchronization during offline field operations.
 2. **Deterministic Unidirectional Data Flow**: Global application state resides exclusively in the root `App.tsx` component. Child components communicate changes upstream strictly through typed callback props (`onNavigate`, `onSetUserRole`, `onOpenReportModal`). This ensures predictable auditing traces, instantaneous hot swapping between Consumer and Officer modes, and deterministic state resets upon scan completion.
 3. **Low Latency & High Frame Rates on Field Hardware**: Government field inspectors often utilize budget Android tablets or ruggedized handheld devices. Eliminating state-proxy libraries guarantees 60fps interaction during image manipulation, bounding box rendering, and millimeter font calibration.
@@ -85,7 +85,7 @@ The primary states managed at the root component level include:
 ## 2. Role-Based Navigation & Page Hierarchy
 
 ### 2.1 Role-Based Page Access Matrix
-MetroScan enforces strict operational separation between ordinary consumers auditing packaged goods and Legal Metrology field enforcement officers issuing statutory inspection certificates.
+PackDrashiti enforces strict operational separation between ordinary consumers auditing packaged goods and Legal Metrology field enforcement officers issuing statutory inspection certificates.
 
 | Route Identifier | Page Component | Consumer Mode | Officer Mode | Primary Purpose |
 |---|---|---|---|---|
@@ -401,7 +401,7 @@ Each record in the ledger expands to display:
 - Chronological enforcement timeline with timestamped actions by the assigned officer.
 
 ### 5.3 Statutory Report Viewer & Browser Print Engine (`ReportViewerPage.tsx`)
-MetroScan implements an official inspection docket viewer adhering to FORM LM-INSP-2011 standards.
+PackDrashiti implements an official inspection docket viewer adhering to FORM LM-INSP-2011 standards.
 
 #### Inspection Docket Specifications
 - **Docket Header**: State Government Directorate of Legal Metrology, Inspection Docket Reference Number, Inspection Date, and Inspector Credentials.
@@ -410,7 +410,7 @@ MetroScan implements an official inspection docket viewer adhering to FORM LM-IN
 - **Section 36(1) Legal Notice Draft**: Pre-filled statutory text citing non-compliance and specifying the compounding fee under Section 48.
 
 #### One-Click Browser Print Integration (`window.print()`)
-Rather than depending on server-side PDF generation binaries that may stall during offline field inspections, MetroScan uses optimized client-side CSS print styles triggered via `window.print()`.
+Rather than depending on server-side PDF generation binaries that may stall during offline field inspections, PackDrashiti uses optimized client-side CSS print styles triggered via `window.print()`.
 
 ```css
 @media print {
@@ -452,9 +452,9 @@ Rather than depending on server-side PDF generation binaries that may stall duri
 ## 6. Client-Side Offline Caching & LocalStorage Schema
 
 ### 6.1 Offline Architecture Philosophy
-Field inspections by Legal Metrology Officers frequently occur in basements, wholesale grain mandis, cold storage units, and rural retail outlets lacking cellular connectivity. Similarly, consumers audit commodities inside underground hypermarkets with zero signal. MetroScan implements an offline-first storage architecture utilizing browser `localStorage` and `IndexedDB` caching layers.
+Field inspections by Legal Metrology Officers frequently occur in basements, wholesale grain mandis, cold storage units, and rural retail outlets lacking cellular connectivity. Similarly, consumers audit commodities inside underground hypermarkets with zero signal. PackDrashiti implements an offline-first storage architecture utilizing browser `localStorage` and `IndexedDB` caching layers.
 
-### 6.2 Key 1: `metroscan_history_v1`
+### 6.2 Key 1: `packdrashiti_history_v1`
 Stores the most recent 20 verified scan records. This cache enables instantaneous client-side retrieval, search, and filtering without issuing HTTP requests.
 
 #### Storage Capacity & Eviction Rule
@@ -486,7 +486,7 @@ export interface StoredScanHistoryItem {
 
 #### Storage Utility API Contract
 ```typescript
-const HISTORY_STORAGE_KEY = "metroscan_history_v1";
+const HISTORY_STORAGE_KEY = "packdrashiti_history_v1";
 const MAX_HISTORY_ITEMS = 20;
 
 export function saveScanToHistory(record: StoredScanHistoryItem): void {
@@ -507,7 +507,7 @@ export function saveScanToHistory(record: StoredScanHistoryItem): void {
     
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items));
   } catch (error) {
-    console.error("LocalStorage write failed for metroscan_history_v1:", error);
+    console.error("LocalStorage write failed for packdrashiti_history_v1:", error);
   }
 }
 
@@ -516,7 +516,7 @@ export function getScanHistory(): StoredScanHistoryItem[] {
     const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (error) {
-    console.error("LocalStorage read failed for metroscan_history_v1:", error);
+    console.error("LocalStorage read failed for packdrashiti_history_v1:", error);
     return [];
   }
 }
@@ -530,7 +530,7 @@ export function clearScanHistory(): void {
 }
 ```
 
-### 6.3 Key 2: `metroscan_officer_session_v1`
+### 6.3 Key 2: `packdrashiti_officer_session_v1`
 Preserves officer session credentials, active district filters, and offline draft notices across browser restarts.
 
 #### TypeScript Schema
@@ -585,16 +585,16 @@ To prevent application crashes from uncaught JavaScript runtime exceptions (e.g.
 | Unsupported Image Format | File MIME type check (!= `image/jpeg`, `image/png`, `image/webp`) | Upload rejected; warning card rendered with red border | Inline notice: `Please upload packaging photographs in JPEG, PNG, or WEBP format up to 20MB` |
 | Image Resolution Sub-Optimal | Canvas loader detects width or height < 400 pixels | Toast alert: `Image resolution too low for statutory verification` | Prompts user to re-capture packaging closer to label; proceeds with best-effort OCR warning badge |
 | Network Disconnect / 500 Timeout | `fetch` rejects with `NetworkError` or response status >= 500 | Progress bar halts; error card: `Verification engine unreachable (Offline)` | Displays cached local rulebook analysis; preserves captured specimen in offline queue for background sync |
-| Storage Quota Exceeded | `localStorage.setItem` throws `QuotaExceededError` | Silent eviction of the oldest 5 records from `metroscan_history_v1` | Retries save operation; informs user scan history has been pruned |
+| Storage Quota Exceeded | `localStorage.setItem` throws `QuotaExceededError` | Silent eviction of the oldest 5 records from `packdrashiti_history_v1` | Retries save operation; informs user scan history has been pruned |
 
 ### 7.3 Empty State Component Standards
 Every view implements contextual empty state components to prevent confusing blank screens:
 - **Scanner Initial Empty State**: Rendered when `activeTab === 'upload'` and no image is loaded. Displays drag-and-drop target, browse button, camera trigger, and a direct link: `Or switch to Benchmark Test Samples to test pre-configured specimens`.
-- **History Ledger Empty State**: Rendered when `metroscan_history_v1` is empty or search filters return zero matches. Displays search icon, message `No verified commodities found matching active criteria`, and a `Reset All Filters` action button.
+- **History Ledger Empty State**: Rendered when `packdrashiti_history_v1` is empty or search filters return zero matches. Displays search icon, message `No verified commodities found matching active criteria`, and a `Reset All Filters` action button.
 - **Inspections Ledger Empty State**: Rendered when an officer selects a status filter containing zero cases. Displays message `No enforcement actions currently flagged under [Status] in your jurisdiction`.
 
 ---
 
 ## 8. Summary & Technical Verification
 
-The MetroScan frontend architecture provides a robust, zero-bloat, role-adaptive interface adhering strictly to the Legal Metrology (Packaged Commodities) Rules, 2011. By unifying Consumer and Officer workflows within a single typed state container, downsampling images on the client canvas, enforcing dual-panel uploads for nutritional audits, and maintaining client-side offline storage, the platform guarantees high-speed compliance auditing in both field inspection environments and everyday consumer shopping contexts.
+The PackDrashiti frontend architecture provides a robust, zero-bloat, role-adaptive interface adhering strictly to the Legal Metrology (Packaged Commodities) Rules, 2011. By unifying Consumer and Officer workflows within a single typed state container, downsampling images on the client canvas, enforcing dual-panel uploads for nutritional audits, and maintaining client-side offline storage, the platform guarantees high-speed compliance auditing in both field inspection environments and everyday consumer shopping contexts.

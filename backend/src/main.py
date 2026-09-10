@@ -6,7 +6,7 @@ from backend.src.api.v1.router import api_router
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="MetroScan: Automated Compliance Verification Platform under Legal Metrology (Packaged Commodities) Rules, 2011.",
+    description="PackDrashiti: Automated Compliance Verification Platform under Legal Metrology (Packaged Commodities) Rules, 2011.",
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
     docs_url=f"{settings.API_V1_STR}/docs" if settings.DEBUG else None,
     redoc_url=f"{settings.API_V1_STR}/redoc" if settings.DEBUG else None,

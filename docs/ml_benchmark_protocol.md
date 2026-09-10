@@ -1,4 +1,4 @@
-# MetroScan: Machine Learning Accuracy Benchmark and Evaluation Protocol
+# PackDrashiti: Machine Learning Accuracy Benchmark and Evaluation Protocol
 
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
@@ -13,12 +13,12 @@
 ## 1. Document Header and Evaluation Objectives
 
 ### 1.1 Scope and Regulatory Authority
-This document establishes the formal machine learning accuracy benchmark and quantitative evaluation protocol for MetroScan (SIH26034). Pre-packaged commodities distributed across Indian commercial retail, wholesale, and e-commerce supply chains are governed by the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011 (as amended through G.S.R. 779(E) and the Jan Vishwas (Amendment of Provisions) Act, 2023).
+This document establishes the formal machine learning accuracy benchmark and quantitative evaluation protocol for PackDrashiti (SIH26034). Pre-packaged commodities distributed across Indian commercial retail, wholesale, and e-commerce supply chains are governed by the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011 (as amended through G.S.R. 779(E) and the Jan Vishwas (Amendment of Provisions) Act, 2023).
 
-Enforcement proceedings initiated under Section 36(1) or Section 36(2) of the Act carry legal liability, including statutory compoundable compounding notices and penal prosecution. Consequently, algorithmic verification of package labels cannot rely on qualitative heuristics or loose approximations. The MetroScan automated compliance engine must operate under certified, reproducible, and mathematically grounded evaluation standards before being cleared for operational use by State Legal Metrology Officers and Indian consumers.
+Enforcement proceedings initiated under Section 36(1) or Section 36(2) of the Act carry legal liability, including statutory compoundable compounding notices and penal prosecution. Consequently, algorithmic verification of package labels cannot rely on qualitative heuristics or loose approximations. The PackDrashiti automated compliance engine must operate under certified, reproducible, and mathematically grounded evaluation standards before being cleared for operational use by State Legal Metrology Officers and Indian consumers.
 
 ### 1.2 Evaluation Objectives
-The objective of this protocol is to benchmark and continuously validate the analytical sub-systems of the MetroScan platform across four distinct architectural tiers:
+The objective of this protocol is to benchmark and continuously validate the analytical sub-systems of the PackDrashiti platform across four distinct architectural tiers:
 1. **Tier 1: Multimodal VLM & High-Performance OCR Extraction Engine**: Rigorous character-level and word-level accuracy assessment (CER <= 5%, WER <= 8%) on complex, curved, glossy, and low-contrast packaging substrates, alongside spatial entity localization and bounding box precision (IoU >= 0.70) across all 11 mandatory declarations mandated under Rule 6.
 2. **Tier 2: Deterministic Python Rule Engine**: 100% mathematical verification accuracy on Unit Sale Price (USP) arithmetic, Rule 7 Table-I font calibration step functions, Rule 9 WCAG 2.1 contrast ratios, and Rule 13 SI metric unit validation, while maintaining a statutory false positive rate below 5.0%. Zero tolerance for mathematical or statutory hallucination.
 3. **Tier 3: Statutory Legal RAG Retrieval Engine**: Precision and recall of statutory retrieval over the Legal Metrology Act 2009, Packaged Commodities Rules 2011 (amended through 2024), gazette notifications, and compounding schedules (MRR >= 0.85, Context Recall >= 90%, Hit Rate @ 3 >= 92%).
@@ -399,7 +399,7 @@ The complete Python evaluation script structure with metric calculation function
 ```python
 #!/usr/bin/env python3
 """
-MetroScan ML Accuracy Benchmark and Evaluation Protocol Runner
+PackDrashiti ML Accuracy Benchmark and Evaluation Protocol Runner
 Path: scripts/run_benchmarks.py
 Administered for Smart India Hackathon (SIH26034)
 
@@ -638,7 +638,7 @@ class BenchmarkRunner:
 
         md_file = self.output_dir / "benchmark_summary.md"
         with open(md_file, "w", encoding="utf-8") as f:
-            f.write("# MetroScan Automated Accuracy Benchmark Report\n\n")
+            f.write("# PackDrashiti Automated Accuracy Benchmark Report\n\n")
             f.write(f"- **Generated**: {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}\n")
             f.write(f"- **Dataset Samples**: {summary['total_samples_evaluated']}\n")
             f.write(f"- **SIH Acceptance Verdict**: {summary['sih_demo_readiness_verdict']}\n\n")
@@ -666,7 +666,7 @@ class BenchmarkRunner:
         print(f"Benchmark execution completed. Results saved to: {self.output_dir}")
 
 def main():
-    parser = argparse.ArgumentParser(description="MetroScan Automated Accuracy Benchmark Runner")
+    parser = argparse.ArgumentParser(description="PackDrashiti Automated Accuracy Benchmark Runner")
     parser.add_argument("--data-dir", default="ml/test_data", help="Dataset root directory")
     parser.add_argument("--output-dir", default="reports/benchmarks", help="Output directory for benchmark reports")
     args = parser.parse_args()
@@ -688,7 +688,7 @@ if __name__ == "__main__":
 
 ## 5. Error Analysis and Failure Mode Taxonomy
 
-During optical scanning and automated compliance evaluation, packaging exhibits real-world physical and linguistic artifacts. MetroScan establishes a systematic taxonomy categorizing these error mechanisms and details algorithmic mitigations implemented in the pipeline.
+During optical scanning and automated compliance evaluation, packaging exhibits real-world physical and linguistic artifacts. PackDrashiti establishes a systematic taxonomy categorizing these error mechanisms and details algorithmic mitigations implemented in the pipeline.
 
 ### 5.1 Failure Mode Taxonomy Matrix
 
@@ -837,7 +837,7 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `### MetroScan Automated ML Benchmark Results\n\n${summaryContent}`
+                body: `### PackDrashiti Automated ML Benchmark Results\n\n${summaryContent}`
               });
             }
 ```
@@ -854,7 +854,7 @@ During live jury evaluations for Smart India Hackathon (SIH26034), the following
 2. **Physical Caliper Verification**:
    - Present a physical test commodity (e.g. Parle-G 800g biscuit pack or Tata Salt 1kg pouch).
    - Measure numeral height of the net quantity and MRP using the digital vernier caliper.
-   - Run MetroScan label scan and demonstrate that on-screen measured font height matches caliper measurement within $\pm 0.40\text{ mm}$.
+   - Run PackDrashiti label scan and demonstrate that on-screen measured font height matches caliper measurement within $\pm 0.40\text{ mm}$.
 3. **Proscribed Unit Symbol Interception**:
    - Scan commodity specimen declaring illegal non-standard unit `"100 gms"`.
    - Verify immediate detection of non-standard metric abbreviation under Rule 13 and correct citation of Section 36(1).

@@ -12,7 +12,7 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <span className="font-bold text-neutral-900 font-heading block">
-                MetroScan — Legal Metrology Compliance System
+                PackDrashiti — Legal Metrology Compliance System
               </span>
               <span className="text-[11px] text-neutral-500">
                 Statutory framework: Legal Metrology Act, 2009 & Packaged Commodities Rules, 2011

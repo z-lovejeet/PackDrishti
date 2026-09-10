@@ -1,4 +1,4 @@
-# MetroScan: Packaged Commodities Legal Metrology Compliance System
+# PackDrashiti: Packaged Commodities Legal Metrology Compliance System
 
 **Problem Statement ID**: SIH26034  
 **Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-MetroScan is an automated regulatory compliance verification and nutritional auditing platform. It is engineered to detect mandatory packaging declarations, verify dimensional font height compliance, identify illegal units or price tampering, and conduct nutritional health assessments for Indian retail commodities.
+PackDrashiti is an automated regulatory compliance verification and nutritional auditing platform. It is engineered to detect mandatory packaging declarations, verify dimensional font height compliance, identify illegal units or price tampering, and conduct nutritional health assessments for Indian retail commodities.
 
 The platform serves two primary audiences:
 1. **Legal Metrology Inspectors (Enforcement Officers)**: Automates field label scrutiny, validates letter/numeral heights against Principal Display Panel (PDP) area under Rule 7 Table-I, flags statutory violations under Section 36(1) of the Legal Metrology Act, 2009, and generates formal inspection dockets (FORM LM-INSP-2011) with photographic evidence.

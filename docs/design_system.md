@@ -1,4 +1,4 @@
-# MetroScan: Design System & Component Guidelines Specification
+# PackDrashiti: Design System & Component Guidelines Specification
 **Document Identifier**: SIH26034-DS-SPEC-2026-V1.0  
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
@@ -12,9 +12,9 @@
 ## 1. Document Header & Design Principles
 
 ### 1.1 Purpose and Scope
-This document defines the complete visual language, design token architecture, typographic hierarchy, iconography standards, component patterns, and accessibility mandates for MetroScan (SIH26034). 
+This document defines the complete visual language, design token architecture, typographic hierarchy, iconography standards, component patterns, and accessibility mandates for PackDrashiti (SIH26034). 
 
-MetroScan operates across two operational modalities:
+PackDrashiti operates across two operational modalities:
 1. **Officer Mode (Enforcement Console)**: High-density, data-intensive auditing workspace engineered for Legal Metrology Inspectors conducting retail shelf audits and e-commerce verification under the Legal Metrology Act, 2009.
 2. **Consumer Mode (Public Portal)**: Clean, high-legibility interface enabling everyday consumers to verify statutory packaging declarations, identify unfair trade practices (such as dual MRP and deceptive packaging), and evaluate ICMR-NIN nutritional safety.
 
@@ -23,7 +23,7 @@ Every element within this design system is engineered to uphold institutional cr
 ### 1.2 Core Design Principles
 
 1. **Civic Restraint & Institutional Dignity**  
-   MetroScan represents the sovereign regulatory authority of the Department of Consumer Affairs. The visual interface rejects decorative gimmicks:
+   PackDrashiti represents the sovereign regulatory authority of the Department of Consumer Affairs. The visual interface rejects decorative gimmicks:
    - No neon gradients or fluorescent highlights.
    - No glassmorphism, heavy blur backdrops, or floating translucent layers.
    - No AI-generated decorative illustrations, abstract shapes, or non-functional visual noise.
@@ -37,7 +37,7 @@ Every element within this design system is engineered to uphold institutional cr
    - Numerical measurements (font height in millimeters, net weight in grams, MRP in rupees) must be displayed in monospaced, tabular numerals to prevent misinterpretation.
 
 3. **Zero Emojis Policy (Zero Tolerance Mandate)**  
-   Emojis are strictly prohibited across all MetroScan interfaces, notification toasts, alert banners, modal dialogs, empty states, system logs, and documentation.
+   Emojis are strictly prohibited across all PackDrashiti interfaces, notification toasts, alert banners, modal dialogs, empty states, system logs, and documentation.
    - Emojis compromise the formal dignity of statutory notices and legal dockets.
    - Status indicators, alerts, and actions must exclusively utilize vector iconography from `@phosphor-icons/react` using established semantic weights (`regular`, `bold`, `fill`).
    - Any commit introducing unicode emojis into user-facing templates or system messages will fail automated linting checks.
@@ -55,7 +55,7 @@ Every element within this design system is engineered to uphold institutional cr
 
 ## 2. Color Palette & Token Architecture
 
-The MetroScan color system is organized into semantic color tiers. Every color has been validated for WCAG 2.1 AA contrast compliance against both light canvas backgrounds and elevated card surfaces.
+The PackDrashiti color system is organized into semantic color tiers. Every color has been validated for WCAG 2.1 AA contrast compliance against both light canvas backgrounds and elevated card surfaces.
 
 ### 2.1 Master Palette Table
 
@@ -105,7 +105,7 @@ The MetroScan color system is organized into semantic color tiers. Every color h
 To ensure consistency across the React application, designers and engineers must reference semantic functional tokens rather than ad-hoc hex codes:
 
 ```typescript
-// Semantic token abstractions for MetroScan UI components
+// Semantic token abstractions for PackDrashiti UI components
 export const tokens = {
   canvas: {
     bg: "bg-slate-50",             // Global page background
@@ -270,7 +270,7 @@ The typography system uses three specialized font stacks to separate visual hier
 ## 4. Iconography Standards
 
 ### 4.1 Exclusive Library Mandate
-MetroScan exclusively standardizes on **`@phosphor-icons/react`** (v2.1.x). 
+PackDrashiti exclusively standardizes on **`@phosphor-icons/react`** (v2.1.x). 
 - **Strictly Prohibited**: Lucide, Feather, FontAwesome, Material Icons, Heroicons, Bootstrap Icons, and all emoji glyphs.
 - Phosphor provides consistent 24x24 optical bounding boxes, uniform corner radii, and identical stroke weights across all icons.
 
@@ -284,7 +284,7 @@ MetroScan exclusively standardizes on **`@phosphor-icons/react`** (v2.1.x).
 
 ### 4.3 Master Icon Dictionary
 
-The following table dictates the exact Phosphor icon component required for every functional domain and action within MetroScan:
+The following table dictates the exact Phosphor icon component required for every functional domain and action within PackDrashiti:
 
 | Category | Domain / Action | Phosphor Icon Component | Weight | Visual Intent & Context |
 |---|---|---|---|---|
@@ -334,7 +334,7 @@ The following table dictates the exact Phosphor icon component required for ever
 
 ## 5. Component Specifications & Design Patterns
 
-Every component in MetroScan is built as an accessible, deterministic React component styled exclusively via Tailwind CSS. 
+Every component in PackDrashiti is built as an accessible, deterministic React component styled exclusively via Tailwind CSS. 
 
 ### 5.1 StatCard Component
 Used across Officer and Consumer dashboards to display high-level analytical KPIs, total scanned commodities, violation tallies, and compliance percentages.
@@ -1028,7 +1028,7 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
 
 ## 6. Accessibility & Contrast Guidelines
 
-MetroScan is designed in accordance with **WCAG 2.1 Level AA** standards. As a regulatory platform for the Government of India, digital accessibility is mandatory.
+PackDrashiti is designed in accordance with **WCAG 2.1 Level AA** standards. As a regulatory platform for the Government of India, digital accessibility is mandatory.
 
 ### 6.1 Contrast Verification Matrix
 
@@ -1056,7 +1056,7 @@ All primary foreground-to-background combinations must meet or exceed the WCAG 2
 The design system enforces prominent, standardized focus rings across all interactive controls. Never suppress focus rings with `outline-none` unless accompanied by `focus:ring-2`:
 
 ```css
-/* MetroScan Universal Focus Ring Standard */
+/* PackDrashiti Universal Focus Ring Standard */
 .focus-civic {
   outline: none;
   box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #1B5E7B;

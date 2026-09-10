@@ -1,4 +1,4 @@
-# MetroScan: Object Storage & Asset Conventions Specification
+# PackDrashiti: Object Storage & Asset Conventions Specification
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
 **Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
@@ -60,14 +60,14 @@
 ## 1. Executive Summary & Storage Strategy
 
 ### 1.1 Statutory and Operational Mandate
-MetroScan (SIH26034) operates at the intersection of consumer protection, machine learning inference, and statutory regulatory enforcement under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011 (LMPCR 2011). Packaging imagery, annotated violation evidence, generated inspection dockets (FORM LM-INSP-2011), and nutritional label audits represent sensitive statutory records.
+PackDrashiti (SIH26034) operates at the intersection of consumer protection, machine learning inference, and statutory regulatory enforcement under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011 (LMPCR 2011). Packaging imagery, annotated violation evidence, generated inspection dockets (FORM LM-INSP-2011), and nutritional label audits represent sensitive statutory records.
 
 The storage architecture must fulfill two distinct, non-negotiable operational requirements:
 1. **High-Throughput, Low-Latency Delivery**: Rapid ingestion and serving of high-resolution packaging images and optimized thumbnails to tens of thousands of consumer devices and field enforcement tablets.
 2. **Statutory Non-Repudiation & Evidentiary Rigor**: Absolute integrity guarantees for photographs submitted as judicial evidence in compounding proceedings under Section 48 or trial courts under Section 36 of the Legal Metrology Act, 2009.
 
 ### 1.2 Multi-Cloud Storage Architecture: Cloudflare R2 and AWS S3
-To avoid single-vendor lock-in while optimizing operational expenditure, MetroScan employs an S3-compatible object storage layer with dual-deployment compatibility:
+To avoid single-vendor lock-in while optimizing operational expenditure, PackDrashiti employs an S3-compatible object storage layer with dual-deployment compatibility:
 - **Primary Object Engine**: Cloudflare R2 Storage. R2 provides full S3 API compatibility (ListObjectsV2, PutObject, GetObject, HeadObject, DeleteObject, Presigned URL signing) while physically residing across Cloudflare's global edge network.
 - **Failover / Sovereign GovCloud Engine**: AWS S3 (AWS Asia Pacific - Mumbai region: `ap-south-1` / MeitY-empanelled AWS GovCloud). Used where government mandates require domestic on-soil data residency guarantees under strict National Informatics Centre (NIC) procurement guidelines.
 
@@ -100,7 +100,7 @@ Cloudflare R2 completely eliminates data egress charges ($0.00/GB egress), deliv
                     Multipart POST (<=10MB)| or Direct Presigned PUT
                                            v
 +-----------------------------------------------------------------------------------+
-|                             METROSCAN FASTAPI BACKEND                             |
+|                             PACKDRASHITI FASTAPI BACKEND                             |
 |   1. Content-Length & Stream Size Clamp (<=10MB)                                  |
 |   2. In-Stream SHA-256 Hash Computation                                           |
 |   3. Magic Byte Header Inspection (JPEG: FF D8 FF / PNG: 89 50 4E 47 / WebP)      |
@@ -138,12 +138,12 @@ To fulfill these judicial requirements:
 ## 2. Bucket Organization & Directory Taxonomy
 
 ### 2.1 Bucket Isolation and Naming Conventions
-MetroScan enforces environment isolation using dedicated cloud storage buckets. Multi-tenant partitioning within buckets is strictly organized by functional domain, temporal hierarchy, and unique entity identifiers.
+PackDrashiti enforces environment isolation using dedicated cloud storage buckets. Multi-tenant partitioning within buckets is strictly organized by functional domain, temporal hierarchy, and unique entity identifiers.
 
 Canonical Bucket Naming Scheme:
-- Production Primary: `metroscan-prod-storage`
-- Staging / Testing: `metroscan-stage-storage`
-- Local / Development: `metroscan-dev-storage`
+- Production Primary: `packdrashiti-prod-storage`
+- Staging / Testing: `packdrashiti-stage-storage`
+- Local / Development: `packdrashiti-dev-storage`
 
 Bucket access is decoupled from individual developer credentials, utilizing IAM roles and Service Tokens scoped strictly by least-privilege policies.
 
@@ -151,7 +151,7 @@ Bucket access is decoupled from individual developer credentials, utilizing IAM 
 All objects within the storage bucket are stored under a deterministic, partitioned directory tree. Path keys avoid hotspots by utilizing date-based prefixes (`{year}/{month}/`) combined with high-entropy UUIDv4 identifiers.
 
 ```
-metroscan-prod-storage/
+packdrashiti-prod-storage/
 |-- scans/
 |   |-- {year}/
 |   |   |-- {month}/
@@ -229,7 +229,7 @@ def generate_canonical_key(prefix: str, identifier: str, suffix: str, extension:
 ## 3. File Ingestion & Security Validation Protocol
 
 ### 3.1 Multi-Stage Ingestion Pipeline
-Unrestricted file uploads represent a severe attack vector for web applications (remote code execution, polyglot shellcode injection, SSRF, denial of service via zip bombs or decompression attacks). MetroScan executes a six-tier validation barrier before any asset is accepted into durable storage:
+Unrestricted file uploads represent a severe attack vector for web applications (remote code execution, polyglot shellcode injection, SSRF, denial of service via zip bombs or decompression attacks). PackDrashiti executes a six-tier validation barrier before any asset is accepted into durable storage:
 
 ```
 [Raw HTTP Stream] 
@@ -267,7 +267,7 @@ The system only accepts raster packaging imagery conforming to three standardize
 All other formats—including SVG (vector XML vulnerable to Cross-Site Scripting), HEIC/HEIF (patent and decoding complexity), TIFF, BMP, and executable container formats—are rejected with HTTP `415 Unsupported Media Type`.
 
 ### 3.4 Magic Byte Header Inspection and Polyglot Attack Mitigation
-Attackers frequently disguise PHP, Python, ELF, or shell scripts by spoofing file extensions (e.g., `payload.php.jpg`) or forging the HTTP `Content-Type` header. MetroScan implements deterministic magic byte inspection by evaluating the binary signature of the first 16 bytes of the payload stream:
+Attackers frequently disguise PHP, Python, ELF, or shell scripts by spoofing file extensions (e.g., `payload.php.jpg`) or forging the HTTP `Content-Type` header. PackDrashiti implements deterministic magic byte inspection by evaluating the binary signature of the first 16 bytes of the payload stream:
 
 | Image Format | Magic Byte Sequence (Hexadecimal) | Byte Offset | Description |
 |---|---|---|---|
@@ -285,7 +285,7 @@ Modern smartphone cameras automatically embed sensitive metadata in the Exchange
 
 For consumer submissions, storing or exposing raw GPS coordinates exposes citizens to privacy hazards and regulatory scrutiny under the Digital Personal Data Protection Act, 2023 (DPDP Act). For enforcement officers, while geographic jurisdiction is necessary, device metadata must not be exposed on public networks.
 
-MetroScan executes server-side EXIF sanitization using Pillow (`PIL.ImageOps.exif_transpose` and clean re-encoding):
+PackDrashiti executes server-side EXIF sanitization using Pillow (`PIL.ImageOps.exif_transpose` and clean re-encoding):
 1. **Timestamp & Orientation Extraction**: The capture timestamp (`DateTimeOriginal`) and camera orientation are parsed and recorded into the transactional database schema (`product_scans.scanned_at`).
 2. **Complete EXIF Strip**: The raw image is decoded into raw RGB raster buffers in memory, auto-rotated according to the orientation flag, and re-saved to a clean JPEG buffer with zero metadata tags (`exif=b""`).
 3. **Evidentiary Preservation**: If the scan is an official enforcement inspection, the original, unstripped raw image is preserved in the locked `scans/` bucket for judicial verification, but the sanitized derivative is served for routine client review.
@@ -364,14 +364,14 @@ When an inspector exports an inspection docket (FORM LM-INSP-2011), the backend 
 - Cryptographic SHA-256 Digest of the raw master photograph
 - Server Ingestion ISO-8601 Timestamp (UTC and IST)
 - Authenticated Officer Identification Number and Digital Signature placeholder
-- System Integrity Declaration certifying the operational status of the MetroScan ingestion pipeline
+- System Integrity Declaration certifying the operational status of the PackDrashiti ingestion pipeline
 
 ---
 
 ## 5. Thumbnail Generation & Performance Optimization
 
 ### 5.1 Asynchronous Pipeline Architecture
-Generating image derivatives (resizing, color space conversion, WebP encoding) during the synchronous HTTP upload lifecycle degrades API responsiveness and blocks server worker threads. MetroScan employs an asynchronous processing pattern:
+Generating image derivatives (resizing, color space conversion, WebP encoding) during the synchronous HTTP upload lifecycle degrades API responsiveness and blocks server worker threads. PackDrashiti employs an asynchronous processing pattern:
 1. The user uploads the image.
 2. The API validates magic bytes, computes SHA-256, stores the raw image to `scans/`, and writes the initial record to `product_scans`.
 3. The API immediately dispatches a background task (via Celery with Redis broker, or FastAPI `BackgroundTasks` in lightweight deployments).
@@ -379,7 +379,7 @@ Generating image derivatives (resizing, color space conversion, WebP encoding) d
 5. The frontend utilizes progressive loading: rendering a low-resolution blur placeholder or standard icon until the WebP thumbnail is available.
 
 ### 5.2 Downsampling Engine (Pillow and libvips)
-For production thumbnail generation, MetroScan supports two high-performance imaging backends:
+For production thumbnail generation, PackDrashiti supports two high-performance imaging backends:
 - **libvips (via pyvips)**: Primary production downsampling engine. Memory-efficient streaming architecture with SIMD vectorization. Processes a 10 MB JPEG in under 35 milliseconds with less than 20 MB peak RAM consumption.
 - **Pillow (PIL)**: Standard fallback engine using `Image.Resampling.LANCZOS` filter for anti-aliasing quality.
 
@@ -416,7 +416,7 @@ Directive Breakdown:
 ## 6. Access Control & Presigned URL Protocol
 
 ### 6.1 Dual-Tier Access Model: Public Edge CDN vs Authenticated Presigned Access
-Assets within MetroScan are segregated into two distinct security zones:
+Assets within PackDrashiti are segregated into two distinct security zones:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -425,14 +425,14 @@ Assets within MetroScan are segregated into two distinct security zones:
   ZONE A: PUBLIC / LOW-SENSITIVITY ASSETS (Via Cloudflare Anycast CDN)
   - Thumbnails: `thumbnails/*`
   - Commodity Sample Diagrams: `static/commodities/*`
-  - URL Pattern: https://cdn.metroscan.gov.in/thumbnails/2026/09/{id}_thumb.webp
+  - URL Pattern: https://cdn.packdrashiti.gov.in/thumbnails/2026/09/{id}_thumb.webp
   - Access Mechanism: Anonymous HTTPS GET with Cloudflare Edge Caching
 
   ZONE B: PRIVATE / STATUTORY EVIDENCE ASSETS (Via Time-Limited Presigned URLs)
   - Raw Evidence Scans: `scans/*`
   - Annotated Violation Calipers: `annotations/*`
   - Inspection Dockets (FORM LM-INSP-2011): `reports/*`
-  - URL Pattern: https://storage.metroscan.gov.in/scans/2026/09/...?X-Amz-Signature=...
+  - URL Pattern: https://storage.packdrashiti.gov.in/scans/2026/09/...?X-Amz-Signature=...
   - Access Mechanism: Authenticated REST endpoint -> Role Validation -> Presigned URL
 ```
 
@@ -457,7 +457,7 @@ To prevent unauthorized URL leakage or forwarding, presigned URLs enforce strict
 | Temporary Upload (`temp/`) | Client Upload Agent | 10 Minutes (600s) | 15 Minutes (900s) | Constrains upload window for direct client-to-storage PUT operations. |
 
 ### 6.4 Client-Direct Ingestion via Presigned PUT Operations
-For high-resolution field captures on mobile networks, routing 10 MB files through application servers can cause network bottlenecks. MetroScan supports direct client-to-bucket ingestion:
+For high-resolution field captures on mobile networks, routing 10 MB files through application servers can cause network bottlenecks. PackDrashiti supports direct client-to-bucket ingestion:
 1. Client sends request to backend: `POST /api/v1/storage/upload-ticket` specifying file size, MIME type, and panel identifier.
 2. Backend verifies authentication, checks file size <= 10 MB, creates a temporary staging key `temp/{upload_session_id}/raw.jpg`, and returns a Presigned PUT URL signed with exact headers (`Content-Type`, `Content-Length`).
 3. Client executes direct HTTP PUT to the object storage endpoint.
@@ -524,7 +524,7 @@ from typing import Optional, Dict, Any
 import datetime
 import logging
 
-logger = logging.getLogger("metroscan.storage")
+logger = logging.getLogger("packdrashiti.storage")
 
 class StorageService:
     """
@@ -537,9 +537,9 @@ class StorageService:
         self.endpoint_url = os.getenv("STORAGE_ENDPOINT_URL")
         self.access_key = os.getenv("STORAGE_ACCESS_KEY_ID")
         self.secret_key = os.getenv("STORAGE_SECRET_ACCESS_KEY")
-        self.bucket_name = os.getenv("STORAGE_BUCKET_NAME", "metroscan-prod-storage")
+        self.bucket_name = os.getenv("STORAGE_BUCKET_NAME", "packdrashiti-prod-storage")
         self.region_name = os.getenv("STORAGE_REGION", "auto")
-        self.public_cdn_domain = os.getenv("STORAGE_PUBLIC_CDN_DOMAIN", "cdn.metroscan.gov.in")
+        self.public_cdn_domain = os.getenv("STORAGE_PUBLIC_CDN_DOMAIN", "cdn.packdrashiti.gov.in")
 
         # Initialize Boto3 S3 Client with SigV4 configuration
         self.s3_client = boto3.client(
@@ -805,7 +805,7 @@ import logging
 from PIL import Image
 from app.services.storage_service import StorageService
 
-logger = logging.getLogger("metroscan.thumbnail_worker")
+logger = logging.getLogger("packdrashiti.thumbnail_worker")
 
 def process_thumbnail_task(raw_image_key: str, thumbnail_key: str) -> str:
     """
@@ -883,8 +883,8 @@ The following bucket policy enforces TLS encryption in transit, blocks unencrypt
       "Principal": "*",
       "Action": "s3:*",
       "Resource": [
-        "arn:aws:s3:::metroscan-prod-storage",
-        "arn:aws:s3:::metroscan-prod-storage/*"
+        "arn:aws:s3:::packdrashiti-prod-storage",
+        "arn:aws:s3:::packdrashiti-prod-storage/*"
       ],
       "Condition": {
         "Bool": {
@@ -897,7 +897,7 @@ The following bucket policy enforces TLS encryption in transit, blocks unencrypt
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::metroscan-prod-storage/thumbnails/*"
+      "Resource": "arn:aws:s3:::packdrashiti-prod-storage/thumbnails/*"
     },
     {
       "Sid": "DenyPublicAccessToEvidenceAndReports",
@@ -905,16 +905,16 @@ The following bucket policy enforces TLS encryption in transit, blocks unencrypt
       "Principal": "*",
       "Action": "s3:GetObject",
       "Resource": [
-        "arn:aws:s3:::metroscan-prod-storage/scans/*",
-        "arn:aws:s3:::metroscan-prod-storage/annotations/*",
-        "arn:aws:s3:::metroscan-prod-storage/reports/*",
-        "arn:aws:s3:::metroscan-prod-storage/temp/*"
+        "arn:aws:s3:::packdrashiti-prod-storage/scans/*",
+        "arn:aws:s3:::packdrashiti-prod-storage/annotations/*",
+        "arn:aws:s3:::packdrashiti-prod-storage/reports/*",
+        "arn:aws:s3:::packdrashiti-prod-storage/temp/*"
       ],
       "Condition": {
         "StringNotLike": {
           "aws:PrincipalArn": [
-            "arn:aws:iam::*:role/MetroScanBackendRole",
-            "arn:aws:iam::*:role/MetroScanWorkerRole"
+            "arn:aws:iam::*:role/PackDrashitiBackendRole",
+            "arn:aws:iam::*:role/PackDrashitiWorkerRole"
           ]
         }
       }
@@ -973,7 +973,7 @@ To automate storage tiering and eliminate abandoned staging sessions:
 ```
 
 ### 8.3 Cryptographic Integrity Audit Routine
-To guarantee that records comply with Section 63 of Bharatiya Sakshya Adhiniyam throughout their storage lifecycle, MetroScan executes an automated bi-weekly integrity audit job.
+To guarantee that records comply with Section 63 of Bharatiya Sakshya Adhiniyam throughout their storage lifecycle, PackDrashiti executes an automated bi-weekly integrity audit job.
 
 Audit Protocol:
 1. Select a deterministic random sample (5%) of scans older than 30 days from `product_scans`.
@@ -992,7 +992,7 @@ import logging
 from app.services.storage_service import StorageService
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("metroscan.audit")
+logger = logging.getLogger("packdrashiti.audit")
 
 def run_integrity_audit(sample_percentage: float = 5.0):
     storage = StorageService()
@@ -1031,4 +1031,4 @@ if __name__ == "__main__":
 
 ---
 **End of Specification**  
-*MetroScan Engineering & Legal Metrology Compliance Architecture Group*
+*PackDrashiti Engineering & Legal Metrology Compliance Architecture Group*

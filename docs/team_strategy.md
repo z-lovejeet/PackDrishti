@@ -1,4 +1,4 @@
-# MetroScan: Engineering Team Strategy & Execution Plan
+# PackDrashiti: Engineering Team Strategy & Execution Plan
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
 **Document Classification**: Engineering Work Allocation and Technical Execution Strategy  

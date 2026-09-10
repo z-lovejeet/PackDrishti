@@ -1,6 +1,6 @@
-# MetroScan: Statutory Rule Engine Logic & Heuristic Patterns Specification
+# PackDrashiti: Statutory Rule Engine Logic & Heuristic Patterns Specification
 **Document Reference**: MS-SPEC-RULE-2026-V1  
-**Project ID**: SIH26034 (MetroScan)  
+**Project ID**: SIH26034 (PackDrashiti)  
 **Governing Act**: Legal Metrology Act, 2009 (Act No. 1 of 2010)  
 **Governing Rules**: Legal Metrology (Packaged Commodities) Rules, 2011 (G.S.R. 202(E), as amended)  
 **Administering Authority**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
@@ -14,10 +14,10 @@
 ### 1.1 Statutory Authority and Regulatory Context
 Under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011 (hereinafter "LMPC Rules, 2011"), every pre-packaged commodity distributed, sold, or offered for sale across the territory of India is required to bear explicit statutory declarations. These declarations safeguard consumer rights, establish fair trade practices, and enforce standardization of weights and measures.
 
-Enforcement of these provisions historically depended upon physical inspection by State Legal Metrology Officers utilizing manual micrometer calipers, optical comparator scales, and physical documentation. The **MetroScan Statutory Rule Engine** translates statutory text, legislative provisos, gazette notifications, and schedule tables into a deterministic, machine-executable validation pipeline. The engine ingests optical text, bounding box spatial coordinates, and calibrated visual features to produce legally defensible compliance adjudications.
+Enforcement of these provisions historically depended upon physical inspection by State Legal Metrology Officers utilizing manual micrometer calipers, optical comparator scales, and physical documentation. The **PackDrashiti Statutory Rule Engine** translates statutory text, legislative provisos, gazette notifications, and schedule tables into a deterministic, machine-executable validation pipeline. The engine ingests optical text, bounding box spatial coordinates, and calibrated visual features to produce legally defensible compliance adjudications.
 
 ### 1.2 System Execution Pipeline: The Four-Tier Architecture
-The MetroScan statutory verification engine operates within a strict four-tier architecture designed to eliminate hallucinations, enforce mathematical determinism, and ground all legal actions in statutory law:
+The PackDrashiti statutory verification engine operates within a strict four-tier architecture designed to eliminate hallucinations, enforce mathematical determinism, and ground all legal actions in statutory law:
 
 - **Tier 1: Multimodal VLM & High-Performance OCR (Perception & Spatial Token Stream)**
   High-accuracy extraction combining Multimodal Vision-Language Models (Google Gemini 1.5 Flash / OpenAI GPT-4o-mini) with structured Pydantic schemas, supplemented by PaddleOCR for low-latency edge/fallback processing. Extracts text tokens, bounding boxes `[ymin, xmin, ymax, xmax]`, and confidence metrics.
@@ -913,7 +913,7 @@ Furthermore, charging a price higher than the declared MRP or maintaining dual M
 
 ### 5.1 Sticker Overlay and Boundary Gradient Detection
 
-Retail price tampering typically involves pasting a thermal or paper adhesive label over the manufacturer's printed price deck. MetroScan deploys an edge-artifact and texture-discontinuity pipeline on the MRP bounding region.
+Retail price tampering typically involves pasting a thermal or paper adhesive label over the manufacturer's printed price deck. PackDrashiti deploys an edge-artifact and texture-discontinuity pipeline on the MRP bounding region.
 
 ```
 +-------------------------------------------------------------------------+
@@ -996,7 +996,7 @@ def reconcile_cross_panel_mrp(panel_scan_results: list) -> dict:
 
 ## 6. Composite Statutory Compliance Scoring Algorithm
 
-The MetroScan platform computes a standardized **Compliance Index (0 - 100)** representing the overall legal defensibility of the scanned product packaging.
+The PackDrashiti platform computes a standardized **Compliance Index (0 - 100)** representing the overall legal defensibility of the scanned product packaging.
 
 ### 6.1 Deductive Mathematical Formulation
 The scoring pipeline initializes the package at a baseline score of $S_0 = 100$ points and deducts points for detected statutory infractions:

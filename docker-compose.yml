@@ -4,39 +4,39 @@ services:
   # ----------------------------------------------------------------------------
   # PostgreSQL 16 with pgvector extension
   # ----------------------------------------------------------------------------
-  metroscan-db:
+  packdrashiti-db:
     image: pgvector/pgvector:pg16
-    container_name: metroscan-postgres
+    container_name: packdrashiti-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-metroscan_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-metroscan_pass}
-      POSTGRES_DB: ${POSTGRES_DB:-metroscan_db}
+      POSTGRES_USER: ${POSTGRES_USER:-packdrashiti_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-packdrashiti_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-packdrashiti_db}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
-      - metroscan_postgres_data:/var/lib/postgresql/data
+      - packdrashiti_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-metroscan_user} -d $${POSTGRES_DB:-metroscan_db}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-packdrashiti_user} -d $${POSTGRES_DB:-packdrashiti_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - metroscan-network
+      - packdrashiti-network
 
   # ----------------------------------------------------------------------------
   # Redis 7 Cache & Message Broker
   # ----------------------------------------------------------------------------
-  metroscan-redis:
+  packdrashiti-redis:
     image: redis:7-alpine
-    container_name: metroscan-redis
+    container_name: packdrashiti-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - metroscan_redis_data:/data
+      - packdrashiti_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -44,58 +44,58 @@ services:
       retries: 5
       start_period: 5s
     networks:
-      - metroscan-network
+      - packdrashiti-network
 
   # ----------------------------------------------------------------------------
-  # MetroScan FastAPI Backend Application
+  # PackDrashiti FastAPI Backend Application
   # ----------------------------------------------------------------------------
-  metroscan-backend:
+  packdrashiti-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: metroscan-backend
+    container_name: packdrashiti-backend
     restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
       APP_ENV: development
       DEBUG: "true"
-      DATABASE_URL: postgresql://metroscan_user:metroscan_pass@metroscan-db:5432/metroscan_db
-      REDIS_URL: redis://metroscan-redis:6379/0
+      DATABASE_URL: postgresql://packdrashiti_user:packdrashiti_pass@packdrashiti-db:5432/packdrashiti_db
+      REDIS_URL: redis://packdrashiti-redis:6379/0
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650}
       CORS_ORIGINS: http://localhost:5173,http://localhost:3000
     depends_on:
-      metroscan-db:
+      packdrashiti-db:
         condition: service_healthy
-      metroscan-redis:
+      packdrashiti-redis:
         condition: service_healthy
     networks:
-      - metroscan-network
+      - packdrashiti-network
 
   # ----------------------------------------------------------------------------
   # Database GUI Administration (Adminer)
   # Accessible via http://localhost:8080
   # ----------------------------------------------------------------------------
-  metroscan-adminer:
+  packdrashiti-adminer:
     image: adminer:latest
-    container_name: metroscan-adminer
+    container_name: packdrashiti-adminer
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
-      ADMINER_DEFAULT_SERVER: metroscan-db
+      ADMINER_DEFAULT_SERVER: packdrashiti-db
     depends_on:
-      metroscan-db:
+      packdrashiti-db:
         condition: service_healthy
     networks:
-      - metroscan-network
+      - packdrashiti-network
 
 volumes:
-  metroscan_postgres_data:
+  packdrashiti_postgres_data:
     driver: local
-  metroscan_redis_data:
+  packdrashiti_redis_data:
     driver: local
 
 networks:
-  metroscan-network:
+  packdrashiti-network:
     driver: bridge

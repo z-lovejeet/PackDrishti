@@ -1,5 +1,5 @@
 """
-MetroScan Backend Entrypoint.
+PackDrashiti Backend Entrypoint.
 Delegates to backend.src.main:app.
 """
 from backend.src.main import app

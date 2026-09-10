@@ -1,4 +1,4 @@
-# MetroScan Backend Dependencies (SIH26034)
+# PackDrashiti Backend Dependencies (SIH26034)
 # Python 3.11+
 
 # Web Framework & ASGI Server

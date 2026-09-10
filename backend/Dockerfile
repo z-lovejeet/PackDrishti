@@ -1,4 +1,4 @@
-# Multi-stage / Production-ready Python 3.11 Dockerfile for MetroScan Backend
+# Multi-stage / Production-ready Python 3.11 Dockerfile for PackDrashiti Backend
 FROM python:3.11-slim AS builder
 
 WORKDIR /app

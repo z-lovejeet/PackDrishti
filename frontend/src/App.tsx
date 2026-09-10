@@ -24,7 +24,7 @@ export function App() {
     {
       id: "init-toast",
       type: "info",
-      title: "MetroScan Engine Ready",
+      title: "PackDrashiti Engine Ready",
       message: "Legal Metrology Rules 2011 rulebook loaded. Choose Consumer or Officer mode above.",
     }
   ]);

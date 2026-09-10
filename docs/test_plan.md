@@ -1,4 +1,4 @@
-# MetroScan: Quality Assurance, Verification & Test Strategy Matrix
+# PackDrashiti: Quality Assurance, Verification & Test Strategy Matrix
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
 **Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
@@ -11,7 +11,7 @@
 ## 1. Document Header & Quality Objectives
 
 ### 1.1 Mission and Quality Policy
-MetroScan is an automated legal compliance auditing engine and nutritional safety platform designed to inspect packaged commodities under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011, as well as the Consumer Protection Act, 2019 and ICMR-NIN nutritional safety guidelines. Because the platform serves both enforcement officers (field inspectors issuing statutory notices under Section 36(1)) and everyday citizens, software reliability, mathematical accuracy, and deterministic rule validation are mission-critical.
+PackDrashiti is an automated legal compliance auditing engine and nutritional safety platform designed to inspect packaged commodities under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011, as well as the Consumer Protection Act, 2019 and ICMR-NIN nutritional safety guidelines. Because the platform serves both enforcement officers (field inspectors issuing statutory notices under Section 36(1)) and everyday citizens, software reliability, mathematical accuracy, and deterministic rule validation are mission-critical.
 
 This document establishes the comprehensive quality assurance architecture, test automation pyramid, detailed statutory test suites, cross-browser responsiveness standards, security penetration defenses, and CI/CD gatekeeper workflows. The overriding objective is to guarantee zero critical defects, eliminate statutory miscalculations, and ensure seamless performance during the Smart India Hackathon (SIH) live evaluation.
 
@@ -57,7 +57,7 @@ This document establishes the comprehensive quality assurance architecture, test
 
 ## 2. Testing Pyramid and Strategy
 
-MetroScan adheres to a structured testing pyramid where fast, deterministic unit tests form the broad foundation, followed by integration tests, machine learning benchmarking, and browser-driven end-to-end user journeys.
+PackDrashiti adheres to a structured testing pyramid where fast, deterministic unit tests form the broad foundation, followed by integration tests, machine learning benchmarking, and browser-driven end-to-end user journeys.
 
 ```
                    /\
@@ -198,7 +198,7 @@ test.describe('Consumer Label Verification Flow', () => {
 
   test('TC-E2E-01: Full scanning, compliance card rendering, and history logging', async ({ page }) => {
     // Step 1: Verify landing in Consumer Mode
-    await expect(page.locator('header')).toContainText('MetroScan');
+    await expect(page.locator('header')).toContainText('PackDrashiti');
     const roleBadge = page.locator('[data-testid="current-role-badge"]');
     await expect(roleBadge).toContainText('Consumer Mode');
 
@@ -357,7 +357,7 @@ test.describe('Legal Metrology Officer Enforcement Flow', () => {
 
 ## 5. Security & Penetration Testing Cases
 
-To protect governmental enforcement records and ensure compliance with the Digital Personal Data Protection (DPDP) Act, 2023, MetroScan undergoes automated security and penetration test vectors.
+To protect governmental enforcement records and ensure compliance with the Digital Personal Data Protection (DPDP) Act, 2023, PackDrashiti undergoes automated security and penetration test vectors.
 
 | Test ID | Vulnerability Vector | Target Endpoint / Input | Attack Payload / Method | Severity | Security Countermeasure | Expected System Defense |
 |---|---|---|---|---|---|---|
@@ -375,7 +375,7 @@ To protect governmental enforcement records and ensure compliance with the Digit
 
 ## 6. Cross-Browser & Viewport Responsiveness Matrix
 
-MetroScan must function seamlessly on field tablets and budget smartphones used by Legal Metrology inspectors, as well as high-resolution desktop displays used in enforcement headquarters.
+PackDrashiti must function seamlessly on field tablets and budget smartphones used by Legal Metrology inspectors, as well as high-resolution desktop displays used in enforcement headquarters.
 
 ### 6.1 Viewport Breakpoints and Hardware Target Matrix
 
@@ -400,7 +400,7 @@ MetroScan must function seamlessly on field tablets and budget smartphones used 
 
 ## 7. ML Accuracy Benchmarking Against 50-Product Ground Truth Dataset
 
-To ensure optical parsing and statutory classification meet judicial standards, MetroScan is evaluated against a curated 50-product packaging ground truth dataset located in `/Users/lovejeetsingh1/Documents/SIH/ml/test_data/`.
+To ensure optical parsing and statutory classification meet judicial standards, PackDrashiti is evaluated against a curated 50-product packaging ground truth dataset located in `/Users/lovejeetsingh1/Documents/SIH/ml/test_data/`.
 
 ### 7.1 Dataset Composition and Categorical Diversity
 The benchmark suite consists of 50 high-resolution photographic captures representing standard Indian retail commodities across complex packaging topologies:
@@ -446,7 +446,7 @@ The CI/CD pipeline enforces automated quality checks on every pull request targe
 ### 8.1 GitHub Actions Workflow Specification (`.github/workflows/qa_gatekeeper.yml`)
 
 ```yaml
-name: MetroScan QA Gatekeeper & Automated Test Suite
+name: PackDrashiti QA Gatekeeper & Automated Test Suite
 
 on:
   push:

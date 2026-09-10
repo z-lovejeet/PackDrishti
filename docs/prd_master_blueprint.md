@@ -1,4 +1,4 @@
-# MetroScan: Product Requirements Document & Master Blueprint
+# PackDrashiti: Product Requirements Document & Master Blueprint
 **Project ID**: SIH26034  
 **Project Title**: Software System to Check Compliance of Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011 by Scanning Products, Images and Labels  
 **Administering Ministry**: Ministry of Consumer Affairs, Food & Public Distribution, Department of Consumer Affairs (Legal Metrology Division), Government of India  
@@ -13,7 +13,7 @@
 In India, packaged commodities across retail and e-commerce are governed by the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011. The law mandates explicit declarations on every package: complete manufacturer identity and address with postal PIN, generic commodity name, net quantity in standardized SI units, Maximum Retail Price (MRP inclusive of all taxes), month and year of manufacture/packing/import, consumer care contact coordinates, country of origin, and Unit Sale Price (USP). Currently, verification relies upon manual enforcement by field inspectors. Given the volume of stock keeping units (SKUs) in offline retail and millions of e-commerce listings, manual inspection cannot provide adequate coverage, leading to undetected violations, unfair trade practices, dual-pricing manipulation, non-standard metric declarations, and consumer deception. Consumers also lack an automated mechanism to verify statutory compliance, price fairness, and nutritional safety.
 
 ### 1.2 System Overview
-MetroScan is an automated regulatory compliance verification and nutritional auditing platform designed for dual operating contexts: Enforcement Officials (Legal Metrology Inspectors) and Everyday Consumers. The platform consumes product packaging images, processes them through an optical and layout pipeline, validates extracted declarations against the statutory codification of the Legal Metrology (Packaged Commodities) Rules, 2011, and computes a comprehensive compliance dossier. For consumers, it extends label auditing to ICMR-NIN nutritional thresholds, alerting on excess sugar, saturated fat, sodium, and deceptive unit pricing. For inspectors, it measures physical font letter heights according to Principle Display Panel (PDP) areas under Rule 7 Table-I, identifies statutory violations under Section 36(1) of the Act, and compiles verifiable inspection dockets (FORM LM-INSP-2011) with photographic evidence.
+PackDrashiti is an automated regulatory compliance verification and nutritional auditing platform designed for dual operating contexts: Enforcement Officials (Legal Metrology Inspectors) and Everyday Consumers. The platform consumes product packaging images, processes them through an optical and layout pipeline, validates extracted declarations against the statutory codification of the Legal Metrology (Packaged Commodities) Rules, 2011, and computes a comprehensive compliance dossier. For consumers, it extends label auditing to ICMR-NIN nutritional thresholds, alerting on excess sugar, saturated fat, sodium, and deceptive unit pricing. For inspectors, it measures physical font letter heights according to Principle Display Panel (PDP) areas under Rule 7 Table-I, identifies statutory violations under Section 36(1) of the Act, and compiles verifiable inspection dockets (FORM LM-INSP-2011) with photographic evidence.
 
 ### 1.3 Target Personas and Value Proposition
 1. **Legal Metrology Inspector (Enforcement Officer)**:
@@ -223,7 +223,7 @@ $$\text{PDP Area (Cylindrical Container)} = 40\% \times (\text{Height} \times \t
 
 ## 5. Consumer Health and Nutrition Engine Specification
 
-For everyday consumers, MetroScan performs an automated nutritional safety and price-fairness audit on food and beverage commodities.
+For everyday consumers, PackDrashiti performs an automated nutritional safety and price-fairness audit on food and beverage commodities.
 
 ### 5.1 Dual-Panel Capture Requirement
 The consumer interface requires:
@@ -272,7 +272,7 @@ Score Bands:
 
 ## 6. 4-Tier Hybrid AI & Rules Pipeline
 
-Instead of brittle custom computer vision models, MetroScan uses a modern 4-tier hybrid pipeline to ensure 100% auditable mathematical logic for legal verification.
+Instead of brittle custom computer vision models, PackDrashiti uses a modern 4-tier hybrid pipeline to ensure 100% auditable mathematical logic for legal verification.
 
 ### 6.1 Tier 1: Multimodal VLM & High-Performance OCR
 - **Engine**: Gemini 1.5 Flash / GPT-4o-mini coupled with PaddleOCR.
@@ -483,7 +483,7 @@ All API responses use standard HTTP status codes and JSON payloads. All protecte
   "mfg_date": "04/2026",
   "overall_status": "violation",
   "compliance_score": 78.5,
-  "image_url": "https://storage.metroscan.gov.in/scans/LM-SCAN-2026-9042.jpg",
+  "image_url": "https://storage.packdrashiti.gov.in/scans/LM-SCAN-2026-9042.jpg",
   "declarations": [
     {
       "id": "dec-001",
@@ -623,7 +623,7 @@ All API responses use standard HTTP status codes and JSON payloads. All protecte
 ```json
 {
   "report_number": "REP-DEL-2026-0812",
-  "download_url": "https://storage.metroscan.gov.in/reports/REP-DEL-2026-0812.pdf",
+  "download_url": "https://storage.packdrashiti.gov.in/reports/REP-DEL-2026-0812.pdf",
   "generated_at": "2026-09-10T12:00:00Z"
 }
 ```
