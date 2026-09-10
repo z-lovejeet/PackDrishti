@@ -163,3 +163,18 @@ def require_admin_role(
             detail="Operation requires system administrator privileges.",
         )
     return current_user
+
+
+async def get_optional_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
+) -> Optional[CurrentUser]:
+    """
+    Optional authentication dependency.
+    Returns CurrentUser if valid bearer credentials are provided, else None.
+    """
+    if not credentials or not credentials.credentials:
+        return None
+    try:
+        return await get_current_user(credentials)
+    except HTTPException:
+        return None
