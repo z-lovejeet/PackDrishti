@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     CACHE_MAX_ITEMS: int = 5000
 
     # Authentication & Security Tokens (Supabase Auth)
+    JWT_SECRET_KEY: str = "4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
