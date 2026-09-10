@@ -31,6 +31,12 @@ This specification provides the production-grade PostgreSQL 16 database definiti
 - **Hybrid Relational-Document Architecture**: Relational constraints enforce business invariants (e.g., users, scans, reports), while PostgreSQL `JSONB` storage captures complex hierarchical structures (optical bounding boxes with polygonal vertices, ICMR-NIN 2024 nutritional profiles, and multi-actor case timeline histories).
 - **Zero-Tolerance Statutory Consistency**: Floating-point types (`REAL` or `DOUBLE PRECISION`) are prohibited for monetary, physical dimensional, or score calculations due to binary rounding inaccuracies. All physical measurements (mm, cm2) and monetary amounts (INR) utilize fixed-point `NUMERIC(p, s)` types.
 
+### 1.3 Supabase Managed Platform Integration & Zero-Manual Infrastructure
+- **Unified PostgreSQL & Vector Persistence**: The database is hosted on Supabase (PostgreSQL 16), utilizing the native `pgvector` extension. This completely consolidates relational records (scans, violations, audit logs) and high-dimensional semantic embeddings (`vector(1536)`) into a single managed database, removing the need for external vector databases like Pinecone or Milvus.
+- **Supabase Auth Integration**: User authentication is anchored to Supabase Auth (`auth.users`). The `public.users` table acts as the application profile table with foreign key linkage to `auth.users(id)`. Backend endpoints verify incoming Supabase JWT tokens via `SUPABASE_KEY` / `JWT_SECRET_KEY`.
+- **Zero-Manual In-Memory Caching**: Redis has been completely eliminated. Short-lived session denylists, statutory rule lookup tables, and scan rate limiting are managed via Python in-memory asynchronous caching (`cachetools` / `async-lru`), eliminating external hosting, maintenance, and manual setup costs.
+
+
 ---
 
 ## 2. Entity-Relationship (ER) Overview

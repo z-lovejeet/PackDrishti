@@ -60,19 +60,20 @@ The development team consists of four technical members. All soft skills, slide 
 ---
 
 ### Member 2: Backend Developer
-**Core Objective**: Architect, develop, and maintain the FastAPI backend application, PostgreSQL database, authentication mechanisms, and statutory report rendering engine.
+**Core Objective**: Architect, develop, and maintain the FastAPI backend application, Supabase PostgreSQL database with pgvector, Supabase Auth integration, zero-manual-step in-memory caching, and statutory report rendering engine.
 
 #### Primary Responsibilities
 1. **API Gateway & Service Layer**:
    - Scaffold production-grade FastAPI application with structured routers (`/api/v1/auth`, `/api/v1/scan`, `/api/v1/health`, `/api/v1/reports`, `/api/v1/dashboard`).
    - Implement request validation, exception handlers, and standard JSON response envelopes using Pydantic v2.
+   - Implement zero-manual-step, 100% free Python in-memory asynchronous caching (`cachetools` / `async-lru`) for token blacklisting, statutory lookup tables, and scan rate limiting without Redis dependencies.
 2. **Database Modeling & Relational Integrity**:
-   - Write SQLAlchemy 2.0 ORM models corresponding to the PRD schema (`users`, `product_scans`, `extracted_declarations`, `statutory_violations`, `compliance_reports`, `health_audits`).
-   - Configure Alembic database migration scripts with automated rollback support.
+   - Write SQLAlchemy 2.0 ORM models and Supabase client bindings corresponding to the PRD schema (`users`, `product_scans`, `extracted_declarations`, `statutory_violations`, `compliance_reports`, `health_audits`).
+   - Manage Supabase PostgreSQL 16 migrations and `pgvector` extension schemas.
 3. **Authentication & Role-Based Access Control (RBAC)**:
-   - Implement JWT token generation (HMAC-SHA256), bcrypt password hashing, and role verification dependencies (`verify_officer`, `verify_consumer`).
+   - Integrate Supabase Auth SDK and JWT verification middleware (`verify_officer`, `verify_consumer`) with automatic token rotation and session sync.
 4. **Object Storage & File Handling**:
-   - Implement multipart image upload streaming directly into Cloudflare R2 / AWS S3 storage buckets with SHA-256 integrity checks.
+   - Implement multipart image upload streaming directly into Cloudflare R2 / AWS S3 / Supabase storage buckets with SHA-256 integrity checks.
 5. **Server-Side PDF Generation**:
    - Implement headless WeasyPrint or ReportLab PDF generator service to dynamically produce FORM LM-INSP-2011 certificates with embedded scan photos and legal violation notices.
 
@@ -82,37 +83,40 @@ The development team consists of four technical members. All soft skills, slide 
 - `backend/models/` (user.py, scan.py, violation.py, report.py, health.py)
 - `backend/schemas/` (auth_schema.py, scan_schema.py, health_schema.py, report_schema.py)
 - `backend/services/` (compliance_engine.py, pdf_generator.py, storage_service.py)
-- `backend/core/` (security.py, config.py, database.py)
+- `backend/core/` (security.py, config.py, database.py, cache.py)
 - `alembic/` (migration scripts)
 
 ---
 
 ### Member 3: AI Engineer
-**Core Objective**: Build, calibrate, and benchmark the 4-tier hybrid pipeline (Multimodal VLM/OCR + Deterministic Python Rule Engine + Statutory RAG + LLM Synthesis).
+**Core Objective**: Build, calibrate, and benchmark the industrial-grade LangGraph stateful RAG workflow and Parallel Dual-LLM pipeline (Multimodal VLM/OCR + Deterministic Python Rule Engine + Supabase pgvector RAG + Parallel Gemini & Groq LLMs).
 
 #### Primary Responsibilities
-1. **Tier 1: Multimodal VLM & OCR Integration**:
-   - Author VLM structured prompts for Gemini 1.5 Flash / GPT-4o-mini to extract spatial layout and text with PaddleOCR fallback.
-   - Enforce Pydantic structured output for reliable downstream ingestion.
+1. **Tier 1: Multimodal Spatial Perception & Automated Fallback**:
+   - Author VLM visual perception prompts to extract spatial layout, label text, and bounding boxes with zero-manual-step PaddleOCR fallback.
+   - Enforce strict Pydantic structured output for downstream processing.
 2. **Tier 2: Deterministic Python Rule Engine**:
    - Implement 100% auditable mathematical logic for legal verification.
    - Write pure Python modules for Unit Sale Price calculations, strict SI metric units filtering, Rule 7 Table-I font height step functions, and Rule 9 contrast limits.
-   - Ensure the LLM is never used for legal math.
-3. **Tier 3: Statutory Legal RAG**:
-   - Build the Statutory RAG vector index using PostgreSQL pgvector.
-   - Index the Legal Metrology Act 2009, Packaged Commodities Rules 2011, and court precedents.
-   - Automate retrieval of exact statutory sections to generate formal show-cause notices (FORM LM-INSP-2011).
-4. **Tier 4: LLM Consumer Synthesis**:
-   - Create synthesis pipelines to translate complex ICMR-NIN nutritional audits into plain-language warnings and healthy Indian food recommendations.
+   - Strictly guarantee that the LLM is never used for legal math.
+3. **Tier 3: Statutory Legal RAG via Supabase pgvector**:
+   - Build the Statutory RAG vector index using Supabase PostgreSQL native `pgvector` with HNSW cosine similarity.
+   - Index the Legal Metrology Act 2009, Packaged Commodities Rules 2011 (amended up to 2024), and court precedents.
+   - Implement LangGraph retrieval nodes to fetch exact statutory clauses and compounding schedules for cited violations.
+4. **Tier 4: Parallel Dual-LLM Consensus & Synthesis**:
+   - Architect and deploy Parallel Dual-LLM execution via `asyncio.gather()`:
+     - **Primary Chain**: Google Gemini fallback hierarchy (`gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite`).
+     - **Secondary Chain**: Groq API fallback hierarchy (`gpt-oss-120b` -> `gpt-oss-20b`).
+   - Synthesize consumer nutrition warnings (ICMR-NIN 2024) and generate formal statutory show-cause notices (FORM LM-INSP-2011) with zero hallucinations.
 5. **Shift from Manual Labeling**:
-   - Pivot from tedious manual image labeling in CVAT to building robust prompts, vector indexes, and the deterministic rule engine.
+   - Eliminate manual bounding box labeling in CVAT in favor of automated evaluation benchmarks against 50 golden ground-truth SKUs.
 
 #### Key Files Owned
-- `ai/vlm_prompts.py` (Structured prompt templates)
-- `ai/rule_engine.py` (Deterministic legal math and SI validation)
-- `ai/rag_indexer.py` (pgvector ingestion and search)
-- `ai/synthesis.py` (Consumer plain-language translation)
-- `ai/compliance_pipeline.py` (Unified 4-tier orchestrator)
+- `ai/src/pipeline/langgraph_workflow.py` (Stateful LangGraph RAG workflow)
+- `ai/src/llm/dual_engine.py` (Parallel Gemini & Groq fallback orchestrator)
+- `ai/src/rules/deterministic.py` (Pure Python legal math and SI validation)
+- `ai/src/rag/supabase_vector.py` (Supabase pgvector ingestion and retrieval)
+- `ai/src/rules/compliance_checker.py` (Consensus validation and statutory citation)
 
 ---
 
@@ -122,7 +126,7 @@ The development team consists of four technical members. All soft skills, slide 
 #### Primary Responsibilities
 1. **Automated Testing Suites**:
    - Frontend E2E Testing: Implement Playwright test suites covering consumer scan flow, officer dashboard review, and report PDF export.
-   - Backend Testing: Write comprehensive `pytest` test suites covering API endpoints, JWT authorization guards, and validation schemas.
+   - Backend Testing: Write comprehensive `pytest` test suites covering API endpoints, Supabase JWT authorization guards, in-memory caching, and validation schemas.
    - ML Regression Testing: Build an automated evaluation harness that runs against the 50-product benchmark dataset to detect accuracy regressions.
 2. **Continuous Integration & Delivery (CI/CD)**:
    - Configure GitHub Actions workflows:
@@ -131,8 +135,8 @@ The development team consists of four technical members. All soft skills, slide 
      - Production Release: Automated deployment on tagged releases to `main`.
 3. **Containerization & Deployment Architecture**:
    - Write multi-stage `Dockerfile` for the backend application ensuring minimal image footprint.
-   - Author `docker-compose.yml` orchestrating FastAPI, PostgreSQL, and local blob storage emulator for local development.
-   - Configure hosting on Vercel/Netlify (Frontend) and Railway/Render (Backend).
+   - Author `docker-compose.yml` orchestrating FastAPI, Supabase/pgvector local PostgreSQL, and Adminer for local development with zero external Redis baggage.
+   - Configure hosting on Vercel (Frontend) and Railway/Render/Supabase (Backend & DB).
 4. **Security & Performance Auditing**:
    - Run automated security scans: OWASP Top 10 vulnerabilities, SQL injection checks, dependency vulnerability scanning (`npm audit`, `pip-audit`).
    - Execute load testing with Locust or k6 simulating concurrent image upload requests.

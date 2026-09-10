@@ -258,13 +258,31 @@ OCR_CONFIDENCE_THRESHOLD=0.60
 CALIBRATION_PIXEL_PER_MM=11.81
 
 # ------------------------------------------------------------------------------
-# 7. LLM & Statutory RAG Pipeline Configuration
+# 7. Supabase Platform Configuration (Database, pgvector & Auth)
 # ------------------------------------------------------------------------------
-LLM_PROVIDER=openai
-OPENAI_API_KEY=
-GEMINI_API_KEY=
-EMBEDDING_MODEL=text-embedding-3-small
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# ------------------------------------------------------------------------------
+# 8. In-Memory Asynchronous Cache (Zero Manual Configuration, 100% Free)
+# ------------------------------------------------------------------------------
+CACHE_TTL_SECONDS=3600
+CACHE_MAX_ENTRIES=1000
+
+# ------------------------------------------------------------------------------
+# 9. Parallel Dual-LLM & LangGraph Statutory RAG Configuration
+# ------------------------------------------------------------------------------
+RAG_FRAMEWORK=langgraph
 VECTOR_DIMENSION=1536
+
+# Primary LLM Chain: Google Gemini (Fallback Hierarchy)
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_FALLBACK_CHAIN=gemini-3.8-flash,gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash-lite
+
+# Secondary LLM Chain: Groq API (Fallback Hierarchy, strictly two models)
+GROQ_API_KEY=your-groq-api-key
+GROQ_FALLBACK_CHAIN=gpt-oss-120b,gpt-oss-20b
 ```
 
 #### Backend Variable Dictionary
@@ -276,6 +294,11 @@ VECTOR_DIMENSION=1536
 | `PORT` | Integer | Yes | `8000` | TCP port on which the Uvicorn ASGI server binds. |
 | `HOST` | String | Yes | `0.0.0.0` | Network interface binding. `0.0.0.0` allows Docker bridge and container connectivity. |
 | `DATABASE_URL` | String | Yes | `postgresql://...` | Full PostgreSQL connection string with authentication credentials, host, and database name. |
+| `SUPABASE_URL` | URL | Yes | Empty | Supabase project API gateway endpoint URL. |
+| `SUPABASE_KEY` | String | Yes | Empty | Supabase anonymous public publishable API key for client-safe operations. |
+| `SUPABASE_SERVICE_ROLE_KEY` | String | No | Empty | Supabase service-role secret key for backend privileged operations and vector index migrations. |
+| `CACHE_TTL_SECONDS` | Integer | No | `3600` | In-memory asynchronous cache Time-To-Live in seconds (`cachetools` / `async-lru`). Zero Redis dependency. |
+| `CACHE_MAX_ENTRIES` | Integer | No | `1000` | Maximum entries retained in the in-memory LRU cache pool. |
 | `DATABASE_POOL_SIZE` | Integer | No | `10` | Number of persistent connections maintained in the SQLAlchemy connection pool. |
 | `DATABASE_MAX_OVERFLOW` | Integer | No | `20` | Max overflow connections created during burst traffic above `POOL_SIZE`. |
 | `JWT_SECRET_KEY` | Hex String | Yes | N/A | HMAC SHA-256 private key for signing authentication tokens. Must be at least 32 bytes (64 hex characters). |
@@ -292,6 +315,12 @@ VECTOR_DIMENSION=1536
 | `OCR_ENGINE` | String | Yes | `paddleocr` | Primary text detection model (`paddleocr`, `tesseract`, or `mock`). |
 | `OCR_USE_GPU` | Boolean | No | `false` | Enables CUDA acceleration for PaddleOCR inference if NVIDIA GPU is present. |
 | `CALIBRATION_PIXEL_PER_MM` | Float | Yes | `11.81` | Dimensional calibration coefficient for converting pixel measurements to physical millimeters under Rule 7 Table-I. |
+| `RAG_FRAMEWORK` | String | Yes | `langgraph` | Stateful graph-based RAG orchestrator (`langgraph`). |
+| `GEMINI_API_KEY` | String | Yes | Empty | Google AI Studio API key for primary VLM and LLM inference. |
+| `GEMINI_FALLBACK_CHAIN` | Comma List | Yes | `gemini-3.8-flash,gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash-lite` | Primary LLM ordered fallback chain. |
+| `GROQ_API_KEY` | String | Yes | Empty | Groq Cloud API key for ultra-low-latency secondary LLM inference. |
+| `GROQ_FALLBACK_CHAIN` | Comma List | Yes | `gpt-oss-120b,gpt-oss-20b` | Secondary LLM ordered fallback chain (strictly two models). |
+| `VECTOR_DIMENSION` | Integer | Yes | `1536` | High-dimensional embedding vector length for Supabase pgvector cosine indexing. |
 
 ---
 

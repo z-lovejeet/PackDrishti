@@ -3,15 +3,17 @@
 ## 1. Executive Roadmap Overview & Engineering Tenets
 
 **Current State vs Production Target Gap Analysis**
-Currently, the PackDrashiti project consists of a React frontend prototype utilizing mock data. The production target requires a robust dual-audience architecture (Consumer vs Officer), complete with an integrated FastAPI backend, a 4-tier hybrid AI pipeline, and PostgreSQL persistence. The gap involves migrating away from static `frontend/src/data/mock.ts` stubs to live API endpoints, implementing role-based access control (RBAC), setting up real-time AI processing for packaging rule verification, and deploying automated CI/CD pipelines.
+Currently, the PackDrashiti project consists of a React frontend and FastAPI backend skeleton. The production target requires a robust dual-audience architecture (Consumer vs Officer), complete with Supabase managed PostgreSQL persistence, Supabase native `pgvector` vector storage, Supabase Auth session security, zero-manual-step Python in-memory asynchronous caching (`cachetools` / `async-lru`), and a stateful LangGraph RAG workflow powered by a Parallel Dual-LLM engine (Gemini fallback chain: `gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite` and Groq fallback chain: `gpt-oss-120b` -> `gpt-oss-20b`).
 
 **Dual-Audience Architecture Requirements**
 1. **Consumer Portal:** Focuses on sub-500ms latency health metrics, nutritional scanning, allergen detection, and simplified compliance indicators.
 2. **Officer Enforcement Portal:** Demands strict data integrity, chain-of-custody logging, complex aggregate queries, and automated statutory PDF generation (FORM LM-INSP-2011) for legal compliance.
 
 **Engineering Tenets**
-- Strict Type Safety: Shared types between TypeScript frontend and FastAPI Pydantic models.
-- Predictable State: Frontend state transitions must follow finite state machine principles.
+- Strict Type Safety: Shared types between TypeScript frontend, Supabase schemas, and FastAPI Pydantic models.
+- Zero Manual Infrastructure Overhead: Eliminate Redis in favor of zero-configuration in-memory async caching (`cachetools` / `async-lru`) and FastAPI native `BackgroundTasks`.
+- Parallel Dual-LLM Concurrency: Run Gemini and Groq fallback chains concurrently via `asyncio.gather()` for real-time consensus and zero hallucination.
+- Deterministic Legal Verification: 100% auditable mathematical logic for legal math (USP arithmetic, font calibration, contrast ratio); never delegate math to an LLM.
 - Stateless Backend: Core inference and rule parsing must be horizontally scalable and stateless.
 - Traceable Enforcement: All officer actions require immutable audit logs.
 
@@ -24,28 +26,33 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 **Member 1 (Frontend Developer)**
 - [x] Initialize React 19 + TypeScript 6 via Vite in `frontend/`.
 - [x] Configure `frontend/tailwind.config.ts` and install Phosphor Icons.
-- [x] Setup `frontend/src/utils/apiClient.ts` with Axios interceptors for JWT injection.
+- [x] Install `@supabase/supabase-js` and initialize Supabase client in `frontend/src/utils/supabaseClient.ts`.
+- [x] Setup `frontend/src/utils/apiClient.ts` with Axios interceptors for Supabase JWT injection.
+- [x] Configure `frontend/src/store/authStore.ts` with Supabase session synchronization.
 
 **Member 2 (Backend Developer)**
 - [x] Scaffold FastAPI project in `backend/src/main.py`.
-- [x] Define environment variables in `backend/.env.template`.
-- [x] Setup `backend/src/core/config.py` using Pydantic Settings.
+- [x] Define environment variables in `backend/.env.template` (Supabase, Gemini fallback chain, Groq API, cache TTL).
+- [x] Setup `backend/src/core/config.py` using Pydantic Settings for Supabase DB, pgvector, Auth, in-memory cache, and Dual-LLM fallback chains.
+- [x] Implement comprehensive diagnostic health endpoint in `backend/src/api/v1/endpoints/health.py`.
 
 **Member 3 (AI Engineer)**
-- [ ] Define Python environment with Poetry or conda in `ai/`.
-- [ ] Setup VLM API keys and PaddleOCR locally.
-- [ ] Initialize pgvector database connections for RAG testing.
+- [ ] Scaffold LangGraph stateful RAG workflow in `ai/src/pipeline/langgraph_workflow.py`.
+- [ ] Configure Primary Gemini fallback chain (`gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite`).
+- [ ] Configure Secondary Groq API fallback chain (`gpt-oss-120b` -> `gpt-oss-20b`).
+- [ ] Initialize Supabase `pgvector` database connection and HNSW cosine similarity query harness.
 
 **Member 4 (Tester + DevOps Engineer)**
-- [x] Scaffold `docker-compose.yml` for local PostgreSQL 16 and Redis.
-- [x] Create `.github/workflows/ci.yml` with basic linting for frontend/backend.
+- [x] Scaffold `docker-compose.yml` for local PostgreSQL 16 with pgvector and Adminer (zero Redis dependency).
+- [x] Create `.github/workflows/ci.yml` with linting and unit testing for frontend/backend.
+- [x] Author and verify backend health test suite in `backend/tests/test_health.py`.
 
 **Phase Verification Gate & Acceptance Criteria**
-- Execution: `docker-compose up -d && curl -X GET http://localhost:8000/health`
-- Output: `{"status": "ok", "version": "0.1.0"}`
+- Execution: `pytest backend/tests/test_health.py -v && curl -X GET http://localhost:8000/api/v1/health`
+- Output: All tests pass; health payload reports `database: supabase_postgresql`, `vectordb: supabase_pgvector`, `auth: supabase_auth`, `cache: in_memory_async_lru`, `rag_framework: langgraph`.
 
 ### Phase 2: Database Schemas, Migrations & Backend Core
-**Estimated Duration:** 4 Days | **Milestones:** Alembic migrations applied, CRUD endpoints for Users/Scans active.
+**Estimated Duration:** 4 Days | **Milestones:** Supabase migrations applied, CRUD endpoints for Users/Scans active.
 **Entry Pre-requisites:** Phase 1 complete, `database_schema.md` finalized.
 
 **Member 1 (Frontend Developer)**
@@ -53,25 +60,26 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 - [x] Implement local state management (Zustand/Context) in `frontend/src/store/authStore.ts`.
 
 **Member 2 (Backend Developer)**
-- [ ] Define SQLAlchemy 2.0 models in `backend/src/models/`.
-- [ ] Generate initial Alembic migration: `alembic revision --autogenerate -m "init"`.
-- [ ] Implement JWT RBAC utilities in `backend/src/core/security.py`.
+- [ ] Define SQLAlchemy 2.0 models and Supabase client bindings in `backend/src/models/`.
+- [ ] Enable `pgvector` extension and configure `statutory_knowledge_base` with HNSW index in Supabase.
+- [ ] Implement Supabase Auth JWT verification middleware in `backend/src/core/security.py`.
+- [ ] Implement in-memory async LRU cache (`cachetools`) for token denylist and static lookup tables.
 
 **Member 3 (AI Engineer)**
 - [ ] Structure the Pydantic response schema mapping to `backend/src/schemas/ai_results.py`.
-- [ ] Prototype Deterministic Rule Engine logic in `ai/scripts/rule_engine.py`.
+- [ ] Prototype Deterministic Rule Engine logic in `ai/src/rules/deterministic.py`.
 
 **Member 4 (Tester + DevOps Engineer)**
-- [ ] Write Pytest fixtures for DB sessions in `backend/tests/conftest.py`.
-- [ ] Provision remote Supabase PostgreSQL instance for staging.
+- [ ] Write Pytest fixtures for Supabase DB sessions in `backend/tests/conftest.py`.
+- [ ] Verify remote Supabase PostgreSQL instance and pgvector extension for staging.
 
 **Phase Verification Gate & Acceptance Criteria**
-- Execution: `alembic upgrade head && pytest backend/tests/test_db.py`
-- Output: 100% pass on DB model validation and relationships.
+- Execution: `pytest backend/tests/test_db.py`
+- Output: 100% pass on Supabase DB model validation, pgvector indexing, and relations.
 
-### Phase 3: 4-Tier Hybrid AI Pipeline & Rules Engine
-**Estimated Duration:** 6 Days | **Milestones:** VLM/OCR operational, deterministic rules running, pgvector indexed.
-**Entry Pre-requisites:** VLM API access and statutory texts available for RAG.
+### Phase 3: LangGraph Stateful RAG & Parallel Dual-LLM Pipeline
+**Estimated Duration:** 6 Days | **Milestones:** VLM spatial perception, deterministic rules, Supabase pgvector RAG, and parallel LLMs active.
+**Entry Pre-requisites:** Supabase pgvector configured, Gemini API key, and Groq API key available.
 
 **Member 1 (Frontend Developer)**
 - [ ] Build camera module in `frontend/src/components/Scanner/Camera.tsx`.
@@ -79,12 +87,13 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 
 **Member 2 (Backend Developer)**
 - [ ] Create `POST /api/v1/scans/analyze` endpoint accepting multipart/form-data.
-- [ ] Implement Cloudflare R2 / S3 upload function in `backend/src/services/storage.py`.
+- [ ] Implement Cloudflare R2 / S3 / Supabase Storage upload function in `backend/src/services/storage.py`.
 
 **Member 3 (AI Engineer)**
-- [ ] Tier 1: Implement VLM + PaddleOCR extraction in `ai/src/pipeline/extractor.py`.
+- [ ] Tier 1: Implement Multimodal VLM visual perception with automated PaddleOCR fallback.
 - [ ] Tier 2: Build Deterministic Python Rule Engine for legal math in `ai/src/rules/deterministic.py`.
-- [ ] Tier 3: Setup pgvector Statutory RAG in `ai/src/rag/indexer.py`.
+- [ ] Tier 3: Implement LangGraph stateful RAG workflow querying Supabase pgvector in `ai/src/rag/supabase_vector.py`.
+- [ ] Tier 4: Implement Parallel Dual-LLM execution via `asyncio.gather()` orchestrating Gemini and Groq fallback chains with consensus validation.
 
 **Member 4 (Tester + DevOps Engineer)**
 - [ ] Create AI benchmark runner script `ai/tests/benchmark.py` verifying precision/recall against rule logic.
@@ -92,7 +101,7 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 
 **Phase Verification Gate & Acceptance Criteria**
 - Execution: `python ai/tests/benchmark.py`
-- Output: Strict deterministic rule passes without LLM math errors.
+- Output: Strict deterministic rule passes without LLM math errors, parallel LLM execution latency < 2.5s, 0 hallucinations.
 
 ### Phase 4: Frontend API Integration & Scanner Flow Refinement
 **Estimated Duration:** 4 Days | **Milestones:** Real-time scanning feedback loop completed without mock data.
@@ -101,9 +110,10 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 **Member 1 (Frontend Developer)**
 - [ ] Replace `frontend/src/data/mock.ts` with API calls in `frontend/src/pages/ConsumerScan.tsx`.
 - [ ] Build finite state machine for scanner flow (Idle, Capturing, Uploading, Processing, Complete) in `frontend/src/store/scanMachine.ts`.
+- [ ] Connect Supabase Auth login and registration modals with persistent token refresh.
 
 **Member 2 (Backend Developer)**
-- [ ] Optimize response latency on inference endpoint.
+- [ ] Optimize response latency on inference endpoint using in-memory async caching (`async-lru`).
 - [ ] Implement rate limiting middleware in `backend/src/core/middleware.py`.
 
 **Member 3 (AI Engineer)**
@@ -127,7 +137,7 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 - [ ] Implement dynamic allergen highlighting in `frontend/src/components/Results/IngredientList.tsx`.
 
 **Member 2 (Backend Developer)**
-- [ ] Integrate ICMR-NIN nutrition standards database in PostgreSQL.
+- [ ] Integrate ICMR-NIN nutrition standards database in Supabase PostgreSQL.
 - [ ] Create `GET /api/v1/health/score/{scan_id}` endpoint in `backend/src/api/health.py`.
 
 **Member 3 (AI Engineer)**
@@ -143,7 +153,7 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 
 ### Phase 6: Officer Enforcement, FORM LM-INSP-2011 PDF Generator & Dashboard Aggregates
 **Estimated Duration:** 6 Days | **Milestones:** Officer dashboard live, PDF generation working.
-**Entry Pre-requisites:** RBAC operational, substantial scan data available.
+**Entry Pre-requisites:** Supabase Auth RBAC operational, substantial scan data available.
 
 **Member 1 (Frontend Developer)**
 - [ ] Build `frontend/src/pages/OfficerDashboard.tsx` with aggregate charts.
@@ -155,6 +165,7 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 
 **Member 3 (AI Engineer)**
 - [ ] Implement non-compliance classification model outputting exact legal clauses violated in `ai/src/rules/compliance_checker.py`.
+- [ ] Connect LangGraph statutory RAG node to draft formal legal notices citing Legal Metrology Act 2009 sections.
 
 **Member 4 (Tester + DevOps Engineer)**
 - [ ] Validate PDF outputs against legal format requirements.
@@ -173,15 +184,15 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 - [ ] Ensure strict Content Security Policy (CSP) in `frontend/index.html`.
 
 **Member 2 (Backend Developer)**
-- [ ] Audit SQLAlchemy queries for injection flaws.
-- [ ] Verify JWT expiration, rotation, and secret management.
+- [ ] Audit Supabase queries and API routes for injection flaws.
+- [ ] Verify Supabase JWT expiration, role claim validation, and secret management.
 
 **Member 3 (AI Engineer)**
 - [ ] Harden API boundaries to prevent adversarial image attacks (excessive resolution handling).
 
 **Member 4 (Tester + DevOps Engineer)**
 - [ ] Finalize GitHub Actions CI/CD in `.github/workflows/main.yml` covering lint, test, build, and deploy.
-- [ ] Configure Railway/Render deployments for the FastAPI backend.
+- [ ] Configure Render/Railway/Supabase deployments for the FastAPI backend and database.
 
 **Phase Verification Gate & Acceptance Criteria**
 - Execution: CI/CD Pipeline Run on GitHub.
@@ -196,16 +207,16 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 - [ ] Verify UI rendering across target mobile resolutions.
 
 **Member 2 (Backend Developer)**
-- [ ] Implement caching layer (Redis) for static lookup tables.
-- [ ] Tune PostgreSQL connection pooling settings.
+- [ ] Implement zero-manual-step in-memory caching layer (`cachetools` / `async-lru`) for static lookup tables.
+- [ ] Tune Supabase PostgreSQL connection pooling settings.
 
 **Member 3 (AI Engineer)**
-- [ ] Freeze model weights and rule parameters.
+- [ ] Freeze prompt templates, LangGraph nodes, and rule parameters.
 - [ ] Run final 50-SKU benchmark and document metrics for judges.
 
 **Member 4 (Tester + DevOps Engineer)**
 - [ ] Perform load testing on deployed staging environment.
-- [ ] Backup final PostgreSQL state.
+- [ ] Backup final Supabase PostgreSQL state.
 
 **Phase Verification Gate & Acceptance Criteria**
 - Execution: Offline loading test and full 5-product demo dry run.

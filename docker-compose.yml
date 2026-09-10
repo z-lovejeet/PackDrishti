@@ -27,26 +27,6 @@ services:
       - packdrashiti-network
 
   # ----------------------------------------------------------------------------
-  # Redis 7 Cache & Message Broker
-  # ----------------------------------------------------------------------------
-  packdrashiti-redis:
-    image: redis:7-alpine
-    container_name: packdrashiti-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - packdrashiti_redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-    networks:
-      - packdrashiti-network
-
-  # ----------------------------------------------------------------------------
   # PackDrashiti FastAPI Backend Application
   # ----------------------------------------------------------------------------
   packdrashiti-backend:
@@ -60,14 +40,16 @@ services:
     environment:
       APP_ENV: development
       DEBUG: "true"
-      DATABASE_URL: postgresql://packdrashiti_user:packdrashiti_pass@packdrashiti-db:5432/packdrashiti_db
-      REDIS_URL: redis://packdrashiti-redis:6379/0
+      DATABASE_URL: ${DATABASE_URL:-postgresql://packdrashiti_user:packdrashiti_pass@packdrashiti-db:5432/packdrashiti_db}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_KEY: ${SUPABASE_KEY:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650}
       CORS_ORIGINS: http://localhost:5173,http://localhost:3000
     depends_on:
       packdrashiti-db:
-        condition: service_healthy
-      packdrashiti-redis:
         condition: service_healthy
     networks:
       - packdrashiti-network
@@ -92,8 +74,6 @@ services:
 
 volumes:
   packdrashiti_postgres_data:
-    driver: local
-  packdrashiti_redis_data:
     driver: local
 
 networks:

@@ -369,7 +369,7 @@ To protect governmental enforcement records and ensure compliance with the Digit
 | TC-SEC-06 | Horizontal Privilege Escalation (IDOR) | `GET /api/v1/scan/{scan_id}` | Consumer A attempts to fetch private scan report belonging to Consumer B. | Medium | Ownership verification query: `WHERE scan_id = :id AND user_id = :current_user`. | Request rejected with `404 Not Found` or `403 Forbidden`. |
 | TC-SEC-07 | Cross-Site Scripting (Stored XSS) | `POST /api/v1/scan/upload` | Manufacturer name injected with script tag: `<script>alert(document.cookie)</script>` via mock OCR. | High | React DOM JSX automatic string escaping; Backend Pydantic sanitization filters. | Script rendered strictly as sanitized plain text; script execution prevented. |
 | TC-SEC-08 | DoS / Unrestricted File Upload Bomb | `POST /api/v1/scan/upload` | Gzip decompression bomb (42KB compressed expanding to 10GB in memory). | High | Streaming upload size delimiter; Pillow decompression bomb protection: `Image.MAX_IMAGE_PIXELS = 89478485`. | Upload terminates when memory limit exceeded; returns `413 Payload Too Large`. |
-| TC-SEC-09 | API Rate Limiting Bypass | `POST /api/v1/auth/login` | 150 login attempts within 30 seconds from single IP address. | Medium | Redis sliding-window rate limiter configured for max 10 requests / min on auth endpoints. | Requests exceeding 10 receive `429 Too Many Requests` with `Retry-After` header. |
+| TC-SEC-09 | API Rate Limiting Bypass | `POST /api/v1/auth/login` | 150 login attempts within 30 seconds from single IP address. | Medium | In-memory async sliding-window rate limiter (cachetools) configured for max 10 requests / min on auth endpoints. | Requests exceeding 10 receive `429 Too Many Requests` with `Retry-After` header. |
 
 ---
 

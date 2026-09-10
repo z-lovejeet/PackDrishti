@@ -374,7 +374,7 @@ When an inspector exports an inspection docket (FORM LM-INSP-2011), the backend 
 Generating image derivatives (resizing, color space conversion, WebP encoding) during the synchronous HTTP upload lifecycle degrades API responsiveness and blocks server worker threads. PackDrashiti employs an asynchronous processing pattern:
 1. The user uploads the image.
 2. The API validates magic bytes, computes SHA-256, stores the raw image to `scans/`, and writes the initial record to `product_scans`.
-3. The API immediately dispatches a background task (via Celery with Redis broker, or FastAPI `BackgroundTasks` in lightweight deployments).
+3. The API immediately dispatches a background task (via native FastAPI `BackgroundTasks` and asyncio, requiring zero external brokers or Redis dependencies).
 4. The background worker fetches the raw image buffer, executes downsampling, uploads the WebP derivative to `thumbnails/`, and updates `product_scans.thumbnail_storage_key`.
 5. The frontend utilizes progressive loading: rendering a low-resolution blur placeholder or standard icon until the WebP thumbnail is available.
 

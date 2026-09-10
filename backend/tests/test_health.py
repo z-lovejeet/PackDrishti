@@ -27,8 +27,13 @@ def test_api_v1_health_endpoint():
     assert data["version"] == "0.1.0"
     assert data["app_name"] == "PackDrashiti"
     assert "subsystems" in data
-    assert data["subsystems"]["database"] == "configured"
-    assert data["subsystems"]["redis"] == "configured"
+    assert data["subsystems"]["database"] == "supabase_postgresql"
+    assert data["subsystems"]["vectordb"] == "supabase_pgvector"
+    assert data["subsystems"]["auth"] == "supabase_auth"
+    assert data["subsystems"]["cache"] == "in_memory_async_lru"
+    assert data["subsystems"]["rag_framework"] == "langgraph"
+    assert "gemini-3.8-flash" in data["subsystems"]["llm_primary_chain"]
+    assert "gpt-oss-120b" in data["subsystems"]["llm_secondary_chain"]
 
 
 def test_root_index_endpoint():

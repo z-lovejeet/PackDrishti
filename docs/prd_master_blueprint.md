@@ -56,43 +56,50 @@ PackDrashiti is an automated regulatory compliance verification and nutritional 
 
 ### 3.1 Architecture Overview
 The platform uses a decoupled client-server architecture:
-- **Client Tier**: Single Page Application (SPA) built with React 19, TypeScript, and Tailwind CSS.
-- **Application Tier**: RESTful API built with Python FastAPI, providing asynchronous pipeline execution, request validation, and auth enforcement.
-- **AI & Compliance Tier**: 4-Tier Hybrid Pipeline: Tier 1: Multimodal VLM (Gemini 1.5 Flash / GPT-4o-mini) + High-Performance OCR (PaddleOCR) with Pydantic structured output. Tier 2: Deterministic Python Rule Engine for audited legal verification. Tier 3: Statutory Legal RAG powered by PostgreSQL pgvector for automatic retrieval of statutory sections. Tier 4: LLM Consumer Synthesis for translating nutritional audits into plain-language warnings.
-- **Persistence Tier**: PostgreSQL 16 relational database for transactional integrity, coupled with S3-compatible object storage (Cloudflare R2 or AWS S3) for high-resolution packaging imagery.
+- **Client Tier**: Single Page Application (SPA) built with React 19, TypeScript, and Tailwind CSS. Authenticated via Supabase Auth with automatic session persistence and JWT token injection.
+- **Application Tier**: RESTful API built with Python FastAPI, providing asynchronous pipeline execution, request validation, Supabase Auth JWT verification, and in-memory asynchronous caching (`cachetools` / `async-lru`) requiring zero manual configuration.
+- **AI & Compliance Tier**: Stateful LangGraph RAG Workflow powered by a Parallel Dual-LLM Architecture:
+  - **Primary Chain**: Google Gemini fallback hierarchy (`gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite`).
+  - **Secondary Chain**: Groq API fallback hierarchy (`gpt-oss-120b` -> `gpt-oss-20b`).
+  - **Parallel Concurrency**: Executed concurrently via `asyncio.gather()` for real-time latency optimization and cross-model consensus.
+  - **OCR & Spatial Perception**: Multimodal VLM direct spatial perception with zero-manual-step local PaddleOCR fallback.
+  - **Deterministic Rule Engine**: 100% auditable mathematical logic for legal verification (USP calculation, Rule 7 Table-I font calibration, Rule 9 contrast, SI metric validation).
+  - **Statutory RAG**: LangGraph state machine querying Supabase PostgreSQL native `pgvector` extension (HNSW cosine index over Legal Metrology Act 2009 and Packaged Commodities Rules 2011 embeddings).
+- **Persistence & Storage Tier**: Supabase PostgreSQL 16 unified database with native `pgvector` extension and Supabase Auth, coupled with S3-compatible object storage (Cloudflare R2 or AWS S3) for high-resolution packaging imagery.
 
 ```
 +-------------------------------------------------------------------------+
 |                              CLIENT LAYER                               |
 |   React 19 SPA + TypeScript + Tailwind CSS + Phosphor Icons              |
+|   - Supabase Auth Client (Session Management & Token Injection)         |
 |   - Consumer Portal (Scanner, Health Check, Scan History)               |
 |   - Enforcement Portal (Dashboard, Inspections Ledger, FORM LM-INSP)    |
 +------------------------------------+------------------------------------+
                                      |
-                                     | HTTPS / JSON & Multipart
+                                     | HTTPS / JSON & Multipart (Supabase JWT)
                                      v
 +-------------------------------------------------------------------------+
 |                           API GATEWAY / BACKEND                         |
-|   Python FastAPI + Uvicorn + Pydantic v2 + SQLAlchemy 2.0               |
-|   - Auth & RBAC (/api/v1/auth)                                          |
-|   - Scan Orchestration (/api/v1/scan)                                   |
-|   - Health Engine (/api/v1/health)                                      |
-|   - Compliance & Violations (/api/v1/violations)                        |
-|   - Official Reports & PDF Engine (/api/v1/reports)                     |
+|   Python FastAPI + Uvicorn + Pydantic v2 + Supabase Python SDK          |
+|   - Supabase Auth & RBAC Middleware (/api/v1/auth)                      |
+|   - Scan Orchestration & In-Memory Cache (cachetools / async-lru)       |
+|   - Compliance & Violations Engine (/api/v1/violations)                 |
+|   - Official Reports & PDF Generator Engine (/api/v1/reports)           |
 +-------------------+--------------------------------+--------------------+
                     |                                |
-         SQL Queries|                      Inference | Raw Image Stream
+         SQL Queries|                      LangGraph | Parallel LLM Dispatch
                     v                                v
 +-------------------+---------+    +-----------------+--------------------+
-|       DATA PERSISTENCE      |    |        CV & ML PIPELINE             |
-|   PostgreSQL 16 Engine      |    |   - Image Preprocessor (Deskew/CLAHE)|
-|   - Users & Officer Profiles|    |   - PaddleOCR (DBNet Text Detection) |
-|   - Product Scans & History |    |   - SVTR Text Recognition            |
-|   - Extracted Declarations  |    |   - Statutory Rule 6 NER Engine      |
-|   - Statutory Violations    |    |   - Rule 7 Table-I Font Estimator    |
-|   - Health & Nutrition Data |    |   - Rule 9 Contrast Ratio Engine     |
-|   Cloudflare R2 Object Store|    |   - Rule 18 Dual-MRP Tamper Detector |
-|   - High-Res Package Photos |    |   - ICMR-NIN Nutrition Table Parser  |
+|   SUPABASE PERSISTENCE      |    |   LANGGRAPH RAG & AI PIPELINE        |
+|   Supabase PostgreSQL 16    |    |   - Spatial Perception (VLM + OCR)   |
+|   - auth.users & Profiles   |    |   - Deterministic Python Rule Engine |
+|   - Product Scans & History |    |   - Parallel Dual-LLM Execution:     |
+|   - Extracted Declarations  |    |     * Primary: Gemini Fallback Chain |
+|   - Statutory Violations    |    |       (3.8 -> 3.7 -> 3.6 -> 3.5-lite)|
+|   - Health & Nutrition Data |    |     * Secondary: Groq Fallback Chain |
+|   - pgvector HNSW Embeddings|    |       (gpt-oss-120b -> gpt-oss-20b)  |
+|   Cloudflare R2 Store       |    |   - Supabase pgvector Retrieval      |
+|   - Packaging Raw Images    |    |   - Statutory Show-Cause Synthesis   |
 +-----------------------------+    +--------------------------------------+
 ```
 
@@ -270,28 +277,35 @@ Score Bands:
 
 ---
 
-## 6. 4-Tier Hybrid AI & Rules Pipeline
+## 6. LangGraph Stateful RAG & Parallel Dual-LLM Pipeline
 
-Instead of brittle custom computer vision models, PackDrashiti uses a modern 4-tier hybrid pipeline to ensure 100% auditable mathematical logic for legal verification.
+Instead of brittle custom computer vision models, PackDrashiti uses an industrial-grade LangGraph stateful RAG workflow powered by a Parallel Dual-LLM architecture and a deterministic rule engine to ensure 100% auditable mathematical logic for legal verification.
 
-### 6.1 Tier 1: Multimodal VLM & High-Performance OCR
-- **Engine**: Gemini 1.5 Flash / GPT-4o-mini coupled with PaddleOCR.
-- **Function**: Extracts spatial text, bounding boxes, and image layout data.
-- **Output**: Strict Pydantic structured output for downstream processing.
+### 6.1 Tier 1: Multimodal Spatial Perception & Automated Fallback
+- **Primary Engine**: Multimodal VLM direct visual spatial perception.
+- **Fallback Engine**: Local PaddleOCR (automated pip dependency, zero manual steps).
+- **Function**: Extracts spatial text, bounding box coordinates `[ymin, xmin, ymax, xmax]`, and package surface geometry.
+- **Output**: Strict Pydantic structured output validated via Instructor/Pydantic v2.
 
 ### 6.2 Tier 2: Deterministic Python Rule Engine
-- **Engine**: Pure Python Mathematical Logic Engine.
-- **Function**: 100% auditable mathematical logic for legal verification. Performs Unit Sale Price calculations, strict SI metric units filtering, Rule 7 Table-I font height step function evaluation, and Rule 9 contrast checking.
-- **Constraint**: Never let an LLM do legal math! All verifications are deterministic.
+- **Engine**: Pure Python Mathematical Logic Engine (`ai/src/rules/deterministic.py`).
+- **Function**: 100% auditable mathematical logic for legal verification. Performs Unit Sale Price (USP) arithmetic, strict SI metric units filtering, Rule 7 Table-I font height step function evaluation against principal display panel (PDP) area, and Rule 9 WCAG contrast checking.
+- **Strict Tenet**: Never let an LLM do legal math. All compliance scores and legal arithmetic are evaluated deterministically.
 
-### 6.3 Tier 3: Statutory Legal RAG
-- **Engine**: PostgreSQL pgvector.
-- **Function**: Indexes the Legal Metrology Act 2009, Packaged Commodities Rules 2011 (with all amendments up to 2024), and court precedents.
-- **Output**: Automatically retrieves exact statutory sections and generates formal show-cause notices (FORM LM-INSP-2011).
+### 6.3 Tier 3: Statutory Legal RAG via Supabase pgvector
+- **Engine**: Supabase native PostgreSQL `pgvector` extension with HNSW cosine similarity indexing (`vector(1536)`).
+- **Knowledge Base**: Legal Metrology Act 2009, Legal Metrology (Packaged Commodities) Rules 2011 (with all amendments up to 2024), and precedent court rulings.
+- **Function**: LangGraph retrieval node queries Supabase `pgvector` using semantic similarity to fetch exact statutory rules, gazette notifications, and compounding schedules corresponding to detected violations.
 
-### 6.4 Tier 4: LLM Consumer Synthesis
-- **Engine**: Secondary LLM Prompt Chain.
-- **Function**: Translates complex ICMR-NIN nutritional audits into plain-language warnings and healthy Indian food recommendations for everyday consumers.
+### 6.4 Tier 4: Parallel Dual-LLM Consensus & Synthesis
+- **Architecture**: Two LLM fallback chains executed concurrently using `asyncio.gather()`:
+  - **Primary Gemini Fallback Chain**: `gemini-3.8-flash` -> `gemini-3.7-flash` -> `gemini-3.6-flash` -> `gemini-3.5-flash-lite`.
+  - **Secondary Groq Fallback Chain**: `gpt-oss-120b` -> `gpt-oss-20b` (strictly two models).
+- **Concurrency & Consensus**: Both chains run in parallel. The fastest valid structured output is prioritized and validated against the deterministic rule engine. Cross-model validation ensures zero hallucination in legal citations.
+- **Outputs**:
+  - **Consumer Output**: Translates complex ICMR-NIN nutritional audits into plain-language warnings and healthy Indian food recommendations.
+  - **Enforcement Output**: Generates formal statutory show-cause notices (FORM LM-INSP-2011) citing verified legal clauses.
+
 
 ---
 

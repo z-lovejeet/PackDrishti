@@ -51,8 +51,8 @@ PackDrashiti implements an asynchronous token-based authentication system utiliz
 ```
 +---------------+              +-----------------------+              +----------------------+
 |               |              |                       |              |                      |
-| Client App    |              | PackDrashiti Auth API    |              | Redis Token Cache    |
-| (React / App) |              | (FastAPI Application) |              | & PostgreSQL DB      |
+| Client App    |              | PackDrashiti Auth API |              | In-Memory Cache      |
+| (React / App) |              | (FastAPI Application) |              | & Supabase DB        |
 +-------+-------+              +-----------+-----------+              +----------+-----------+
         |                                  |                                     |
         | 1. POST /api/auth/login          |                                     |
@@ -125,7 +125,7 @@ Every JWT issued by the PackDrashiti authentication service contains standardize
 | `zone` | String | Jurisdictional Zone Code | Administrative district/zone code (e.g. `DL-NORTH-01`, `MH-MUM-03`, `KA-BLR-02`). | Yes (Null for `consumer`) |
 | `iat` | Integer (Epoch) | Issued At Timestamp | UNIX epoch timestamp marking token issuance for clock skew and age validation. | No |
 | `exp` | Integer (Epoch) | Expiration Timestamp | UNIX epoch timestamp marking expiry (`iat + 86400` for access tokens). | No |
-| `jti` | String (UUIDv4) | JWT Unique ID | Cryptographically unique token identifier used for single-use token rotation and Redis denylisting. | No |
+| `jti` | String (UUIDv4) | JWT Unique ID | Cryptographically unique token identifier used for single-use token rotation and in-memory denylisting. | No |
 
 ### 2.3 Refresh Token Schema and Rotation Policy
 Refresh tokens contain a restricted payload containing only `sub`, `jti`, `iat`, and `exp`.
@@ -141,10 +141,10 @@ Refresh tokens contain a restricted payload containing only `sub`, `jti`, `iat`,
 
 #### Strict Refresh Token Rotation (RTR) Mechanism:
 1. Refresh tokens are strictly **single-use**.
-2. When `/api/auth/refresh` is invoked, the incoming `jti` is checked against the Redis token registry.
-3. If the `jti` is valid and active, the backend immediately marks the incoming `jti` as consumed/revoked in Redis, generates a completely fresh Access Token and Refresh Token pair with new `jti` values, and returns them to the client.
+2. When `/api/auth/refresh` is invoked, the incoming `jti` is checked against the in-memory token cache registry (`cachetools`).
+3. If the `jti` is valid and active, the backend immediately marks the incoming `jti` as consumed/revoked in the cache registry, generates a completely fresh Access Token and Refresh Token pair with new `jti` values, and returns them to the client.
 4. **Replay Attack Detection**: If a consumed `jti` is presented a second time (indicating that the token was intercepted by an adversary), the authentication service triggers an immediate security alert:
-   - All active tokens associated with that `sub` are instantly invalidated in Redis.
+   - All active tokens associated with that `sub` are instantly invalidated in the cache.
    - The user account is temporarily locked.
    - A critical security warning is written to the audit log.
 
@@ -236,7 +236,7 @@ The following matrix defines the authoritative access control rules enforced by 
 | `POST` | `/api/auth/register` | User account registration | Allow | Allow* | Deny | Public endpoint (*Officer status sets `is_verified=False`) |
 | `POST` | `/api/auth/login` | Credential validation and token issuance | Allow | Allow | Allow | Public endpoint (Rate limited: 5 req/5min) |
 | `POST` | `/api/auth/refresh` | Refresh token exchange | Allow | Allow | Allow | HTTP-only cookie validation + JTI denylist check |
-| `POST` | `/api/auth/logout` | Session revocation and token invalidation | Allow | Allow | Allow | Invalidation of active JTI in Redis registry |
+| `POST` | `/api/auth/logout` | Session revocation and token invalidation | Allow | Allow | Allow | Invalidation of active JTI in in-memory cache registry |
 | `GET` | `/api/auth/me` | Current authenticated user profile | Allow | Allow | Allow | `get_current_user` dependency |
 | `POST` | `/api/scan/upload` | Ingest packaging image for analysis | Allow | Allow | Allow | Magic byte validation, SHA-256 computation |
 | `POST` | `/api/scan/analyze` | Run OCR & statutory compliance engine | Allow | Allow | Allow | Rule engine execution (Rate limited) |
@@ -309,7 +309,7 @@ Because officers possess state statutory powers to issue formal notices of prose
      - Dispatches an automated verification notification email to the officer.
 4. **Revocation and Suspension**:
    - If an officer is transferred, suspended, or faces departmental inquiry, an administrator calls `/api/admin/officers/{id}/suspend`.
-   - The backend sets `is_active = False` and broadcasts a revocation command to Redis, immediately blacklisting all active JTIs issued to that officer. Subsequent requests with existing access tokens are rejected instantly.
+   - The backend sets `is_active = False` and immediately blacklists all active JTIs issued to that officer in the in-memory cache registry. Subsequent requests with existing access tokens are rejected instantly.
 
 ---
 
@@ -504,7 +504,7 @@ def validate_image_binary(raw_bytes: bytes) -> str:
 ```
 
 ### 5.2 Token Bucket Rate Limiting Architecture
-To safeguard scanning APIs against distributed denial of service, resource exhaustion, and automated data scraping, PackDrashiti implements the **Token Bucket Algorithm** backed by Redis.
+To safeguard scanning APIs against distributed denial of service, resource exhaustion, and automated data scraping, PackDrashiti implements the **Token Bucket Algorithm** backed by Python in-memory async sliding-window caching (`cachetools` / `async-lru`), with zero manual configuration.
 
 #### Rate Limiting Quota Configuration
 

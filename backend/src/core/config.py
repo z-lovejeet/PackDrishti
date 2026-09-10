@@ -1,12 +1,12 @@
 from typing import List, Union
-from pydantic import Field, field_validator
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """
     PackDrashiti Application Configuration Settings.
-    Utilizes Pydantic BaseSettings for strict environment variable parsing and validation.
+    Type-safe environment parsing backed by Pydantic v2 Settings.
     """
 
     model_config = SettingsConfigDict(
@@ -25,7 +25,13 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     VERSION: str = "0.1.0"
 
-    # Database Configuration (PostgreSQL with pgvector)
+    # Supabase Unified Relational Database & Vector Store (pgvector)
+    SUPABASE_URL: str = "https://placeholder.supabase.co"
+    SUPABASE_ANON_KEY: str = ""
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
+    SUPABASE_JWT_SECRET: str = "4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650"
+
+    # Direct PostgreSQL / Supabase pooler connection string for SQLAlchemy & Alembic
     DATABASE_URL: str = (
         "postgresql://packdrashiti_user:packdrashiti_pass@localhost:5432/packdrashiti_db"
     )
@@ -33,26 +39,19 @@ class Settings(BaseSettings):
     DATABASE_MAX_OVERFLOW: int = 20
     DATABASE_POOL_TIMEOUT: int = 30
 
-    # Redis Cache & Broker Configuration
-    REDIS_URL: str = "redis://localhost:6379/0"
+    # Zero-Manual In-Memory Cache (Replaces Redis with 0 external setup)
+    CACHE_TTL_SECONDS: int = 3600
+    CACHE_MAX_ITEMS: int = 5000
 
-    # Authentication, Tokenization & Security
-    JWT_SECRET_KEY: str = (
-        "4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650"
-    )
+    # Authentication & Security Tokens (Supabase Auth)
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    BCRYPT_ROUNDS: int = 12
 
-    # Storage Architecture
-    STORAGE_PROVIDER: str = "local"
+    # Storage Architecture (Supabase Storage / Local)
+    STORAGE_PROVIDER: str = "supabase"
     STORAGE_LOCAL_DIR: str = "./uploads"
-    S3_ENDPOINT_URL: str = ""
-    S3_BUCKET_NAME: str = ""
-    S3_ACCESS_KEY: str = ""
-    S3_SECRET_KEY: str = ""
-    S3_REGION: str = "auto"
+    STORAGE_BUCKET_NAME: str = "packaging-scans"
 
     # Cross-Origin Resource Sharing (CORS)
     CORS_ORIGINS: Union[List[str], str] = [
@@ -70,18 +69,55 @@ class Settings(BaseSettings):
             return v
         return ["http://localhost:5173", "http://localhost:3000"]
 
-    # Optical & Computer Vision Pipeline
-    OCR_ENGINE: str = "paddleocr"
+    # Optical & Spatial Perception (Zero Manual Setup)
+    OCR_ENGINE: str = "multimodal_vlm"
     OCR_USE_GPU: bool = False
     OCR_CONFIDENCE_THRESHOLD: float = 0.60
     CALIBRATION_PIXEL_PER_MM: float = 11.81
 
-    # LLM & Statutory RAG Pipeline
-    LLM_PROVIDER: str = "gemini"
+    # Parallel Dual-LLM Pipeline: Primary Gemini Fallback Chain
     GEMINI_API_KEY: str = ""
-    OPENAI_API_KEY: str = ""
+    GEMINI_FALLBACK_CHAIN: Union[List[str], str] = [
+        "gemini-3.8-flash",
+        "gemini-3.7-flash",
+        "gemini-3.6-flash",
+        "gemini-3.5-flash-lite",
+    ]
+
+    @field_validator("GEMINI_FALLBACK_CHAIN", mode="before")
+    @classmethod
+    def assemble_gemini_chain(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",") if i.strip()]
+        elif isinstance(v, list):
+            return v
+        return [
+            "gemini-3.8-flash",
+            "gemini-3.7-flash",
+            "gemini-3.6-flash",
+            "gemini-3.5-flash-lite",
+        ]
+
+    # Parallel Dual-LLM Pipeline: Secondary Groq Fallback Chain
+    GROQ_API_KEY: str = ""
+    GROQ_FALLBACK_CHAIN: Union[List[str], str] = [
+        "gpt-oss-120b",
+        "gpt-oss-20b",
+    ]
+
+    @field_validator("GROQ_FALLBACK_CHAIN", mode="before")
+    @classmethod
+    def assemble_groq_chain(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",") if i.strip()]
+        elif isinstance(v, list):
+            return v
+        return ["gpt-oss-120b", "gpt-oss-20b"]
+
+    # LangGraph Statutory RAG Pipeline in Supabase pgvector
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     VECTOR_DIMENSION: int = 1536
+    RAG_FRAMEWORK: str = "langgraph"
 
 
 settings = Settings()

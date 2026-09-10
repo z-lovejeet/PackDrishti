@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { User, UserRole, AuthTokens } from '../types/models';
+import { supabase } from '../utils/supabaseClient';
 
 interface AuthState {
   user: User | null;
@@ -62,8 +63,7 @@ if (storedUserJson) {
   try {
     initialUser = JSON.parse(storedUserJson);
   } catch {
-    initialUser = null;
-  }
+}
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -104,6 +104,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
+    try {
+      supabase.auth.signOut().catch(() => {});
+    } catch {
+      // Storage or offline fallback
+    }
+
     removeStoredItem(STORAGE_KEYS.TOKEN);
     removeStoredItem(STORAGE_KEYS.REFRESH_TOKEN);
     removeStoredItem(STORAGE_KEYS.USER);
