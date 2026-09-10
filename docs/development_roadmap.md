@@ -22,9 +22,9 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 **Entry Pre-requisites:** Git access, local dev tools installed.
 
 **Member 1 (Frontend Developer)**
-- [ ] Initialize React 19 + TypeScript 6 via Vite in `frontend/`.
-- [ ] Configure `frontend/tailwind.config.ts` and install Phosphor Icons.
-- [ ] Setup `frontend/src/utils/apiClient.ts` with Axios interceptors for JWT injection.
+- [x] Initialize React 19 + TypeScript 6 via Vite in `frontend/`.
+- [x] Configure `frontend/tailwind.config.ts` and install Phosphor Icons.
+- [x] Setup `frontend/src/utils/apiClient.ts` with Axios interceptors for JWT injection.
 
 **Member 2 (Backend Developer)**
 - [x] Scaffold FastAPI project in `backend/src/main.py`.
@@ -49,8 +49,8 @@ Currently, the PackDrashiti project consists of a React frontend prototype utili
 **Entry Pre-requisites:** Phase 1 complete, `database_schema.md` finalized.
 
 **Member 1 (Frontend Developer)**
-- [ ] Generate TypeScript interfaces in `frontend/src/types/models.ts` matching backend schemas.
-- [ ] Implement local state management (Zustand/Context) in `frontend/src/store/authStore.ts`.
+- [x] Generate TypeScript interfaces in `frontend/src/types/models.ts` matching backend schemas.
+- [x] Implement local state management (Zustand/Context) in `frontend/src/store/authStore.ts`.
 
 **Member 2 (Backend Developer)**
 - [ ] Define SQLAlchemy 2.0 models in `backend/src/models/`.

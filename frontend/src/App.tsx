@@ -4,6 +4,7 @@ import { Footer } from "./components/layout/Footer";
 import { ToastContainer, ToastMessage } from "./components/common/Toast";
 import { GenerateReportModal } from "./components/reports/GenerateReportModal";
 import { UserRole } from "./types";
+import { useAuthStore } from "./store/authStore";
 
 // Consumer Pages
 import { LandingPage } from "./pages/consumer/LandingPage";
@@ -18,7 +19,7 @@ import { ReportViewerPage } from "./pages/officer/ReportViewerPage";
 
 export function App() {
   const [activePage, setActivePage] = useState<string>("landing");
-  const [userRole, setUserRole] = useState<UserRole>("consumer");
+  const { role: userRole, setRole: setUserRole } = useAuthStore();
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([
     {

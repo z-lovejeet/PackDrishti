@@ -1,6 +1,7 @@
 export type ComplianceStatus = 'compliant' | 'violation' | 'warning' | 'pending';
 
 export * from './roles';
+export * from './models';
 
 export interface BoundingBox {
   id: string;
