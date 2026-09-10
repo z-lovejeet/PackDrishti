@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "NODE_OPTIONS='--max-http-header-size=1048576' vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "NODE_OPTIONS='--max-http-header-size=1048576' vite preview"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
