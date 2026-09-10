@@ -12,7 +12,7 @@ const BASE_URL: string =
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000,
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

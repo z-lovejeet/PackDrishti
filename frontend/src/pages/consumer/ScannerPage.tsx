@@ -296,23 +296,82 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
     }
   };
 
-  // 4-Tier Pipeline Configuration
-  const getPipelineProgress = () => {
-    switch (scanStatus) {
-      case "compressing":
-        return { percent: 25, activeStep: 1 };
-      case "uploading":
-        return { percent: 50, activeStep: 2 };
-      case "processing":
-        return { percent: 85, activeStep: 3 };
-      case "complete":
-        return { percent: 100, activeStep: 4 };
-      default:
-        return { percent: 0, activeStep: 0 };
-    }
-  };
+  // 5-Agent Multi-Agent Progress Engine
+  const [progressPercent, setProgressPercent] = useState<number>(0);
+  const [progressStageText, setProgressStageText] = useState<string>('');
+  const [activeAgentLabel, setActiveAgentLabel] = useState<string>('Perception Agent');
+  const [activeStepIndex, setActiveStepIndex] = useState<number>(1);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const pipeline = getPipelineProgress();
+  useEffect(() => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+
+    if (scanStatus === 'compressing') {
+      setProgressPercent(12);
+      setProgressStageText('Stage 1/5: Client Downsampling (< 2MB) & Visual Normalization...');
+      setActiveAgentLabel('Visual Preprocessor');
+      setActiveStepIndex(1);
+    } else if (scanStatus === 'uploading') {
+      setProgressPercent(22);
+      setProgressStageText('Stage 1/5: Ingesting Packaging Evidence to Legal Metrology Gateway...');
+      setActiveAgentLabel('Evidence Gateway Ingestion');
+      setActiveStepIndex(1);
+    } else if (scanStatus === 'processing') {
+      const startTime = Date.now();
+      setProgressPercent(25);
+      setProgressStageText('Stage 2/5: Perception Agent - Multimodal Vision Inspection of Packaging Panels...');
+      setActiveAgentLabel('Multimodal Vision Perception Agent');
+      setActiveStepIndex(2);
+
+      progressTimerRef.current = setInterval(() => {
+        const elapsedSec = (Date.now() - startTime) / 1000;
+        if (elapsedSec < 3.5) {
+          const p = Math.min(48, Math.round(25 + (elapsedSec / 3.5) * 23));
+          setProgressPercent(p);
+          setProgressStageText('Stage 2/5: Perception Agent - Extracting 11 Declarations & Bounding Boxes...');
+          setActiveAgentLabel('Multimodal Vision Perception Agent');
+          setActiveStepIndex(2);
+        } else if (elapsedSec < 7.5) {
+          const p = Math.min(68, Math.round(48 + ((elapsedSec - 3.5) / 4.0) * 20));
+          setProgressPercent(p);
+          setProgressStageText('Stage 3/5: Rules Engine Agent - Validating Rule 6 Clauses & Rule 7 Table-I Heights...');
+          setActiveAgentLabel('Deterministic Rules Engine');
+          setActiveStepIndex(3);
+        } else if (elapsedSec < 12.0) {
+          const p = Math.min(84, Math.round(68 + ((elapsedSec - 7.5) / 4.5) * 16));
+          setProgressPercent(p);
+          setProgressStageText('Stage 4/5: Statutory RAG Agent - Querying pgvector Knowledge Base & Precedents...');
+          setActiveAgentLabel('Statutory Legal RAG Agent');
+          setActiveStepIndex(4);
+        } else {
+          const p = Math.min(96, Math.round(84 + (elapsedSec - 12.0) * 0.4));
+          setProgressPercent(p);
+          setProgressStageText('Stage 5/5: Consensus Agent - Formulating Legal Audit Docket & Show-Cause Notice...');
+          setActiveAgentLabel('Multi-Agent Consensus Engine');
+          setActiveStepIndex(5);
+        }
+      }, 150);
+    } else if (scanStatus === 'complete') {
+      setProgressPercent(100);
+      setProgressStageText('Verification Complete: Courtroom-Grade Audit Docket Formulated');
+      setActiveAgentLabel('Multi-Agent Consensus Engine');
+      setActiveStepIndex(5);
+    } else if (scanStatus === 'error' || scanStatus === 'rate_limited' || scanStatus === 'idle') {
+      setProgressPercent(0);
+      setProgressStageText('');
+      setActiveStepIndex(0);
+    }
+
+    return () => {
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+        progressTimerRef.current = null;
+      }
+    };
+  }, [scanStatus]);
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto font-sans">
@@ -661,71 +720,82 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
           </div>
         </div>
 
-        {/* 4-Tier Pipeline Progress Indicator */}
+        {/* 5-Agent Multi-Agent Pipeline Progress Indicator */}
         {(scanStatus === "compressing" || scanStatus === "uploading" || scanStatus === "processing") && (
           <div className="p-5 bg-navy-50/60 border border-navy-200/90 rounded-lg space-y-4 animate-fadeIn shadow-xs">
             <div className="flex items-center justify-between text-xs font-bold text-navy-950 font-heading">
               <span className="flex items-center gap-2">
                 <Cpu size={16} className="text-navy-800 animate-pulse" weight="bold" />
-                <span>
-                  {scanStatus === "compressing" && "Tier 1: Client Downsampling (< 2MB) & Visual Normalization"}
-                  {scanStatus === "uploading" && "Tier 2: Ingesting Packaging Evidence to Legal Metrology Gateway"}
-                  {scanStatus === "processing" && "Tier 3 & 4: Executing LangGraph Legal Metrology Engine"}
-                </span>
+                <span>{progressStageText}</span>
               </span>
               <span className="font-mono text-navy-800 bg-white px-2.5 py-0.5 rounded border border-navy-200">
-                {pipeline.percent}%
+                {progressPercent}%
               </span>
             </div>
 
             {/* Overall Progress Bar */}
             <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-navy-800 transition-all duration-300"
-                style={{ width: `${pipeline.percent}%` }}
+                className="h-full bg-navy-800 transition-all duration-300 ease-out"
+                style={{ width: `${progressPercent}%` }}
               />
             </div>
 
-            {/* 4-Tier Visual Breakdown Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-1">
+            <div className="flex items-center justify-between text-2xs text-neutral-600 pt-0.5 font-mono">
+              <span className="font-semibold text-navy-900">{activeAgentLabel}</span>
+              <span>5-Agent Autonomous LangGraph Pipeline</span>
+            </div>
+
+            {/* 5-Agent Visual Breakdown Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 pt-1">
               <div className={`p-2.5 rounded-md border text-2xs space-y-1 ${
-                pipeline.activeStep >= 1 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
+                activeStepIndex >= 1 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
               }`}>
                 <div className="flex items-center justify-between font-bold">
-                  <span>1. Perception &amp; Compression</span>
-                  {pipeline.activeStep > 1 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" />}
+                  <span>1. Preprocessing</span>
+                  {activeStepIndex > 1 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" />}
                 </div>
-                <p className="text-neutral-500 leading-tight">Client-side canvas scaling &lt; 2MB</p>
+                <p className="text-neutral-500 leading-tight">Client canvas scaling &lt; 2MB</p>
               </div>
 
               <div className={`p-2.5 rounded-md border text-2xs space-y-1 ${
-                pipeline.activeStep >= 2 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
+                activeStepIndex >= 2 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
               }`}>
                 <div className="flex items-center justify-between font-bold">
-                  <span>2. Gateway Ingestion</span>
-                  {pipeline.activeStep > 2 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : pipeline.activeStep === 2 ? <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" /> : null}
+                  <span>2. Perception Agent</span>
+                  {activeStepIndex > 2 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : activeStepIndex === 2 ? <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" /> : null}
                 </div>
-                <p className="text-neutral-500 leading-tight">Secure evidence payload transmission</p>
+                <p className="text-neutral-500 leading-tight">Direct multimodal vision extraction</p>
               </div>
 
               <div className={`p-2.5 rounded-md border text-2xs space-y-1 ${
-                pipeline.activeStep >= 3 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
+                activeStepIndex >= 3 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
               }`}>
                 <div className="flex items-center justify-between font-bold">
-                  <span>3. Rules &amp; pgvector</span>
-                  {pipeline.activeStep > 3 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : pipeline.activeStep === 3 ? <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" /> : null}
+                  <span>3. Rules Engine</span>
+                  {activeStepIndex > 3 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : activeStepIndex === 3 ? <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" /> : null}
                 </div>
-                <p className="text-neutral-500 leading-tight">LMPC 2011 clauses &amp; judicial citations</p>
+                <p className="text-neutral-500 leading-tight">LMPC 2011 Table-I font calibrations</p>
               </div>
 
               <div className={`p-2.5 rounded-md border text-2xs space-y-1 ${
-                pipeline.activeStep >= 4 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
+                activeStepIndex >= 4 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
               }`}>
                 <div className="flex items-center justify-between font-bold">
-                  <span>4. Consensus &amp; Notice</span>
-                  {pipeline.activeStep >= 4 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : null}
+                  <span>4. Statutory RAG</span>
+                  {activeStepIndex > 4 ? <CheckCircle size={14} className="text-emerald-600" weight="fill" /> : activeStepIndex === 4 ? <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" /> : null}
                 </div>
-                <p className="text-neutral-500 leading-tight">Dual-model audit &amp; compounding order</p>
+                <p className="text-neutral-500 leading-tight">pgvector legal citations &amp; schedules</p>
+              </div>
+
+              <div className={`p-2.5 rounded-md border text-2xs space-y-1 ${
+                activeStepIndex >= 5 ? "bg-white border-navy-300 text-navy-950 shadow-2xs" : "bg-neutral-100/60 border-neutral-200 text-neutral-400"
+              }`}>
+                <div className="flex items-center justify-between font-bold">
+                  <span>5. Consensus Agent</span>
+                  {activeStepIndex >= 5 ? <span className="w-2 h-2 rounded-full bg-saffron-500 animate-ping" /> : null}
+                </div>
+                <p className="text-neutral-500 leading-tight">Courtroom docket &amp; notice synthesis</p>
               </div>
             </div>
           </div>

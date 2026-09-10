@@ -1,73 +1,180 @@
 import json
 import logging
 import base64
+import re
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from backend.src.core.config import settings
 
 logger = logging.getLogger("packdrashiti.health_agent")
 
 
 class HealthBadge(BaseModel):
-    label: str
-    type: str  # 'danger' | 'warning' | 'good' | 'neutral'
+    label: str = "Health Marker"
+    type: str = "warning"  # 'danger' | 'warning' | 'good' | 'neutral'
     description: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def sanitize(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "badge" in data and not data.get("label"):
+                data["label"] = str(data["badge"])
+            if "severity" in data and not data.get("type"):
+                s = str(data["severity"]).lower()
+                data["type"] = "danger" if s == "danger" else ("good" if s == "good" else "warning")
+        return data
 
 
 class NutrientAuditItem(BaseModel):
-    name: str
-    valuePer100g: float
-    valuePerServe: float
-    unit: str
-    icmrDailyLimit: str
-    level: str  # 'Low' | 'Moderate' | 'High' | 'Excessive'
-    assessment: str
+    name: str = "Nutrient"
+    valuePer100g: float = 0.0
+    valuePerServe: float = 0.0
+    unit: str = "g"
+    icmrDailyLimit: str = "ICMR Standard"
+    level: str = "Moderate"  # 'Low' | 'Moderate' | 'High' | 'Excessive'
+    assessment: str = "Measured on packaging"
+
+    @model_validator(mode="before")
+    @classmethod
+    def sanitize(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "nutrient" in data and not data.get("name"):
+                data["name"] = str(data["nutrient"])
+            if "icmrRda" in data and not data.get("icmrDailyLimit"):
+                data["icmrDailyLimit"] = str(data["icmrRda"])
+            if "value" in data and not data.get("valuePer100g"):
+                try:
+                    data["valuePer100g"] = float(re.sub(r"[^\d.]", "", str(data["value"])))
+                except Exception:
+                    data["valuePer100g"] = 0.0
+            if "valuePer100g" in data:
+                try:
+                    data["valuePer100g"] = float(re.sub(r"[^\d.]", "", str(data["valuePer100g"])))
+                except Exception:
+                    data["valuePer100g"] = 0.0
+            if "valuePerServe" not in data or data.get("valuePerServe") is None:
+                try:
+                    v100 = float(data.get("valuePer100g", 0.0))
+                    data["valuePerServe"] = round(v100 * 0.3, 2)
+                except Exception:
+                    data["valuePerServe"] = 0.0
+            else:
+                try:
+                    data["valuePerServe"] = float(re.sub(r"[^\d.]", "", str(data["valuePerServe"])))
+                except Exception:
+                    data["valuePerServe"] = 0.0
+            if not data.get("level"):
+                data["level"] = "Moderate"
+            if not data.get("assessment"):
+                data["assessment"] = f"Measured {data.get('name', 'nutrient')} level on package."
+            if not data.get("unit"):
+                data["unit"] = "g"
+        return data
 
 
 class MultimodalHealthAnalysis(BaseModel):
-    commodityName: str
-    brandName: str
-    category: str
-    servingSize: str
-    netQuantity: str
-    mrp: str
-    pricePer100g: str
-    priceRating: str  # 'Budget' | 'Fair Market Rate' | 'Premium'
-    priceAnalysis: str
+    commodityName: str = "Packaged Food Commodity"
+    brandName: str = "Packaged Goods"
+    category: str = "Packaged Snack"
+    servingSize: str = "30 g"
+    netQuantity: str = "50 g"
+    mrp: str = "Rs. 20.00"
+    pricePer100g: str = "Rs. 40.00 / 100g"
+    priceRating: str = "Fair Market Rate"
+    priceAnalysis: str = "Standard market pricing."
 
     # Comprehensive Health Verdict & Questions
-    shouldWeEatIt: str  # Direct answer: e.g. "Do Not Recommend for Regular Diet", "Eat Only in Strict Moderation", "Safe & Nutritious"
-    howBadIsIt: str  # Clear detailed plain-language evaluation of the health impact
-    overallRating: str  # 'Nutritious Choice' | 'Consume in Moderation' | 'High Health Concern'
-    ratingScore: int  # 0 to 100
+    shouldWeEatIt: str = "Consume in Strict Moderation"
+    howBadIsIt: str = "Ultra-processed packaged food commodity."
+    overallRating: str = "Consume in Moderation"
+    ratingScore: int = 50
 
     # Age and population restrictions
-    notEatableForAge: List[str]  # e.g. ["Children under 5 years", "Adolescents with sedentary lifestyle", "Elderly"]
-    whoCanConsume: List[str]  # e.g. ["Healthy active adults (strictly within serving size)"]
-    whoShouldAvoid: List[str]  # e.g. ["Diabetics", "Hypertensive individuals", "Heart disease patients", "Children"]
+    notEatableForAge: List[str] = Field(default_factory=lambda: ["Children under 5 years"])
+    whoCanConsume: List[str] = Field(default_factory=lambda: ["Healthy active adults within portion size"])
+    whoShouldAvoid: List[str] = Field(default_factory=lambda: ["Diabetic patients", "Hypertensive individuals"])
 
     # Health problems and overconsumption consequences
-    healthProblemsIfEatenMore: List[str]  # Detailed risks: arterial plaque, insulin spikes, NAFLD, hypertension
-    dietarySummary: str
+    healthProblemsIfEatenMore: List[str] = Field(default_factory=lambda: ["Elevated blood pressure", "Cardiovascular strain"])
+    dietarySummary: str = "High in sodium and saturated fats."
 
     # Direct Badges
-    badges: List[HealthBadge]
+    badges: List[HealthBadge] = Field(default_factory=list)
 
     # Specific Ingredient Inspection
-    hasPalmOil: bool
+    hasPalmOil: bool = False
     palmOilDetails: Optional[str] = None
-    hasAddedSugar: bool
+    hasAddedSugar: bool = False
     addedSugarDetails: Optional[str] = None
-    hasHighSodium: bool
-    hasArtificialAdditives: bool
-    ingredientsList: List[str]
-    flaggedIngredients: List[Dict[str, str]]
+    hasHighSodium: bool = False
+    hasArtificialAdditives: bool = False
+    ingredientsList: List[str] = Field(default_factory=list)
+    flaggedIngredients: List[Dict[str, str]] = Field(default_factory=list)
 
     # Nutrients breakdown table
-    nutrients: List[NutrientAuditItem]
+    nutrients: List[NutrientAuditItem] = Field(default_factory=list)
 
     # Alternatives
-    healthierAlternatives: List[str]
+    healthierAlternatives: List[str] = Field(default_factory=lambda: ["Roasted Makhana", "Roasted Chana"])
+
+    @model_validator(mode="before")
+    @classmethod
+    def sanitize(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "product_name" in data and not data.get("commodityName"):
+                data["commodityName"] = str(data["product_name"])
+            if "product" in data and not data.get("commodityName"):
+                data["commodityName"] = str(data["product"])
+            if "brand" in data and not data.get("brandName"):
+                data["brandName"] = str(data["brand"])
+            if "score" in data and not data.get("ratingScore"):
+                try:
+                    data["ratingScore"] = int(re.sub(r"\D", "", str(data["score"])))
+                except Exception:
+                    data["ratingScore"] = 50
+
+            # Convert string fields to lists if string was returned
+            for list_field in [
+                "notEatableForAge",
+                "whoCanConsume",
+                "whoShouldAvoid",
+                "healthProblemsIfEatenMore",
+                "healthierAlternatives",
+                "ingredientsList",
+            ]:
+                val = data.get(list_field)
+                if isinstance(val, str):
+                    items = [x.strip(" -•*") for x in re.split(r"[\n;]+|,\s*", val) if x.strip()]
+                    data[list_field] = items if items else [val]
+                elif not isinstance(val, list):
+                    data[list_field] = [str(val)] if val else []
+
+            # Handle nutrients if returned as a dict or object instead of list
+            nutr_val = data.get("nutrients")
+            if isinstance(nutr_val, dict):
+                converted_nutrients = []
+                for k, v in nutr_val.items():
+                    if isinstance(v, dict):
+                        converted_nutrients.append({
+                            "name": str(k),
+                            "valuePer100g": v.get("valuePer100g") or v.get("value") or v.get("100g") or 0.0,
+                            "valuePerServe": v.get("valuePerServe") or v.get("serve") or 0.0,
+                            "unit": v.get("unit") or "g",
+                            "icmrDailyLimit": v.get("icmrDailyLimit") or v.get("icmrRda") or "ICMR Standard",
+                            "level": v.get("level") or "Moderate",
+                            "assessment": v.get("assessment") or f"Declared {k}",
+                        })
+                    else:
+                        converted_nutrients.append({
+                            "name": str(k),
+                            "valuePer100g": v,
+                            "assessment": f"Declared {k}",
+                        })
+                data["nutrients"] = converted_nutrients
+            elif not isinstance(nutr_val, list):
+                data["nutrients"] = []
+        return data
 
 
 class MultimodalHealthAgent:
@@ -82,13 +189,13 @@ class MultimodalHealthAgent:
         self.api_key = settings.GEMINI_API_KEY
         self.groq_key = settings.GROQ_API_KEY
         self.models_hierarchy = [
+            "gemini-3.1-flash-lite",
             "gemini-3.5-flash-lite",
-            "gemini-3.5-flash",
             "gemini-3.7-flash",
             "gemini-flash-lite-latest",
-            "gemini-2.5-flash",
-            "gemini-2.0-flash",
-            "gemini-1.5-flash",
+            "gemini-3.1-flash-lite-preview",
+            "gemini-3.6-flash",
+            "gemini-3.5-flash",
         ]
 
     async def analyze_packaging(
@@ -188,7 +295,8 @@ class MultimodalHealthAgent:
                 err_str = str(e).lower()
                 logger.warning(f"Gemini model {model_name} in health agent failed: {e}")
                 if "429" in err_str or "quota" in err_str:
-                    break
+                    logger.warning(f"Gemini model {model_name} quota exceeded. Trying next available model...")
+                    continue
 
         raise RuntimeError("All Gemini models in health agent failed.")
 

@@ -76,11 +76,11 @@ class Settings(BaseSettings):
     # Parallel Dual-LLM Pipeline: Primary Gemini Fallback Chain
     GEMINI_API_KEY: str = ""
     GEMINI_FALLBACK_CHAIN: Union[List[str], str] = [
+        "gemini-3.1-flash-lite",
         "gemini-3.5-flash-lite",
-        "gemini-3.5-flash",
         "gemini-3.7-flash",
         "gemini-flash-lite-latest",
-        "gemini-3.6-flash",
+        "gemini-3.1-flash-lite-preview",
     ]
 
     @field_validator("GEMINI_FALLBACK_CHAIN", mode="before")
@@ -91,11 +91,11 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return [
+            "gemini-3.1-flash-lite",
             "gemini-3.5-flash-lite",
-            "gemini-3.5-flash",
             "gemini-3.7-flash",
             "gemini-flash-lite-latest",
-            "gemini-3.6-flash",
+            "gemini-3.1-flash-lite-preview",
         ]
 
     # Parallel Dual-LLM Pipeline: Secondary Groq Fallback Chain (Pure Open-Weights Qwen Models)

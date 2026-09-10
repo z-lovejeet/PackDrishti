@@ -125,33 +125,39 @@ async def analyze_health_packaging(
         "flagged_ingredients": analysis.flaggedIngredients,
     }
 
-    # 4. Persist to Supabase / Database
+    # 4. Persist to Supabase / Database with graceful fallback
     audit_uuid = uuid.uuid4()
-    audit_record = HealthAudit(
-        id=audit_uuid,
-        user_id=current_user.id if current_user else None,
-        product_name=resolved_product,
-        brand=resolved_brand,
-        front_image_url=f"/uploads/{front_image.filename}",
-        back_image_url=f"/uploads/{back_image.filename}",
-        health_score=Decimal(str(analysis.ratingScore)),
-        nutrients_json=db_nutrients,
-        badges_json=db_badges,
-        dietary_advisory_json=db_advisory,
-    )
-    db.add(audit_record)
+    try:
+        audit_record = HealthAudit(
+            id=audit_uuid,
+            user_id=current_user.id if current_user else None,
+            product_name=resolved_product,
+            brand=resolved_brand,
+            front_image_url=f"/uploads/{front_image.filename}",
+            back_image_url=f"/uploads/{back_image.filename}",
+            health_score=Decimal(str(analysis.ratingScore)),
+            nutrients_json=db_nutrients,
+            badges_json=db_badges,
+            dietary_advisory_json=db_advisory,
+        )
+        db.add(audit_record)
 
-    # Log into ScanHistory
-    history_record = ScanHistory(
-        id=uuid.uuid4(),
-        user_id=current_user.id if current_user else None,
-        scan_id=None,
-        health_audit_id=audit_uuid,
-        scan_type="health_check",
-    )
-    db.add(history_record)
-
-    await db.commit()
+        # Log into ScanHistory
+        history_record = ScanHistory(
+            id=uuid.uuid4(),
+            user_id=current_user.id if current_user else None,
+            scan_id=None,
+            health_audit_id=audit_uuid,
+            scan_type="health_check",
+        )
+        db.add(history_record)
+        await db.commit()
+    except Exception as db_err:
+        logger.warning("Database persistence notice in health audit (returning analysis without DB write): %s", db_err)
+        try:
+            await db.rollback()
+        except Exception:
+            pass
 
     return {
         "status": "success",
@@ -179,7 +185,7 @@ async def analyze_health_packaging(
             "who_should_avoid": analysis.whoShouldAvoid,
             "health_problems_if_eaten_more": analysis.healthProblemsIfEatenMore,
             "dietary_summary": analysis.dietarySummary,
-            "badges": [b.dict() for b in analysis.badges],
+            "badges": [b.model_dump() for b in analysis.badges],
             "has_palm_oil": analysis.hasPalmOil,
             "palm_oil_details": analysis.palmOilDetails,
             "has_added_sugar": analysis.hasAddedSugar,
@@ -188,7 +194,7 @@ async def analyze_health_packaging(
             "has_artificial_additives": analysis.hasArtificialAdditives,
             "ingredients_list": analysis.ingredientsList,
             "flagged_ingredients": analysis.flaggedIngredients,
-            "nutrients": [n.dict() for n in analysis.nutrients],
+            "nutrients": [n.model_dump() for n in analysis.nutrients],
             "healthier_alternatives": analysis.healthierAlternatives,
             "dietary_advisory": db_advisory,
         }

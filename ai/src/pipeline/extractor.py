@@ -1,8 +1,8 @@
 import re
 import json
 import logging
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any, Union
+from pydantic import BaseModel, Field, model_validator
 
 from backend.src.core.config import settings
 
@@ -12,21 +12,58 @@ logger = logging.getLogger("packdrashiti.extractor")
 class BoundingBox(BaseModel):
     """
     Normalized spatial bounding box coordinates [0.0 to 1.0].
+    Automatically normalizes 0-1000 scale or pixel coordinates to [0.0, 1.0].
     """
-    ymin: float = Field(..., ge=0.0, le=1.0)
-    xmin: float = Field(..., ge=0.0, le=1.0)
-    ymax: float = Field(..., ge=0.0, le=1.0)
-    xmax: float = Field(..., ge=0.0, le=1.0)
+    ymin: float = Field(default=0.0)
+    xmin: float = Field(default=0.0)
+    ymax: float = Field(default=1.0)
+    xmax: float = Field(default=1.0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_bbox(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            converted = {}
+            for k in ["ymin", "xmin", "ymax", "xmax"]:
+                raw_val = data.get(k, 0.0)
+                try:
+                    v = float(raw_val)
+                    if v > 1.0:
+                        v = v / 1000.0
+                    converted[k] = max(0.0, min(1.0, v))
+                except (ValueError, TypeError):
+                    converted[k] = 0.0 if "min" in k else 1.0
+            return converted
+        return data
 
 
 class RawDeclarationToken(BaseModel):
     """
     Individual extracted text token with spatial coordinates and declaration category.
     """
-    text: str
-    declaration_type: str  # mrp, usp, net_quantity, mfg_date, consumer_care, manufacturer, origin, etc.
-    bbox: BoundingBox
+    text: str = ""
+    declaration_type: str = "statutory_text"
+    bbox: BoundingBox = Field(default_factory=BoundingBox)
     confidence: float = Field(1.0, ge=0.0, le=1.0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_token(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            conf = data.get("confidence", 1.0)
+            try:
+                conf_f = float(conf)
+                if conf_f > 1.0:
+                    conf_f = conf_f / 100.0
+                data["confidence"] = max(0.0, min(1.0, conf_f))
+            except Exception:
+                data["confidence"] = 1.0
+            if "bbox" in data and isinstance(data["bbox"], dict):
+                # Ensure bbox has all 4 keys
+                for k in ["ymin", "xmin", "ymax", "xmax"]:
+                    if k not in data["bbox"]:
+                        data["bbox"][k] = 0.0 if "min" in k else 1.0
+        return data
 
 
 class PackageVisualExtraction(BaseModel):
@@ -60,8 +97,41 @@ class PackageVisualExtraction(BaseModel):
     tokens: List[RawDeclarationToken] = Field(default_factory=list)
     raw_text: str = ""
 
+    @model_validator(mode="before")
+    @classmethod
+    def sanitize_extraction(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Alias mapping
+            if "brand" in data and not data.get("brand_name"):
+                data["brand_name"] = str(data["brand"])
+            if "product" in data and not data.get("product_name"):
+                data["product_name"] = str(data["product"])
+            if "commodity_name" in data and not data.get("product_name"):
+                data["product_name"] = str(data["commodity_name"])
 
-from typing import List, Optional, Dict, Any, Union
+            # Numeric sanitization for strings like "Rs 30.00", "50g", "150 cm2"
+            for num_field in ["mrp", "declared_usp", "net_quantity_value", "pdp_width_cm", "pdp_height_cm", "pdp_area_cm2", "measured_font_height_mm"]:
+                val = data.get(num_field)
+                if isinstance(val, str):
+                    clean = re.sub(r"[^\d.]", "", val)
+                    try:
+                        data[num_field] = float(clean) if clean else None
+                    except ValueError:
+                        data[num_field] = None
+
+            # Date month/year sanitization
+            if isinstance(data.get("mfg_month"), str):
+                try:
+                    data["mfg_month"] = int(re.sub(r"\D", "", data["mfg_month"]))
+                except Exception:
+                    data["mfg_month"] = None
+            if isinstance(data.get("mfg_year"), str):
+                try:
+                    data["mfg_year"] = int(re.sub(r"\D", "", data["mfg_year"]))
+                except Exception:
+                    data["mfg_year"] = None
+        return data
+
 
 class VisualPerceptionExtractor:
     """
@@ -74,11 +144,13 @@ class VisualPerceptionExtractor:
         self.api_key = settings.GEMINI_API_KEY
         self.pixel_per_mm = settings.CALIBRATION_PIXEL_PER_MM
         self.model_hierarchy = [
+            "gemini-3.1-flash-lite",
             "gemini-3.5-flash-lite",
-            "gemini-3.5-flash",
             "gemini-3.7-flash",
             "gemini-flash-lite-latest",
+            "gemini-3.1-flash-lite-preview",
             "gemini-3.6-flash",
+            "gemini-3.5-flash",
         ]
 
 
@@ -189,8 +261,8 @@ class VisualPerceptionExtractor:
                 err_msg = str(e).lower()
                 logger.warning(f"Model {model_name} failed: {e}.")
                 if "429" in err_msg or "quota" in err_msg or "resource_exhausted" in err_msg:
-                    logger.warning("Gemini project quota exhausted. Bypassing remaining hierarchy to fast OCR fallback.")
-                    break
+                    logger.warning(f"Model {model_name} quota exceeded. Trying next available model in hierarchy...")
+                    continue
                 logger.warning("Trying next model in hierarchy...")
 
         raise RuntimeError(f"All Gemini models in hierarchy failed. Last error: {last_error}")

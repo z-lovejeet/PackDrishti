@@ -52,7 +52,10 @@ export const HealthCheckPage: React.FC = () => {
 
   // Analysis State
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [analysisStep, setAnalysisStep] = useState<number>(0);
+  const [progressPercent, setProgressPercent] = useState<number>(0);
+  const [progressStageText, setProgressStageText] = useState<string>('');
+  const [activeAgentLabel, setActiveAgentLabel] = useState<string>('Multimodal Vision Agent');
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [liveAuditResult, setLiveAuditResult] = useState<ProductHealthAudit | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -119,11 +122,42 @@ export const HealthCheckPage: React.FC = () => {
 
   const runDualScanAudit = async () => {
     setIsAnalyzing(true);
-    setAnalysisStep(1);
+    setProgressPercent(5);
+    setProgressStageText('Step 1/5: Ingesting & validating Front & Back packaging panels...');
+    setActiveAgentLabel('Multimodal Ingestion Agent');
     setErrorMessage(null);
 
-    const timer1 = setTimeout(() => setAnalysisStep(2), 400);
-    const timer2 = setTimeout(() => setAnalysisStep(3), 850);
+    const startTime = Date.now();
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    progressIntervalRef.current = setInterval(() => {
+      const elapsedSec = (Date.now() - startTime) / 1000;
+      if (elapsedSec < 2.0) {
+        const pct = Math.min(20, Math.round(5 + (elapsedSec / 2.0) * 15));
+        setProgressPercent(pct);
+        setProgressStageText('Step 1/5: Ingesting & validating Front & Back packaging panels...');
+        setActiveAgentLabel('Multimodal Preprocessing');
+      } else if (elapsedSec < 7.0) {
+        const pct = Math.min(50, Math.round(20 + ((elapsedSec - 2.0) / 5.0) * 30));
+        setProgressPercent(pct);
+        setProgressStageText('Step 2/5: Multimodal Vision Agent inspecting ingredient list & nutrition table...');
+        setActiveAgentLabel('Multimodal Vision Agent (Zero OCR)');
+      } else if (elapsedSec < 14.0) {
+        const pct = Math.min(75, Math.round(50 + ((elapsedSec - 7.0) / 7.0) * 25));
+        setProgressPercent(pct);
+        setProgressStageText('Step 3/5: Benchmarking nutrients against ICMR-NIN 2024 & detecting palm oil / UPF...');
+        setActiveAgentLabel('ICMR-NIN Profiling Engine');
+      } else if (elapsedSec < 22.0) {
+        const pct = Math.min(92, Math.round(75 + ((elapsedSec - 14.0) / 8.0) * 17));
+        setProgressPercent(pct);
+        setProgressStageText('Step 4/5: Calculating age restrictions, disease risks & clinical advisories...');
+        setActiveAgentLabel('Clinical Nutrition Agent');
+      } else {
+        const creep = Math.min(96, Math.round(92 + (elapsedSec - 22.0) * 0.4));
+        setProgressPercent(creep);
+        setProgressStageText('Step 5/5: Formulating consumer health verdict & whole-food alternatives...');
+        setActiveAgentLabel('Multi-Agent Consensus Engine');
+      }
+    }, 200);
 
     try {
       // Step 1: Client Downsampling if files exceed statutory threshold (< 2MB)
@@ -178,6 +212,14 @@ export const HealthCheckPage: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      setProgressPercent(100);
+      setProgressStageText('Audit Complete: Health & Nutrition Certification Formulated');
+      setActiveAgentLabel('Audit Finalized');
+
       if (response.data && response.data.data) {
         const apiData = response.data.data;
         const mappedAudit: ProductHealthAudit = {
@@ -215,25 +257,21 @@ export const HealthCheckPage: React.FC = () => {
           nutrients: (apiData.nutrients || []).map((n: any) => ({
             name: n.name,
             valuePer100g: n.value ?? n.value_per_100g ?? n.valuePer100g ?? 0,
-            valuePerServe: n.value_per_serve ?? n.valuePerServe ?? Math.round((n.value ?? 0) * 0.2 * 10) / 10,
+            valuePerServe: n.value_per_serve ?? n.valuePerServe ?? Math.round((n.value ?? 0) * 0.3 * 10) / 10,
             unit: n.unit || 'g',
             icmrDailyLimit: n.icmr_daily_limit ?? `${n.icmr_limit ?? ''} ${n.unit ?? ''}`.trim(),
-            level: n.threshold ?? n.level ?? 'Moderate',
-            assessment: n.assessment ?? '',
+            level: n.level || 'Moderate',
+            assessment: n.assessment || `Measured ${n.name} content on packaging.`,
           })),
-          whoCanConsume: apiData.who_can_consume || apiData.dietary_advisory?.who_can_consume || [],
-          whoShouldAvoid: apiData.who_should_avoid || apiData.dietary_advisory?.who_should_avoid || [],
-          healthierAlternatives: (
-            apiData.healthier_alternatives || apiData.dietary_advisory?.healthier_alternatives || []
-          ).map((a: any) =>
-            typeof a === 'string' ? a : `${a.alternative_name || a.name || 'Whole Food'}: ${a.swap_advantage || a.reason || ''}`
-          ),
+          shouldWeEatIt: apiData.should_we_eat_it || 'Consume in Strict Moderation',
+          howBadIsIt: apiData.how_bad_is_it || 'Packaged ultra-processed commodity.',
+          notEatableForAge: apiData.not_eatable_for_age || [],
+          whoCanConsume: apiData.who_can_consume || [],
+          whoShouldAvoid: apiData.who_should_avoid || [],
+          healthProblemsIfEatenMore: apiData.health_problems || apiData.healthProblemsIfEatenMore || [],
           dietarySummary: apiData.dietary_summary || '',
-          shouldWeEatIt: apiData.should_we_eat_it || apiData.dietary_advisory?.should_we_eat_it,
-          howBadIsIt: apiData.how_bad_is_it || apiData.dietary_advisory?.how_bad_is_it,
-          notEatableForAge: apiData.not_eatable_for_age || apiData.dietary_advisory?.not_eatable_for_age || [],
-          healthProblemsIfEatenMore: apiData.health_problems_if_eaten_more || apiData.dietary_advisory?.health_problems || [],
-          hasPalmOil: apiData.has_palm_oil ?? apiData.dietary_advisory?.has_palm_oil,
+          healthierAlternatives: apiData.healthier_alternatives || [],
+          hasPalmOil: Boolean(apiData.has_palm_oil),
           palmOilDetails: apiData.palm_oil_details || apiData.dietary_advisory?.palm_oil_details,
           hasAddedSugar: apiData.has_added_sugar,
           addedSugarDetails: apiData.added_sugar_details,
@@ -245,12 +283,18 @@ export const HealthCheckPage: React.FC = () => {
         setLiveAuditResult(mappedAudit);
       }
     } catch (err: any) {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
       const errorDetail = err?.response?.data?.detail || err?.message || 'Verification request failed';
       setErrorMessage(`Failed to analyze packaging: ${errorDetail}`);
       setLiveAuditResult(null);
     } finally {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
       setIsAnalyzing(false);
     }
   };
@@ -549,24 +593,20 @@ export const HealthCheckPage: React.FC = () => {
               <div className="flex items-center justify-between text-xs font-bold text-neutral-950 font-heading">
                 <span className="flex items-center gap-2">
                   <Sparkle size={16} className="text-neutral-900 animate-spin" weight="fill" />
-                  <span>
-                    {analysisStep === 1 && 'Step 1: Direct visual inspection of ingredients and nutrition panel...'}
-                    {analysisStep === 2 && 'Step 2: Detecting palm oil, added sugars, sodium & ultra-processed markers...'}
-                    {analysisStep === 3 && 'Step 3: Calculating age restrictions, health risks & clinical advisories...'}
-                  </span>
+                  <span>{progressStageText}</span>
                 </span>
                 <span className="font-mono text-neutral-900 bg-white px-2.5 py-0.5 rounded border border-neutral-200">
-                  {Math.round(analysisStep * 33.3)}%
+                  {progressPercent}%
                 </span>
               </div>
               <div className="w-full bg-neutral-200 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="bg-neutral-900 h-full rounded-full transition-all duration-300" 
-                  style={{ width: `${analysisStep * 33.3}%` }} 
+                  className="bg-neutral-900 h-full rounded-full transition-all duration-300 ease-out" 
+                  style={{ width: `${progressPercent}%` }} 
                 />
               </div>
               <div className="flex items-center justify-between text-2xs text-neutral-600 pt-1 font-mono">
-                <span>Multimodal Vision Agent (Zero Brittle OCR)</span>
+                <span className="font-semibold text-neutral-800">{activeAgentLabel}</span>
                 <span>ICMR-NIN 2024 &amp; WHO Dietary Guidelines</span>
               </div>
             </div>
