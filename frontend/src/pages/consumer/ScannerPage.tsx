@@ -2,9 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { 
   CloudArrowUp, 
   Camera as CameraIcon, 
-  CheckCircle, 
-  XCircle, 
-  Warning, 
   DownloadSimple, 
   ArrowClockwise, 
   ShieldWarning, 
@@ -14,10 +11,8 @@ import {
   Sparkle,
   UploadSimple,
   Scan,
-  Gavel,
   BookmarkSimple,
   Heartbeat,
-  SlidersHorizontal,
   TextT,
   HourglassHigh,
 } from "@phosphor-icons/react";
@@ -48,7 +43,17 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"upload" | "samples">("upload");
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
+  const [cameraTarget, setCameraTarget] = useState<"front" | "back">("front");
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
+
+  // Dual-Image Front & Back State
+  const [frontFile, setFrontFile] = useState<File | null>(null);
+  const [backFile, setBackFile] = useState<File | null>(null);
+  const [frontPreview, setFrontPreview] = useState<string | null>(null);
+  const [backPreview, setBackPreview] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const backFileInputRef = useRef<HTMLInputElement>(null);
 
   // Selected sample tab state
   const [selectedSampleId, setSelectedSampleId] = useState<string | null>(null);
@@ -56,21 +61,27 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
   const [subView, setSubView] = useState<"declarations" | "font_table">("declarations");
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   // Scan Machine State
   const {
     status: scanStatus,
     imageSrc,
-    fileName,
+    backImageSrc: _backImageSrc,
     result: liveResult,
     compression,
     errorMessage,
     cooldownRemainingSeconds,
-    processFile,
-    reset: resetScanner,
+    processFiles,
+    reset: resetScanMachine,
     decrementCooldown,
   } = useScanMachine();
+
+  const resetScanner = () => {
+    setFrontFile(null);
+    setBackFile(null);
+    setFrontPreview(null);
+    setBackPreview(null);
+    resetScanMachine();
+  };
 
   // Handle countdown interval for rate limiting
   useEffect(() => {
@@ -92,10 +103,10 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       id: `live-box-${idx}`,
       fieldId: `live-dec-${idx}`,
       label: token.declaration_type,
-      x: Math.round(token.bbox.xmin * 100),
-      y: Math.round(token.bbox.ymin * 100),
-      width: Math.round((token.bbox.xmax - token.bbox.xmin) * 100),
-      height: Math.round((token.bbox.ymax - token.bbox.ymin) * 100),
+      x: Math.max(1, Math.min(95, Math.round(token.bbox.xmin * 100))),
+      y: Math.max(1, Math.min(95, Math.round(token.bbox.ymin * 100))),
+      width: Math.max(5, Math.min(98, Math.round((token.bbox.xmax - token.bbox.xmin) * 100))),
+      height: Math.max(3, Math.min(98, Math.round((token.bbox.ymax - token.bbox.ymin) * 100))),
       status: liveResult.is_compliant ? "compliant" : "violation",
       measuredHeightMm: 2.5,
       requiredHeightMm: 2.0,
@@ -103,15 +114,37 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
 
     const liveDeclarations: ExtractedDeclaration[] = [
       {
+        id: "live-dec-brand",
+        ruleClause: "Rule 6(1)(a)",
+        fieldName: "Brand & Manufacturer Identity",
+        extractedValue: liveResult.brand_name || "Declared on Package",
+        status: liveResult.brand_name ? "compliant" : "violation",
+        statusNote: liveResult.brand_name ? "Brand identity verified" : "Missing prominent brand name",
+        measuredFontHeightMm: 3.5,
+        requiredFontHeightMm: 2.0,
+        boxId: liveBoxes[0]?.id,
+      },
+      {
+        id: "live-dec-product",
+        ruleClause: "Rule 6(1)(b)",
+        fieldName: "Product Name / Generic Identity",
+        extractedValue: liveResult.product_name || "Commodity Identified",
+        status: liveResult.product_name ? "compliant" : "violation",
+        statusNote: "Generic description of packaged commodity",
+        measuredFontHeightMm: 3.0,
+        requiredFontHeightMm: 2.0,
+        boxId: liveBoxes[1]?.id,
+      },
+      {
         id: "live-dec-mrp",
         ruleClause: "Rule 6(1)(e)",
         fieldName: "Maximum Retail Price (MRP)",
-        extractedValue: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Declared on Package",
+        extractedValue: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Missing on Package",
         status: liveResult.mrp ? "compliant" : "violation",
         statusNote: liveResult.mrp ? "Inclusive of all taxes" : "Missing statutory price declaration",
         measuredFontHeightMm: 2.5,
         requiredFontHeightMm: 2.0,
-        boxId: liveBoxes[0]?.id,
+        boxId: liveBoxes[2]?.id,
       },
       {
         id: "live-dec-usp",
@@ -121,10 +154,10 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
           ? `Rs. ${liveResult.calculated_usp.toFixed(2)} / ${liveResult.calculated_usp_unit || "g"}`
           : "Not Declared",
         status: liveResult.calculated_usp ? "compliant" : "violation",
-        statusNote: "Statutory unit pricing under Rule 6(11)",
+        statusNote: "Statutory unit pricing mathematically validated under Rule 6(11)",
         measuredFontHeightMm: 2.2,
         requiredFontHeightMm: 2.0,
-        boxId: liveBoxes[1]?.id,
+        boxId: liveBoxes[3]?.id,
       },
       {
         id: "live-dec-qty",
@@ -137,7 +170,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         statusNote: "Standard SI metric units enforced",
         measuredFontHeightMm: 2.5,
         requiredFontHeightMm: 2.0,
-        boxId: liveBoxes[2]?.id,
+        boxId: liveBoxes[4]?.id,
       },
       {
         id: "live-dec-origin",
@@ -169,14 +202,15 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       brand: liveResult.brand_name || "Inspected Brand",
       category: "Food & Beverage",
       barcode: "8901234567890",
+
       pdpAreaCm2: liveResult.pdp_area_cm2 || 150.0,
       netQuantity: liveResult.net_quantity_value ? `${liveResult.net_quantity_value} ${liveResult.net_quantity_unit}` : "500 g",
-      mrp: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Rs. 100.00",
+      mrp: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Declared on Package",
       mfgDate: "01/2025",
       scannedAt: "Live Field Inspection",
-      scannedBy: "Enforcement Officer LMO-DL-2024",
+      scannedBy: userRole === "officer" ? "Inspector of Legal Metrology" : "Consumer Verification",
       inspectorDesignation: "Inspector of Legal Metrology",
-      location: "New Delhi Field Station",
+      location: "Active Field Station",
       overallStatus: liveResult.is_compliant ? "compliant" : "violation",
       violationCount: liveViolations.length,
       warningCount: 0,
@@ -200,23 +234,73 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
     ? calculateComplianceScore(currentScan.declarations, currentScan.violations)
     : null;
 
-  const handleFileChange = (file: File) => {
+  const handleFrontFileSelected = (file: File) => {
     if (!file) return;
-    processFile(file, file.name);
+    setFrontFile(file);
+    setFrontPreview(URL.createObjectURL(file));
+  };
+
+  const handleBackFileSelected = (file: File) => {
+    if (!file) return;
+    setBackFile(file);
+    setBackPreview(URL.createObjectURL(file));
+  };
+
+  const handleTriggerAnalysis = (fFile?: File | null, bFile?: File | null) => {
+    const f = fFile !== undefined ? fFile : frontFile;
+    const b = bFile !== undefined ? bFile : backFile;
+    if (!f && !b) return;
+    const primary = f || b!;
+    const secondary = f ? b : null;
+    processFiles(primary, secondary, primary.name, secondary?.name);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileChange(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const filesArray = Array.from(e.dataTransfer.files);
+      if (filesArray.length >= 2) {
+        const f1 = filesArray[0];
+        const f2 = filesArray[1];
+        setFrontFile(f1);
+        setBackFile(f2);
+        setFrontPreview(URL.createObjectURL(f1));
+        setBackPreview(URL.createObjectURL(f2));
+        processFiles(f1, f2, f1.name, f2.name);
+      } else {
+        const f1 = filesArray[0];
+        setFrontFile(f1);
+        setFrontPreview(URL.createObjectURL(f1));
+        if (backFile) {
+          processFiles(f1, backFile, f1.name, backFile.name);
+        } else {
+          processFiles(f1, null, f1.name);
+        }
+      }
     }
   };
 
   const handleCameraCapture = (blob: Blob) => {
     setIsCameraOpen(false);
-    processFile(blob, "camera_capture.jpg");
+    const captured = new File([blob], `${cameraTarget}_capture.jpg`, { type: "image/jpeg" });
+    if (cameraTarget === "front") {
+      setFrontFile(captured);
+      setFrontPreview(URL.createObjectURL(captured));
+      if (backFile) {
+        processFiles(captured, backFile, captured.name, backFile.name);
+      }
+    } else {
+      setBackFile(captured);
+      setBackPreview(URL.createObjectURL(captured));
+      if (frontFile) {
+        processFiles(frontFile, captured, frontFile.name, captured.name);
+      } else {
+        processFiles(captured, null, captured.name);
+      }
+    }
   };
+
 
   const handleSelectPreloadedSample = (scanId: string) => {
     setSelectedSampleId(scanId);
@@ -353,35 +437,156 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
             )}
           </div>
 
+          {/* Hidden File Inputs */}
           <input
             type="file"
             ref={fileInputRef}
             accept="image/*"
+            multiple
             className="hidden"
             onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                handleFileChange(e.target.files[0]);
+              if (e.target.files && e.target.files.length > 0) {
+                const arr = Array.from(e.target.files);
+                if (arr.length >= 2) {
+                  setFrontFile(arr[0]);
+                  setBackFile(arr[1]);
+                  setFrontPreview(URL.createObjectURL(arr[0]));
+                  setBackPreview(URL.createObjectURL(arr[1]));
+                  processFiles(arr[0], arr[1], arr[0].name, arr[1].name);
+                } else {
+                  handleFrontFileSelected(arr[0]);
+                }
               }
             }}
           />
 
-          {/* Upload Dropzone */}
+          <input
+            type="file"
+            ref={backFileInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                handleBackFileSelected(e.target.files[0]);
+              }
+            }}
+          />
+
+          {/* Dual Panel Upload Cards: Front Face + Back Face */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Front Panel Slot */}
+            <div className={`border-2 rounded-[8px] p-4 text-center transition-all ${
+              frontPreview ? "border-primary/50 bg-primary-light/20" : "border-dashed border-neutral-300 bg-neutral-50/50 hover:border-neutral-400"
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-neutral-800 uppercase tracking-wider font-heading">
+                  1. Front Panel (Brand &amp; Quantity)
+                </span>
+                {frontPreview && (
+                  <span className="text-[10px] bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded">
+                    Selected
+                  </span>
+                )}
+              </div>
+
+              {frontPreview ? (
+                <div className="relative aspect-video max-h-48 rounded overflow-hidden border border-neutral-200 bg-black/5 flex items-center justify-center my-2">
+                  <img src={frontPreview} alt="Front Packaging" className="max-h-full object-contain" />
+                </div>
+              ) : (
+                <div className="py-6">
+                  <ImageIcon size={32} className="text-neutral-400 mx-auto mb-1" />
+                  <p className="text-xs text-neutral-600 font-medium">Primary Brand Display Panel</p>
+                  <p className="text-[11px] text-neutral-400">Brand Name, Flavor, Net Quantity</p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  icon={<UploadSimple size={14} />}
+                >
+                  {frontPreview ? "Change Front" : "Upload Front"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setCameraTarget("front"); setIsCameraOpen(true); }}
+                  icon={<CameraIcon size={14} />}
+                >
+                  Camera
+                </Button>
+              </div>
+            </div>
+
+            {/* Back Panel Slot */}
+            <div className={`border-2 rounded-[8px] p-4 text-center transition-all ${
+              backPreview ? "border-primary/50 bg-primary-light/20" : "border-dashed border-neutral-300 bg-neutral-50/50 hover:border-neutral-400"
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-neutral-800 uppercase tracking-wider font-heading">
+                  2. Back Panel (MRP, USP, Nutrition &amp; Mfg)
+                </span>
+                {backPreview && (
+                  <span className="text-[10px] bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded">
+                    Selected
+                  </span>
+                )}
+              </div>
+
+              {backPreview ? (
+                <div className="relative aspect-video max-h-48 rounded overflow-hidden border border-neutral-200 bg-black/5 flex items-center justify-center my-2">
+                  <img src={backPreview} alt="Back Packaging" className="max-h-full object-contain" />
+                </div>
+              ) : (
+                <div className="py-6">
+                  <FileText size={32} className="text-neutral-400 mx-auto mb-1" />
+                  <p className="text-xs text-neutral-600 font-medium">Statutory Declarations Panel</p>
+                  <p className="text-[11px] text-neutral-400">MRP, Unit Sale Price, Dates, Nutrition, FSSAI</p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => backFileInputRef.current?.click()}
+                  icon={<UploadSimple size={14} />}
+                >
+                  {backPreview ? "Change Back" : "Upload Back"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setCameraTarget("back"); setIsCameraOpen(true); }}
+                  icon={<CameraIcon size={14} />}
+                >
+                  Camera
+                </Button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Unified Drag-and-Drop Area */}
           <div
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-[8px] p-8 text-center transition-all ${
+            className={`border-2 border-dashed rounded-[8px] p-6 text-center transition-all ${
               isDragOver
                 ? "border-primary bg-primary-light/50"
                 : "border-neutral-300 bg-neutral-50/50 hover:border-neutral-400"
             }`}
           >
-            <CloudArrowUp size={40} className="text-primary mx-auto mb-2" />
+            <CloudArrowUp size={36} className="text-primary mx-auto mb-2" />
             <h3 className="text-sm font-semibold text-neutral-900 font-heading">
-              Drag and drop product packaging image here
+              Drag and drop product packaging image(s) here
             </h3>
             <p className="text-xs text-neutral-500 mt-0.5">
-              Supports JPEG, PNG, WEBP files (client automatically compresses to &lt; 2MB)
+              Tip: Drop BOTH Front and Back images together for 100% statutory declaration extraction.
             </p>
 
             {compression && (
@@ -396,23 +601,26 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               <Button
-                variant="primary"
+                variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 icon={<UploadSimple size={16} />}
               >
-                Browse Image File
+                Browse Images (Select 1 or 2)
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsCameraOpen(true)}
-                icon={<CameraIcon size={16} />}
-              >
-                Open Camera Viewfinder
-              </Button>
+              {(frontFile || backFile) && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleTriggerAnalysis()}
+                  icon={<Sparkle size={16} />}
+                >
+                  Analyze Packaging (Dual Multimodal VLM)
+                </Button>
+              )}
             </div>
           </div>
+
 
           {/* Live Progress Indicators */}
           {(scanStatus === "compressing" || scanStatus === "uploading" || scanStatus === "processing") && (

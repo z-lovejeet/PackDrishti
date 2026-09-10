@@ -67,7 +67,9 @@ export interface CompressionMetrics {
 interface ScanMachineState {
   status: ScanStatus;
   imageSrc: string | null;
+  backImageSrc: string | null;
   fileName: string;
+  backFileName: string;
   result: ScanAnalysisResult | null;
   compression: CompressionMetrics | null;
   errorMessage: string | null;
@@ -78,6 +80,12 @@ interface ScanMachineState {
   startCapture: () => void;
   stopCapture: () => void;
   processFile: (fileOrBlob: File | Blob, filename?: string) => Promise<void>;
+  processFiles: (
+    frontFile: File | Blob,
+    backFile?: File | Blob | null,
+    frontFilename?: string,
+    backFilename?: string
+  ) => Promise<void>;
   selectToken: (index: number | null) => void;
   reset: () => void;
   setRateLimited: (seconds: number) => void;
@@ -87,7 +95,9 @@ interface ScanMachineState {
 export const useScanMachine = create<ScanMachineState>((set, get) => ({
   status: 'idle',
   imageSrc: null,
+  backImageSrc: null,
   fileName: '',
+  backFileName: '',
   result: null,
   compression: null,
   errorMessage: null,
@@ -105,38 +115,60 @@ export const useScanMachine = create<ScanMachineState>((set, get) => ({
   },
 
   processFile: async (fileOrBlob: File | Blob, filename = 'packaging_scan.jpg') => {
+    return get().processFiles(fileOrBlob, null, filename);
+  },
+
+  processFiles: async (
+    frontFile: File | Blob,
+    backFile?: File | Blob | null,
+    frontFilename = 'packaging_front.jpg',
+    backFilename = 'packaging_back.jpg'
+  ) => {
     try {
       // Step 1: Compressing
       set({
         status: 'compressing',
-        fileName: filename,
+        fileName: frontFilename,
+        backFileName: backFile ? backFilename : '',
         errorMessage: null,
       });
 
-      const downsample = await downsampleImage(fileOrBlob, {
+      const frontDownsample = await downsampleImage(frontFile, {
         maxDimension: 2048,
         maxSizeBytes: 2 * 1024 * 1024, // 2MB
         quality: 0.85,
       });
 
-      const compressedFile = blobToFile(downsample.blob, filename);
+      const compressedFront = blobToFile(frontDownsample.blob, frontFilename);
+      const formData = new FormData();
+      formData.append('file', compressedFront);
+
+      let backDataUrl: string | null = null;
+      if (backFile) {
+        const backDownsample = await downsampleImage(backFile, {
+          maxDimension: 2048,
+          maxSizeBytes: 2 * 1024 * 1024,
+          quality: 0.85,
+        });
+        const compressedBack = blobToFile(backDownsample.blob, backFilename);
+        formData.append('back_file', compressedBack);
+        backDataUrl = backDownsample.dataUrl;
+      }
 
       set({
-        imageSrc: downsample.dataUrl,
+        imageSrc: frontDownsample.dataUrl,
+        backImageSrc: backDataUrl,
         compression: {
-          originalSizeBytes: downsample.originalSizeBytes,
-          compressedSizeBytes: downsample.compressedSizeBytes,
-          compressionRatio: downsample.compressionRatio,
+          originalSizeBytes: frontDownsample.originalSizeBytes,
+          compressedSizeBytes: frontDownsample.compressedSizeBytes,
+          compressionRatio: frontDownsample.compressionRatio,
         },
         status: 'processing',
       });
 
-      // Step 2: Live API Execution
-      const formData = new FormData();
-      formData.append('file', compressedFile);
-
+      // Step 2: Live API Execution - apiClient baseURL already includes /api/v1
       const response = await apiClient.post<ScanAnalysisResult>(
-        '/api/v1/scan/analyze',
+        '/scan/analyze',
         formData,
         {
           headers: {
@@ -176,13 +208,16 @@ export const useScanMachine = create<ScanMachineState>((set, get) => ({
     set({
       status: 'idle',
       imageSrc: null,
+      backImageSrc: null,
       fileName: '',
+      backFileName: '',
       result: null,
       compression: null,
       errorMessage: null,
       activeTokenIndex: null,
     });
   },
+
 
   setRateLimited: (seconds: number) => {
     set({

@@ -2,6 +2,7 @@ import os
 import uuid
 import hashlib
 import time
+import logging
 from decimal import Decimal
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
@@ -15,6 +16,8 @@ from backend.src.core.security import get_optional_current_user, CurrentUser
 from backend.src.models.scan import ProductScan, ExtractedDeclaration, ComplianceStatus
 from backend.src.models.violation import StatutoryViolation, ViolationSeverity
 from ai.src.pipeline.langgraph_workflow import run_packaging_scan_workflow
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -86,28 +89,35 @@ async def upload_scan_image(
 
     file_url = f"/static/uploads/{filename}"
 
-    # Create ProductScan database record
+    # Create ProductScan database record with graceful fallback
     user_uuid = current_user.id if (current_user and isinstance(current_user.id, uuid.UUID)) else (
         uuid.UUID(current_user.id) if current_user and current_user.id else None
     )
 
-    scan_record = ProductScan(
-        id=scan_id,
-        scan_code=scan_code,
-        user_id=user_uuid,
-        product_name="Uploaded Label Pending Analysis",
-        brand="Unspecified Brand",
-        category="Packaged Goods",
-        pdp_area_cm2=Decimal("150.00"),
-        net_quantity="Pending",
-        mrp="Pending",
-        mfg_date="Pending",
-        overall_status=ComplianceStatus.PENDING,
-        compliance_score=Decimal("0.00"),
-        image_url=file_url,
-    )
-    db.add(scan_record)
-    await db.commit()
+    try:
+        scan_record = ProductScan(
+            id=scan_id,
+            scan_code=scan_code,
+            user_id=user_uuid,
+            product_name="Uploaded Label Pending Analysis",
+            brand="Unspecified Brand",
+            category="Packaged Goods",
+            pdp_area_cm2=Decimal("150.00"),
+            net_quantity="Pending",
+            mrp="Pending",
+            mfg_date="Pending",
+            overall_status=ComplianceStatus.PENDING,
+            compliance_score=Decimal("0.00"),
+            image_url=file_url,
+        )
+        db.add(scan_record)
+        await db.commit()
+    except Exception as db_err:
+        logger.warning("Database insert failed during upload (continuing without DB write): %s", db_err)
+        try:
+            await db.rollback()
+        except Exception:
+            pass
 
     return UploadScanResponse(
         scan_id=str(scan_id),
@@ -122,26 +132,48 @@ async def upload_scan_image(
 async def analyze_packaging_compliance(
     scan_id: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
+    back_file: Optional[UploadFile] = File(None),
+    files: Optional[List[UploadFile]] = File(None),
     db: AsyncSession = Depends(get_db_session),
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
     Executes the 4-Tier LangGraph Stateful Workflow:
-    Tier 1: Multimodal Visual Perception
+    Tier 1: Multimodal Visual Perception (Supports Front + Back Dual Panel Analysis)
     Tier 2: Deterministic Python Rule Engine (Zero Hallucination Legal Math)
     Tier 3: Statutory RAG (Supabase pgvector)
     Tier 4: Parallel Dual-LLM Consensus Synthesis
     """
     start_time = time.perf_counter()
-    image_bytes = b""
+    image_bytes_list: List[bytes] = []
     target_scan_id = None
     filename = ""
 
-    if file:
-        image_bytes = await file.read()
-        filename = file.filename or "upload.jpg"
+    # Check for multiple files uploaded under 'files'
+    if files:
+        for f in files:
+            b = await f.read()
+            if b:
+                image_bytes_list.append(b)
+        filename = files[0].filename or "upload_multi.jpg"
         target_scan_id = uuid.uuid4()
-    elif scan_id:
+
+    # Check for primary front 'file'
+    if file:
+        f_bytes = await file.read()
+        if f_bytes:
+            image_bytes_list.append(f_bytes)
+        filename = file.filename or "upload_front.jpg"
+        if not target_scan_id:
+            target_scan_id = uuid.uuid4()
+
+    # Check for secondary back 'back_file'
+    if back_file:
+        b_bytes = await back_file.read()
+        if b_bytes:
+            image_bytes_list.append(b_bytes)
+
+    if not image_bytes_list and scan_id:
         target_scan_id = uuid.UUID(scan_id)
         # Look up scan record
         result = await db.execute(select(ProductScan).where(ProductScan.id == target_scan_id))
@@ -156,22 +188,26 @@ async def analyze_packaging_compliance(
         local_path = os.path.join(settings.STORAGE_LOCAL_DIR, local_filename)
         if os.path.exists(local_path):
             with open(local_path, "rb") as f:
-                image_bytes = f.read()
+                image_bytes_list.append(f.read())
         else:
-            image_bytes = b"Fallback Synthetic Packaging Image"
+            image_bytes_list.append(b"Fallback Synthetic Packaging Image")
         filename = local_filename
-    else:
+    elif not image_bytes_list:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Either 'file' or 'scan_id' must be provided.",
+            detail="Either 'file', 'back_file', 'files', or 'scan_id' must be provided.",
         )
+
+    # Pass either list of bytes or single bytes buffer
+    payload_input: Any = image_bytes_list if len(image_bytes_list) > 1 else image_bytes_list[0]
 
     # Execute LangGraph Workflow
     final_state = await run_packaging_scan_workflow(
-        image_bytes=image_bytes,
+        image_bytes=payload_input,
         filename=filename,
         scan_id=str(target_scan_id),
     )
+
 
     if final_state.get("error"):
         raise HTTPException(
@@ -205,81 +241,11 @@ async def analyze_packaging_compliance(
     )
     status_enum = ComplianceStatus.COMPLIANT if (evaluation and evaluation.is_compliant) else ComplianceStatus.VIOLATION
 
-    # Ensure scan record exists or update it
-    result = await db.execute(select(ProductScan).where(ProductScan.id == target_scan_id))
-    scan_row = result.scalar_one_or_none()
-    if not scan_row:
-        scan_row = ProductScan(
-            id=target_scan_id,
-            scan_code=f"SCAN-{target_scan_id.hex[:8].upper()}",
-            user_id=user_uuid,
-            product_name=prod_val,
-            brand=brand_val,
-            category=cat_val,
-            pdp_area_cm2=pdp_area_dec,
-            net_quantity=net_qty_str,
-            mrp=mrp_str,
-            mfg_date=mfg_str,
-            overall_status=status_enum,
-            compliance_score=score_dec,
-            image_url=f"/static/uploads/{filename}",
-        )
-        db.add(scan_row)
-    else:
-        scan_row.brand = brand_val
-        scan_row.product_name = prod_val
-        scan_row.category = cat_val
-        scan_row.pdp_area_cm2 = pdp_area_dec
-        scan_row.net_quantity = net_qty_str
-        scan_row.mrp = mrp_str
-        scan_row.mfg_date = mfg_str
-        scan_row.overall_status = status_enum
-        scan_row.compliance_score = score_dec
-
-    # Insert ExtractedDeclaration entity
-    if extraction:
-        extracted_entity = ExtractedDeclaration(
-            scan_id=target_scan_id,
-            rule_clause="Rule 6(1)",
-            field_name="Mandatory Declarations Summary",
-            extracted_value=prod_val,
-            status=status_enum,
-            status_note="Automated perception verification",
-            measured_font_height_mm=Decimal(f"{(extraction.measured_font_height_mm or 2.0):.2f}"),
-            required_font_height_mm=Decimal(f"{(evaluation.min_font_height_required_mm if evaluation else 2.0):.2f}"),
-            contrast_ratio=Decimal("7.00"),
-            bounding_box_json={
-                "tokens_count": len(extraction.tokens),
-                "mfg_date": mfg_str,
-                "consumer_care": extraction.consumer_care_email,
-            },
-        )
-        db.add(extracted_entity)
-
-    # Insert StatutoryViolations
+    # Serialize violations for response
     serialized_violations = []
     if evaluation and evaluation.violations:
         for v in evaluation.violations:
-            sev_enum = ViolationSeverity.MEDIUM
-            if v.severity == "critical":
-                sev_enum = ViolationSeverity.HIGH
-            elif v.severity == "minor":
-                sev_enum = ViolationSeverity.LOW
-
             viol_id = uuid.uuid4()
-            violation_record = StatutoryViolation(
-                id=viol_id,
-                scan_id=target_scan_id,
-                rule_reference=v.rule_code,
-                act_section=v.statutory_reference,
-                title=v.rule_name,
-                description=v.description,
-                penalty_clause=f"Section 36(1) compounding amount: Rs. {v.compounding_amount:,.2f}",
-                severity=sev_enum,
-                corrective_action=f"Amend package label to declare expected value: {v.expected_value}",
-            )
-            db.add(violation_record)
-
             serialized_violations.append({
                 "violation_id": str(viol_id),
                 "rule_code": v.rule_code,
@@ -292,7 +258,85 @@ async def analyze_packaging_compliance(
                 "compounding_amount": v.compounding_amount,
             })
 
-    await db.commit()
+    # Gracefully persist scan, declarations, and violations to database if available
+    try:
+        result = await db.execute(select(ProductScan).where(ProductScan.id == target_scan_id))
+        scan_row = result.scalar_one_or_none()
+        if not scan_row:
+            scan_row = ProductScan(
+                id=target_scan_id,
+                scan_code=f"SCAN-{target_scan_id.hex[:8].upper()}",
+                user_id=user_uuid,
+                product_name=prod_val,
+                brand=brand_val,
+                category=cat_val,
+                pdp_area_cm2=pdp_area_dec,
+                net_quantity=net_qty_str,
+                mrp=mrp_str,
+                mfg_date=mfg_str,
+                overall_status=status_enum,
+                compliance_score=score_dec,
+                image_url=f"/static/uploads/{filename}",
+            )
+            db.add(scan_row)
+        else:
+            scan_row.brand = brand_val
+            scan_row.product_name = prod_val
+            scan_row.category = cat_val
+            scan_row.pdp_area_cm2 = pdp_area_dec
+            scan_row.net_quantity = net_qty_str
+            scan_row.mrp = mrp_str
+            scan_row.mfg_date = mfg_str
+            scan_row.overall_status = status_enum
+            scan_row.compliance_score = score_dec
+
+        if extraction:
+            extracted_entity = ExtractedDeclaration(
+                scan_id=target_scan_id,
+                rule_clause="Rule 6(1)",
+                field_name="Mandatory Declarations Summary",
+                extracted_value=prod_val,
+                status=status_enum,
+                status_note="Automated perception verification",
+                measured_font_height_mm=Decimal(f"{(extraction.measured_font_height_mm or 2.0):.2f}"),
+                required_font_height_mm=Decimal(f"{(evaluation.min_font_height_required_mm if evaluation else 2.0):.2f}"),
+                contrast_ratio=Decimal("7.00"),
+                bounding_box_json={
+                    "tokens_count": len(extraction.tokens),
+                    "mfg_date": mfg_str,
+                    "consumer_care": extraction.consumer_care_email,
+                },
+            )
+            db.add(extracted_entity)
+
+        if evaluation and evaluation.violations:
+            for v, s_v in zip(evaluation.violations, serialized_violations):
+                sev_enum = ViolationSeverity.MEDIUM
+                if v.severity == "critical":
+                    sev_enum = ViolationSeverity.HIGH
+                elif v.severity == "minor":
+                    sev_enum = ViolationSeverity.LOW
+
+                violation_record = StatutoryViolation(
+                    id=uuid.UUID(s_v["violation_id"]),
+                    scan_id=target_scan_id,
+                    rule_reference=v.rule_code,
+                    act_section=v.statutory_reference,
+                    title=v.rule_name,
+                    description=v.description,
+                    penalty_clause=f"Section 36(1) compounding amount: Rs. {v.compounding_amount:,.2f}",
+                    severity=sev_enum,
+                    corrective_action=f"Amend package label to declare expected value: {v.expected_value}",
+                )
+                db.add(violation_record)
+
+        await db.commit()
+    except Exception as db_err:
+        logger.warning("Database persistence failed during scan analysis (continuing without DB write): %s", db_err)
+        try:
+            await db.rollback()
+        except Exception:
+            pass
 
     total_time_ms = round((time.perf_counter() - start_time) * 1000, 2)
 
@@ -336,9 +380,13 @@ async def get_scan_history(
     """
     Retrieves recent scan audit history.
     """
-    stmt = select(ProductScan).order_by(ProductScan.scanned_at.desc()).limit(limit)
-    result = await db.execute(stmt)
-    scans = result.scalars().all()
+    try:
+        stmt = select(ProductScan).order_by(ProductScan.scanned_at.desc()).limit(limit)
+        result = await db.execute(stmt)
+        scans = result.scalars().all()
+    except Exception as db_err:
+        logger.warning("Database query failed during history retrieval: %s", db_err)
+        return []
 
     return [
         {

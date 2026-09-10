@@ -79,10 +79,10 @@ class Settings(BaseSettings):
     # Parallel Dual-LLM Pipeline: Primary Gemini Fallback Chain
     GEMINI_API_KEY: str = ""
     GEMINI_FALLBACK_CHAIN: Union[List[str], str] = [
+        "gemini-flash-latest",
         "gemini-3.8-flash",
         "gemini-3.7-flash",
         "gemini-3.6-flash",
-        "gemini-3.5-flash-lite",
     ]
 
     @field_validator("GEMINI_FALLBACK_CHAIN", mode="before")
@@ -93,17 +93,17 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return [
+            "gemini-flash-latest",
             "gemini-3.8-flash",
             "gemini-3.7-flash",
             "gemini-3.6-flash",
-            "gemini-3.5-flash-lite",
         ]
 
-    # Parallel Dual-LLM Pipeline: Secondary Groq Fallback Chain
+    # Parallel Dual-LLM Pipeline: Secondary Groq Fallback Chain (Pure Open-Weights Qwen Models)
     GROQ_API_KEY: str = ""
     GROQ_FALLBACK_CHAIN: Union[List[str], str] = [
-        "gpt-oss-120b",
-        "gpt-oss-20b",
+        "qwen/qwen3.8-27b",
+        "qwen/qwen3.6-27b",
     ]
 
     @field_validator("GROQ_FALLBACK_CHAIN", mode="before")
@@ -113,7 +113,8 @@ class Settings(BaseSettings):
             return [i.strip() for i in v.split(",") if i.strip()]
         elif isinstance(v, list):
             return v
-        return ["gpt-oss-120b", "gpt-oss-20b"]
+        return ["qwen/qwen3.8-27b", "qwen/qwen3.6-27b"]
+
 
     # LangGraph Statutory RAG Pipeline in Supabase pgvector
     EMBEDDING_MODEL: str = "text-embedding-3-small"

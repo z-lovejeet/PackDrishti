@@ -129,7 +129,11 @@ async def generate_statutory_show_cause_notice(
         violation_id=str(violation.id),
         scan_id=str(violation.scan_id),
         form_type="FORM LM-INSP-2011",
-        show_cause_notice=consensus.form_lm_insp_2011_notice_draft or "Formal Notice Draft",
+        show_cause_notice=(
+            consensus.form_lm_insp_2011_notice_draft
+            if consensus and consensus.form_lm_insp_2011_notice_draft
+            else "FORM LM-INSP-2011: Statutory Show-Cause Notice Draft"
+        ),
         statutory_citations=citations,
         compounding_amount=compounding_amount,
         issued_to=company_name,

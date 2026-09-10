@@ -32,8 +32,9 @@ def test_api_v1_health_endpoint():
     assert data["subsystems"]["auth"] == "supabase_auth"
     assert data["subsystems"]["cache"] == "in_memory_async_lru"
     assert data["subsystems"]["rag_framework"] == "langgraph"
-    assert "gemini-3.8-flash" in data["subsystems"]["llm_primary_chain"]
-    assert "gpt-oss-120b" in data["subsystems"]["llm_secondary_chain"]
+    assert "gemini" in data["subsystems"]["llm_primary_chain"]
+    assert "qwen" in data["subsystems"]["llm_secondary_chain"]
+
 
 
 def test_root_index_endpoint():

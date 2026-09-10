@@ -1,5 +1,5 @@
 import logging
-from typing import TypedDict, Optional, List, Dict, Any
+from typing import TypedDict, Optional, List, Dict, Any, Union
 from langgraph.graph import StateGraph, START, END
 
 from ai.src.pipeline.extractor import (
@@ -25,8 +25,9 @@ logger = logging.getLogger("packdrashiti.workflow")
 class PackagingScanState(TypedDict):
     """
     State object passed between LangGraph nodes during packaging compliance analysis.
+    Supports single image bytes or multiple image byte buffers (Front + Back panels).
     """
-    image_bytes: bytes
+    image_bytes: Union[bytes, List[bytes]]
     filename: str
     scan_id: Optional[str]
     extraction: Optional[PackageVisualExtraction]
@@ -34,6 +35,7 @@ class PackagingScanState(TypedDict):
     citations: List[StatutoryCitation]
     consensus: Optional[DualLLMConsensusOutput]
     error: Optional[str]
+
 
 
 # Pipeline instances
@@ -136,7 +138,7 @@ packaging_compliance_graph = build_langgraph_workflow()
 
 
 async def run_packaging_scan_workflow(
-    image_bytes: bytes, filename: str = "", scan_id: Optional[str] = None
+    image_bytes: Union[bytes, List[bytes]], filename: str = "", scan_id: Optional[str] = None
 ) -> PackagingScanState:
     """
     Public entrypoint to execute the complete 4-tier LangGraph packaging scan workflow.
@@ -154,3 +156,4 @@ async def run_packaging_scan_workflow(
 
     final_state = await packaging_compliance_graph.ainvoke(initial_state)
     return final_state
+
