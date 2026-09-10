@@ -27,9 +27,9 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Setup `frontend/src/utils/apiClient.ts` with Axios interceptors for JWT injection.
 
 **Member 2 (Backend Developer)**
-- [ ] Scaffold FastAPI project in `backend/src/main.py`.
-- [ ] Define environment variables in `backend/.env.template`.
-- [ ] Setup `backend/src/core/config.py` using Pydantic Settings.
+- [x] Scaffold FastAPI project in `backend/src/main.py`.
+- [x] Define environment variables in `backend/.env.template`.
+- [x] Setup `backend/src/core/config.py` using Pydantic Settings.
 
 **Member 3 (AI Engineer)**
 - [ ] Define Python environment with Poetry or conda in `ai/`.
@@ -37,8 +37,8 @@ Currently, the MetroScan project consists of a React frontend prototype utilizin
 - [ ] Initialize pgvector database connections for RAG testing.
 
 **Member 4 (Tester + DevOps Engineer)**
-- [ ] Scaffold `docker-compose.yml` for local PostgreSQL 16 and Redis.
-- [ ] Create `.github/workflows/ci.yml` with basic linting for frontend/backend.
+- [x] Scaffold `docker-compose.yml` for local PostgreSQL 16 and Redis.
+- [x] Create `.github/workflows/ci.yml` with basic linting for frontend/backend.
 
 **Phase Verification Gate & Acceptance Criteria**
 - Execution: `docker-compose up -d && curl -X GET http://localhost:8000/health`

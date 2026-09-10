@@ -1,6 +1,9 @@
 version: "3.8"
 
 services:
+  # ----------------------------------------------------------------------------
+  # PostgreSQL 16 with pgvector extension
+  # ----------------------------------------------------------------------------
   metroscan-db:
     image: pgvector/pgvector:pg16
     container_name: metroscan-postgres
@@ -23,6 +26,56 @@ services:
     networks:
       - metroscan-network
 
+  # ----------------------------------------------------------------------------
+  # Redis 7 Cache & Message Broker
+  # ----------------------------------------------------------------------------
+  metroscan-redis:
+    image: redis:7-alpine
+    container_name: metroscan-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - metroscan_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - metroscan-network
+
+  # ----------------------------------------------------------------------------
+  # MetroScan FastAPI Backend Application
+  # ----------------------------------------------------------------------------
+  metroscan-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: metroscan-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: development
+      DEBUG: "true"
+      DATABASE_URL: postgresql://metroscan_user:metroscan_pass@metroscan-db:5432/metroscan_db
+      REDIS_URL: redis://metroscan-redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650}
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+    depends_on:
+      metroscan-db:
+        condition: service_healthy
+      metroscan-redis:
+        condition: service_healthy
+    networks:
+      - metroscan-network
+
+  # ----------------------------------------------------------------------------
+  # Database GUI Administration (Adminer)
+  # Accessible via http://localhost:8080
+  # ----------------------------------------------------------------------------
   metroscan-adminer:
     image: adminer:latest
     container_name: metroscan-adminer
@@ -39,6 +92,8 @@ services:
 
 volumes:
   metroscan_postgres_data:
+    driver: local
+  metroscan_redis_data:
     driver: local
 
 networks:

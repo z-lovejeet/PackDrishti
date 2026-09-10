@@ -1,0 +1,79 @@
+name: MetroScan CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-ci:
+    name: Frontend Lint & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Run Static Code Analysis (Oxlint)
+        run: npm run lint
+
+      - name: Build React Application
+        run: npm run build
+
+  backend-ci:
+    name: Backend Lint & Automated Tests
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: testing
+      DEBUG: "false"
+      JWT_SECRET_KEY: test_secret_key_for_ci_pipeline_only_32bytes_minimum
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Verify Python Syntax & Bytecode Compilation
+        run: |
+          python -m py_compile backend/src/core/config.py
+          python -m py_compile backend/src/main.py
+          python -m py_compile backend/src/api/v1/router.py
+          python -m py_compile backend/src/api/v1/endpoints/health.py
+
+      - name: Execute Pytest Test Suite
+        run: |
+          python -m pytest backend/tests -v
