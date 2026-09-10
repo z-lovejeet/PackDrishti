@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   FileText, 
   DownloadSimple, 
@@ -16,8 +16,8 @@ import {
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { Badge } from "../../components/common/Badge";
-import { MOCK_REPORTS } from "../../data/mockReports";
 import { ComplianceReport } from "../../types";
+import { api } from "../../utils/apiClient";
 
 interface ReportViewerPageProps {
   onOpenNewReportModal: () => void;
@@ -26,10 +26,47 @@ interface ReportViewerPageProps {
 export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
   onOpenNewReportModal,
 }) => {
-  const [reports, setReports] = useState<ComplianceReport[]>(MOCK_REPORTS);
+  const [reports, setReports] = useState<ComplianceReport[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
-  const [activeReport, setActiveReport] = useState<ComplianceReport | null>(MOCK_REPORTS[0]);
+  const [activeReport, setActiveReport] = useState<ComplianceReport | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      setIsLoading(true);
+      try {
+        const res = await api.get<any[]>("/scan/history");
+        if (res && Array.isArray(res) && res.length > 0) {
+          const mapped: ComplianceReport[] = res.map((s) => ({
+            id: s.scan_id,
+            reportNumber: `REP-${s.scan_code || s.scan_id.substring(0, 8).toUpperCase()}`,
+            title: `Compliance Audit: ${s.product_name || s.brand_name || 'Packaged Commodity'}`,
+            reportType: "Single Product Audit",
+            generatedDate: s.created_at ? new Date(s.created_at).toLocaleDateString('en-GB') : "Recent",
+            generatedBy: "Legal Metrology Enforcement Officer",
+            designation: "Inspector of Legal Metrology",
+            district: "State Enforcement Division",
+            totalProductsScanned: 1,
+            compliantCount: s.compliance_status === "compliant" ? 1 : 0,
+            violationCount: s.compliance_status === "compliant" ? 0 : 1,
+            format: "PDF",
+          }));
+          setReports(mapped);
+          setActiveReport(mapped[0]);
+        } else {
+          setReports([]);
+          setActiveReport(null);
+        }
+      } catch {
+        setReports([]);
+        setActiveReport(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
 
   const filteredReports = reports.filter((rep) => {
     const matchesSearch = 
@@ -182,6 +219,12 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
                 </div>
               );
             })}
+
+            {filteredReports.length === 0 && !isLoading && (
+              <div className="bg-white border border-neutral-200 rounded-[8px] p-6 text-center text-xs text-neutral-500">
+                No inspection reports found in system records.
+              </div>
+            )}
           </div>
         </div>
 

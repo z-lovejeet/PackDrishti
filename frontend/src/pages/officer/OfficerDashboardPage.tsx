@@ -19,11 +19,30 @@ import { CompoundingCalculator } from "../../components/officer/CompoundingCalcu
 import { NoticePreviewModal } from "../../components/officer/NoticePreviewModal";
 import { api } from "../../utils/apiClient";
 import { 
-  MOCK_OFFICER_PROFILE, 
-  MOCK_DASHBOARD_METRICS, 
-  MOCK_RECENT_ACTIONS, 
-  MOCK_TOP_VIOLATIONS 
-} from "../../data/mockDashboard";
+  OfficerProfile, 
+  DashboardMetrics, 
+  EnforcementActionItem, 
+  ViolationCategoryBreakdown 
+} from "../../types";
+
+const DEFAULT_OFFICER_PROFILE: OfficerProfile = {
+  name: "Sh. Rajesh Kumar Sharma",
+  badgeNumber: "DL-LM-INSP-0442",
+  designation: "Senior Legal Metrology Inspector",
+  division: "Central Enforcement Division",
+  zone: "Zone-1 (Central & Old Delhi)",
+  jurisdiction: "Delhi NCT",
+};
+
+const INITIAL_METRICS: DashboardMetrics = {
+  totalInspections: 0,
+  compliantCount: 0,
+  violationCount: 0,
+  compoundedCount: 0,
+  totalFinesLeviedInr: 0,
+  monthlyScansDelta: 0,
+  complianceRate: 0,
+};
 
 interface OfficerDashboardPageProps {
   onNavigate: (page: string) => void;
@@ -36,7 +55,10 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
 }) => {
   const [isCompoundingOpen, setIsCompoundingOpen] = useState(false);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
-  const [metrics, setMetrics] = useState(MOCK_DASHBOARD_METRICS);
+  const [officerProfile] = useState<OfficerProfile>(DEFAULT_OFFICER_PROFILE);
+  const [metrics, setMetrics] = useState<DashboardMetrics>(INITIAL_METRICS);
+  const [actions, setActions] = useState<EnforcementActionItem[]>([]);
+  const [topViolations, setTopViolations] = useState<ViolationCategoryBreakdown[]>([]);
 
   useEffect(() => {
     const fetchLiveMetrics = async () => {
@@ -48,21 +70,59 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           compounded_closed: number;
           total_compounding_assessed_inr: number;
           monthly_scans_delta: number;
+          top_violating_rules?: any[];
         }>("/dashboard/metrics");
 
-        if (live && live.total_inspections) {
+        if (live) {
           setMetrics(prev => ({
             ...prev,
-            totalInspections: live.total_inspections,
-            compliantCount: live.compliant_count,
-            violationCount: live.violations_recorded,
-            compoundedCount: live.compounded_closed,
-            totalFinesLeviedInr: live.total_compounding_assessed_inr,
-            monthlyScansDelta: live.monthly_scans_delta,
+            totalInspections: live.total_inspections || 0,
+            compliantCount: live.compliant_count || 0,
+            violationCount: live.violations_recorded || 0,
+            compoundedCount: live.compounded_closed || 0,
+            totalFinesLeviedInr: live.total_compounding_assessed_inr || 0,
+            monthlyScansDelta: live.monthly_scans_delta || 0,
           }));
+
+          if (live.top_violating_rules && live.top_violating_rules.length > 0) {
+            const totalV = live.violations_recorded || 1;
+            const mappedViolations: ViolationCategoryBreakdown[] = live.top_violating_rules.map((r: any) => ({
+              ruleClause: r.rule || "Rule 6",
+              categoryTitle: r.title || "Statutory Non-Compliance",
+              count: r.count || 0,
+              percentage: Math.round(((r.count || 0) / totalV) * 1000) / 10,
+              actSection: "Section 36(1)",
+            }));
+            setTopViolations(mappedViolations);
+          }
         }
       } catch {
-        // Graceful fallback to mock dashboard metrics
+        // Retain initial zeroed ledger state
+      }
+
+      try {
+        const actRes = await api.get<{ activities: any[] }>("/dashboard/activity");
+        if (actRes && actRes.activities) {
+          const mappedActions: EnforcementActionItem[] = actRes.activities.map((a: any) => ({
+            id: a.id,
+            caseRef: a.docket_number || a.id,
+            productName: `${a.brand || ''} ${a.product_name || ''}`.trim(),
+            actionType: a.action && a.action.includes("Notice")
+              ? "Show Cause Notice"
+              : a.action && a.action.includes("Compounding")
+              ? "Compounding Order"
+              : a.action && a.action.includes("Seizure")
+              ? "Seizure Memo"
+              : "Cured & Dismissed",
+            statutoryClause: "Rule 6(1) & Sec 36(1)",
+            timestamp: a.timestamp || "Recent",
+            targetEstablishment: a.location || "Market Premises",
+            status: a.status === "Resolved" || a.status === "Compliant" ? "Settled" : "Pending Hearing",
+          }));
+          setActions(mappedActions);
+        }
+      } catch {
+        setActions([]);
       }
     };
 
@@ -81,24 +141,24 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-lg font-bold text-neutral-900 font-heading">
-                {MOCK_OFFICER_PROFILE.name}
+                {officerProfile.name}
               </h1>
               <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-primary-light text-primary border border-primary-border">
-                {MOCK_OFFICER_PROFILE.badgeNumber}
+                {officerProfile.badgeNumber}
               </span>
             </div>
             <p className="text-xs text-neutral-600 font-medium">
-              {MOCK_OFFICER_PROFILE.designation} • {MOCK_OFFICER_PROFILE.division}
+              {officerProfile.designation} • {officerProfile.division}
             </p>
             <div className="flex items-center gap-4 text-[11px] text-neutral-500 pt-0.5">
               <span className="flex items-center gap-1">
                 <Building size={13} />
-                {MOCK_OFFICER_PROFILE.zone}
+                {officerProfile.zone}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <MapPin size={13} />
-                {MOCK_OFFICER_PROFILE.jurisdiction}
+                {officerProfile.jurisdiction}
               </span>
             </div>
           </div>
@@ -129,6 +189,14 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
             icon={<FileText size={16} />}
           >
             Preview FORM LM-INSP-2011
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenReportModal}
+            icon={<FileText size={16} />}
+          >
+            File Report
           </Button>
         </div>
       </div>
@@ -172,7 +240,7 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           <ComplianceChart
             compliantCount={metrics.compliantCount}
             violationCount={metrics.violationCount}
-            pendingCount={metrics.pendingNoticesCount}
+            pendingCount={metrics.pendingNoticesCount || 0}
           />
 
           {/* Quick Navigation Cards */}
@@ -212,7 +280,7 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
 
         <div className="lg:col-span-7">
           <ActivityFeed
-            actions={MOCK_RECENT_ACTIONS}
+            actions={actions}
             onViewCase={() => onNavigate("inspections")}
           />
         </div>
@@ -231,7 +299,7 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
             </p>
           </div>
           <span className="text-xs text-neutral-500 font-mono">
-            413 Total Infractions
+            {metrics.violationCount} Total Infractions
           </span>
         </div>
 
@@ -247,35 +315,43 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-150">
-              {MOCK_TOP_VIOLATIONS.map((viol, idx) => (
-                <tr key={idx} className="hover:bg-neutral-50/80 transition-colors">
-                  <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">
-                    {viol.ruleClause}
-                  </td>
-                  <td className="py-2.5 px-3 text-neutral-800 font-medium">
-                    {viol.categoryTitle}
-                  </td>
-                  <td className="py-2.5 px-3 text-neutral-500 font-mono">
-                    {viol.actSection}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-neutral-900">
-                    {viol.count}
-                  </td>
-                  <td className="py-2.5 px-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <div className="w-16 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                        <div
-                          style={{ width: `${viol.percentage}%` }}
-                          className="bg-violation h-full"
-                        />
+              {topViolations.length > 0 ? (
+                topViolations.map((viol, idx) => (
+                  <tr key={idx} className="hover:bg-neutral-50/80 transition-colors">
+                    <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">
+                      {viol.ruleClause}
+                    </td>
+                    <td className="py-2.5 px-3 text-neutral-800 font-medium">
+                      {viol.categoryTitle}
+                    </td>
+                    <td className="py-2.5 px-3 text-neutral-500 font-mono">
+                      {viol.actSection}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-neutral-900">
+                      {viol.count}
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="w-16 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                          <div
+                            style={{ width: `${viol.percentage}%` }}
+                            className="bg-violation h-full"
+                          />
+                        </div>
+                        <span className="font-mono text-neutral-700 w-10 text-right">
+                          {viol.percentage}%
+                        </span>
                       </div>
-                      <span className="font-mono text-neutral-700 w-10 text-right">
-                        {viol.percentage}%
-                      </span>
-                    </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="py-6 text-center text-neutral-500">
+                    No statutory violations recorded in current inspection ledger.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

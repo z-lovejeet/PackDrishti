@@ -1,6 +1,6 @@
 import React from "react";
 import { Warning, CheckCircle, Info } from "@phosphor-icons/react";
-import { HealthBadge } from "../../data/mockHealthData";
+import { HealthBadge } from "../../types";
 
 interface HealthBadgeGroupProps {
   badges: HealthBadge[];

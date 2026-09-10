@@ -4,22 +4,15 @@ import {
   MagnifyingGlass, 
   Funnel, 
   Calendar, 
-  Tag, 
-  ShieldCheck, 
-  Warning, 
-  Heartbeat, 
   Scan, 
   ArrowRight,
-  Sparkle,
   CheckCircle,
   XCircle,
-  CurrencyInr,
   ArrowClockwise,
   SpinnerGap
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { Badge } from "../../components/common/Badge";
-import { MOCK_SCAN_HISTORY } from "../../data/mockScanHistory";
 import { ScanHistoryItem } from "../../types";
 import { apiClient } from "../../utils/apiClient";
 
@@ -44,13 +37,12 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
   onNavigateToScanner,
   onNavigateToHealth,
 }) => {
-  const [historyItems, setHistoryItems] = useState<ScanHistoryItem[]>(MOCK_SCAN_HISTORY);
+  const [historyItems, setHistoryItems] = useState<ScanHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLiveSource, setIsLiveSource] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [scanTypeFilter, setScanTypeFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedItem, setSelectedItem] = useState<ScanHistoryItem | null>(null);
+  const [statusFilter] = useState<string>("all");
 
   const fetchLiveHistory = async () => {
     setIsLoading(true);
@@ -88,13 +80,11 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
         setHistoryItems(mappedItems);
         setIsLiveSource(true);
       } else {
-        // Retain mock records if database empty
-        setHistoryItems(MOCK_SCAN_HISTORY);
-        setIsLiveSource(false);
+        setHistoryItems([]);
+        setIsLiveSource(true);
       }
     } catch {
-      // Fallback cleanly on network or server issue
-      setHistoryItems(MOCK_SCAN_HISTORY);
+      setHistoryItems([]);
       setIsLiveSource(false);
     } finally {
       setIsLoading(false);

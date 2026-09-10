@@ -6,8 +6,6 @@ import {
   IdentificationCard,
   LockKey,
   EnvelopeSimple,
-  Buildings,
-  CheckCircle,
   WarningCircle,
   Sparkle,
 } from '@phosphor-icons/react';
@@ -136,7 +134,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     setIsLoading(true);
     setErrorMsg(null);
 
-    // Provide immediate mock token and verified session for hackathon evaluation
+    // Provide immediate demo session for local evaluation
     const demoUser = {
       id: role === 'officer' ? '11111111-1111-1111-1111-111111111111' : '22222222-2222-2222-2222-222222222222',
       email: role === 'officer' ? 'officer.verma@packdrashiti.gov.in' : 'citizen.sharma@example.com',

@@ -11,17 +11,70 @@ import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { CompoundingCalculator } from '../../components/officer/CompoundingCalculator';
 import { NoticePreviewModal } from '../../components/officer/NoticePreviewModal';
-import { MOCK_VIOLATIONS } from '../../data/mockViolations';
+import { useEffect } from 'react';
+import { ViolationRecord } from '../../types';
+import { api } from '../../utils/apiClient';
 
 export const InspectionsPage: React.FC = () => {
+  const [records, setRecords] = useState<ViolationRecord[]>([]);
+  const [loading, setLoading] = useState(false);
   const [activeStatus, setActiveStatus] = useState<string>('All');
-  const [expandedId, setExpandedId] = useState<string | null>('viol-rec-101');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCompoundingOpen, setIsCompoundingOpen] = useState(false);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const [activeViolationData, setActiveViolationData] = useState<any>(null);
 
-  const filteredRecords = MOCK_VIOLATIONS.filter((v) => {
+  useEffect(() => {
+    const fetchInspections = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get<{ history: any[] }>('/scan/history');
+        if (res && res.history) {
+          const mapped: ViolationRecord[] = [];
+          res.history.forEach((h: any) => {
+            if (h.violations && h.violations.length > 0) {
+              h.violations.forEach((v: any, idx: number) => {
+                mapped.push({
+                  id: v.violation_id || `viol-${h.scan_id}-${idx}`,
+                  violationCode: `VIO-${h.scan_id ? h.scan_id.substring(0, 8).toUpperCase() : 'REC'}-${idx + 1}`,
+                  productName: h.product_name || 'Audited Specimen',
+                  brand: h.brand || 'Inspected Brand',
+                  category: 'Packaged Commodity',
+                  ruleReference: v.rule_code || 'Legal Metrology Rules',
+                  violationType: v.rule_name || v.description || 'Statutory Non-Compliance',
+                  severity: v.severity || 'high',
+                  dateDetected: h.scanned_at ? new Date(h.scanned_at).toLocaleDateString('en-GB') : 'Recent',
+                  status: 'Notice Issued',
+                  assignedOfficer: 'Inspector of Legal Metrology',
+                  location: 'Field Inspection Station',
+                  timeline: [
+                    {
+                      date: h.scanned_at ? new Date(h.scanned_at).toLocaleString() : 'Recent',
+                      action: 'Statutory Non-Compliance Detected via Field Scan',
+                      by: 'Inspector of Legal Metrology',
+                      note: v.description
+                    }
+                  ]
+                });
+              });
+            }
+          });
+          setRecords(mapped);
+          if (mapped.length > 0) {
+            setExpandedId(mapped[0].id);
+          }
+        }
+      } catch {
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInspections();
+  }, []);
+
+  const filteredRecords = records.filter((v) => {
     const matchesStatus = activeStatus === 'All' || v.status === activeStatus;
     const matchesSearch = 
       v.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -238,6 +291,13 @@ export const InspectionsPage: React.FC = () => {
             </div>
           );
         })}
+
+        {filteredRecords.length === 0 && !loading && (
+          <div className="bg-white border border-neutral-200 rounded-[8px] p-8 text-center space-y-2">
+            <p className="text-sm font-semibold text-neutral-800">No Inspection Records Found</p>
+            <p className="text-xs text-neutral-500">No statutory violations have been recorded or matching the selected filter criteria.</p>
+          </div>
+        )}
       </div>
 
       {/* Compounding Fee Calculator Modal */}

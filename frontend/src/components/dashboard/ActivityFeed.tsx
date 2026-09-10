@@ -1,6 +1,6 @@
 import React from "react";
 import { FileText, Warning, ShieldWarning, CheckCircle, ArrowRight } from "@phosphor-icons/react";
-import { EnforcementActionItem } from "../../data/mockDashboard";
+import { EnforcementActionItem } from "../../types";
 import { Badge } from "../common/Badge";
 
 interface ActivityFeedProps {

@@ -223,21 +223,21 @@ async def analyze_packaging_compliance(
         uuid.UUID(current_user.id) if current_user and current_user.id else None
     )
 
-    brand_val = extraction.brand_name if (extraction and extraction.brand_name) else "Generic Brand"
-    prod_val = extraction.product_name if (extraction and extraction.product_name) else "Packaged Commodity"
-    cat_val = extraction.category if (extraction and extraction.category) else "Packaged Food"
+    brand_val = extraction.brand_name if (extraction and extraction.brand_name) else "Unspecified Brand"
+    prod_val = extraction.product_name if (extraction and extraction.product_name) else "Unidentified Product"
+    cat_val = extraction.category if (extraction and extraction.category) else "Packaged Goods"
     pdp_area_dec = Decimal(f"{(evaluation.pdp_area_cm2 if evaluation else 150.0):.2f}")
     score_dec = Decimal(f"{(evaluation.compliance_score if evaluation else 0.0):.2f}")
     net_qty_str = (
         f"{extraction.net_quantity_value} {extraction.net_quantity_unit}"
-        if (extraction and extraction.net_quantity_value and extraction.net_quantity_unit)
-        else "500 g"
+        if (extraction and extraction.net_quantity_value is not None and extraction.net_quantity_unit)
+        else "Not Declared"
     )
-    mrp_str = f"Rs. {extraction.mrp:.2f}" if (extraction and extraction.mrp) else "Rs. 100.00"
+    mrp_str = f"Rs. {extraction.mrp:.2f}" if (extraction and extraction.mrp is not None) else "Not Declared"
     mfg_str = (
         f"{extraction.mfg_month:02d}/{extraction.mfg_year}"
         if (extraction and extraction.mfg_month and extraction.mfg_year)
-        else "01/2025"
+        else "Not Declared"
     )
     status_enum = ComplianceStatus.COMPLIANT if (evaluation and evaluation.is_compliant) else ComplianceStatus.VIOLATION
 

@@ -101,7 +101,7 @@ async def generate_statutory_show_cause_notice(
         compounding_amount = 5000.0
 
     # Synthesize formal notice using Dual-LLM engine
-    mock_eval = RuleEngineEvaluationResult(
+    rule_eval = RuleEngineEvaluationResult(
         is_compliant=False,
         compliance_score=60.0,
         total_checks_performed=1,
@@ -123,7 +123,7 @@ async def generate_statutory_show_cause_notice(
         min_font_height_required_mm=2.0,
     )
 
-    consensus = await dual_llm_service.generate_consensus(mock_eval, citations)
+    consensus = await dual_llm_service.generate_consensus(rule_eval, citations)
 
     return NoticeGenerationResponse(
         violation_id=str(violation.id),

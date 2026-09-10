@@ -116,3 +116,82 @@ export interface EcommerceAuditItem {
     details: string;
   }[];
 }
+
+export interface NutrientAudit {
+  name: string;
+  valuePer100g: number;
+  valuePerServe: number;
+  unit: string;
+  icmrDailyLimit: string;
+  level: 'Low' | 'Moderate' | 'High' | 'Excessive';
+  assessment: string;
+}
+
+export interface HealthBadge {
+  label: string;
+  type: 'danger' | 'warning' | 'good' | 'neutral';
+}
+
+export interface ProductHealthAudit {
+  id: string;
+  commodityName: string;
+  brandName: string;
+  category: string;
+  servingSize: string;
+  netQuantity: string;
+  mrp: string;
+  pricePer100g: string;
+  priceRating: 'Budget' | 'Fair Market Rate' | 'Premium';
+  priceAnalysis: string;
+  overallRating: 'Nutritious Choice' | 'Consume in Moderation' | 'High Health Concern';
+  ratingScore: number;
+  frontImageUrl: string;
+  backImageUrl: string;
+  badges: HealthBadge[];
+  nutrients: NutrientAudit[];
+  whoCanConsume: string[];
+  whoShouldAvoid: string[];
+  healthierAlternatives: string[];
+  dietarySummary: string;
+}
+
+export interface EnforcementActionItem {
+  id: string;
+  caseRef: string;
+  productName: string;
+  actionType: "Show Cause Notice" | "Compounding Order" | "Seizure Memo" | "Cured & Dismissed";
+  statutoryClause: string;
+  timestamp: string;
+  targetEstablishment: string;
+  fineAmountInr?: number;
+  status: "Pending Hearing" | "Issued" | "Settled" | "Closed";
+}
+
+export interface OfficerProfile {
+  name: string;
+  badgeNumber: string;
+  designation: string;
+  division: string;
+  zone: string;
+  jurisdiction: string;
+}
+
+export interface DashboardMetrics {
+  totalInspections: number;
+  compliantCount: number;
+  violationCount: number;
+  compoundedCount: number;
+  pendingNoticesCount?: number;
+  complianceRate?: number;
+  totalFinesLeviedInr: number;
+  monthlyScansDelta: number | string;
+}
+
+export interface ViolationCategoryBreakdown {
+  ruleClause: string;
+  categoryTitle: string;
+  count: number;
+  percentage: number;
+  actSection: string;
+}
+

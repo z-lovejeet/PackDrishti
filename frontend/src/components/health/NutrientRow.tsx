@@ -1,5 +1,5 @@
 import React from "react";
-import { NutrientAudit } from "../../data/mockHealthData";
+import { NutrientAudit } from "../../types";
 import { Badge } from "../common/Badge";
 
 interface NutrientRowProps {

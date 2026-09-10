@@ -3,15 +3,10 @@ import {
   ShieldCheck, 
   Scan, 
   Heartbeat, 
-  FileText, 
   ArrowRight,
   User,
   IdentificationCard,
-  Archive,
-  Scales,
-  Gavel,
-  CheckCircle,
-  Building
+  Archive
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { UserRole } from "../../types";

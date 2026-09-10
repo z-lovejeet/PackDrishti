@@ -3,27 +3,19 @@ import {
   Heartbeat, 
   Warning, 
   CheckCircle, 
-  XCircle, 
   CloudArrowUp, 
   Camera, 
   Image as ImageIcon, 
   CurrencyInr, 
   ArrowRight, 
-  ShieldCheck, 
-  Sparkle,
-  ArrowClockwise,
-  Info,
-  Scales,
-  SpinnerGap
+  ArrowClockwise
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
-import { BENCHMARK_HEALTH_PRODUCTS, ProductHealthAudit } from '../../data/mockHealthData';
+import { ProductHealthAudit } from '../../types';
 import { apiClient } from '../../utils/apiClient';
 
 export const HealthCheckPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'upload' | 'benchmarks'>('upload');
-
   // Dual Image Upload States
   const [frontImageSrc, setFrontImageSrc] = useState<string | null>(null);
   const [frontFileName, setFrontFileName] = useState<string>('');
@@ -40,33 +32,14 @@ export const HealthCheckPage: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisStep, setAnalysisStep] = useState<number>(0);
   const [liveAuditResult, setLiveAuditResult] = useState<ProductHealthAudit | null>(null);
-  const [isLiveSource, setIsLiveSource] = useState<boolean>(false);
-
-  // Active Audit Selection
-  const [selectedBenchmarkId, setSelectedBenchmarkId] = useState<string | null>(null);
 
   const frontFileRef = useRef<HTMLInputElement>(null);
   const frontCamRef = useRef<HTMLInputElement>(null);
   const backFileRef = useRef<HTMLInputElement>(null);
   const backCamRef = useRef<HTMLInputElement>(null);
 
-  // Active Audit Data Resolution
-  let currentAudit: ProductHealthAudit | null = null;
-
-  if (activeTab === 'upload' && liveAuditResult) {
-    currentAudit = liveAuditResult;
-  } else if (activeTab === 'upload' && frontImageSrc && backImageSrc) {
-    const base = BENCHMARK_HEALTH_PRODUCTS[0];
-    currentAudit = {
-      ...base,
-      commodityName: frontFileName ? `Uploaded Specimen (${frontFileName.replace(/\.[^/.]+$/, '')})` : 'User Uploaded Commodity',
-      frontImageUrl: frontImageSrc,
-      backImageUrl: backImageSrc,
-      priceAnalysis: 'Calculated Unit Sale Price based on back-panel declared MRP and net contents.',
-    };
-  } else if (activeTab === 'benchmarks' && selectedBenchmarkId) {
-    currentAudit = BENCHMARK_HEALTH_PRODUCTS.find((p) => p.id === selectedBenchmarkId) || null;
-  }
+  // Active Audit Data Resolution: strictly live audit result
+  const currentAudit: ProductHealthAudit | null = liveAuditResult;
 
   const handleFrontFile = (file: File) => {
     if (!file) return;
@@ -182,22 +155,10 @@ export const HealthCheckPage: React.FC = () => {
           dietarySummary: apiData.dietary_summary || '',
         };
         setLiveAuditResult(mappedAudit);
-        setIsLiveSource(true);
       }
-    } catch {
-      // Graceful fallback to benchmark record on offline/demo
-      const base = BENCHMARK_HEALTH_PRODUCTS[0];
-      setLiveAuditResult({
-        ...base,
-        commodityName: frontFileName
-          ? `Uploaded Specimen (${frontFileName.replace(/\.[^/.]+$/, '')})`
-          : 'User Uploaded Commodity',
-        frontImageUrl: frontImageSrc || base.frontImageUrl,
-        backImageUrl: backImageSrc || base.backImageUrl,
-        priceAnalysis:
-          'Calculated Unit Sale Price based on back-panel declared MRP and net contents.',
-      });
-      setIsLiveSource(false);
+    } catch (err: any) {
+      alert("Failed to analyze packaging: " + (err?.response?.data?.detail || err?.message || "Verification request failed"));
+      setLiveAuditResult(null);
     } finally {
       clearTimeout(timer1);
       clearTimeout(timer2);
@@ -213,8 +174,6 @@ export const HealthCheckPage: React.FC = () => {
     setBackFileName('');
     setBackRawFile(null);
     setLiveAuditResult(null);
-    setIsLiveSource(false);
-    setSelectedBenchmarkId(null);
   };
 
   const isUploadComplete = frontImageSrc && backImageSrc;
@@ -242,12 +201,8 @@ export const HealthCheckPage: React.FC = () => {
           <div className="flex items-center gap-2">
             {currentAudit && (
               <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] text-[11px] font-mono border border-neutral-200 bg-neutral-50 text-neutral-600">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    isLiveSource ? "bg-success animate-pulse" : "bg-primary"
-                  }`}
-                />
-                <span>{isLiveSource ? "Live ICMR-NIN Analysis" : "Benchmark Evaluation Mode"}</span>
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                <span>Live ICMR-NIN Analysis</span>
               </span>
             )}
             <Button
@@ -262,36 +217,8 @@ export const HealthCheckPage: React.FC = () => {
         )}
       </div>
 
-      {/* Mode Switcher */}
-      <div className="flex border-b border-neutral-200 text-xs font-medium">
-        <button
-          onClick={() => setActiveTab('upload')}
-          className={`pb-3 px-4 transition-all relative font-heading ${
-            activeTab === 'upload'
-              ? 'text-primary font-bold border-b-2 border-primary'
-              : 'text-neutral-500 hover:text-neutral-800'
-          }`}
-        >
-          Scan Front & Back Packaging
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('benchmarks');
-            if (!selectedBenchmarkId) setSelectedBenchmarkId('health-001');
-          }}
-          className={`pb-3 px-4 transition-all relative font-heading ${
-            activeTab === 'benchmarks'
-              ? 'text-primary font-bold border-b-2 border-primary'
-              : 'text-neutral-500 hover:text-neutral-800'
-          }`}
-        >
-          Benchmark Test Foods
-        </button>
-      </div>
-
-      {/* TAB 1: DUAL PHOTO UPLOAD SECTION (Mandatory Front + Back) */}
-      {activeTab === 'upload' && (
-        <div className="bg-white border border-neutral-200 rounded-[8px] p-5 space-y-4">
+      {/* Dual Photo Upload Section (Mandatory Front + Back) */}
+      <div className="bg-white border border-neutral-200 rounded-[8px] p-5 space-y-4">
           <div>
             <h2 className="text-sm font-bold text-neutral-900 font-heading">
               Dual Packaging Photo Upload Required
@@ -453,57 +380,10 @@ export const HealthCheckPage: React.FC = () => {
             )}
           </div>
         </div>
-      )}
 
-      {/* TAB 2: BENCHMARK TEST FOODS */}
-      {activeTab === 'benchmarks' && (
-        <div className="bg-white border border-neutral-200 rounded-[8px] p-4 space-y-3">
-          <div>
-            <h2 className="text-sm font-bold text-neutral-900 font-heading">
-              Benchmark Consumer Packaged Commodities
-            </h2>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Select an official reference packaged food to examine nutrient thresholds, dietary warnings, and price fairness.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {BENCHMARK_HEALTH_PRODUCTS.map((prod) => {
-              const isSelected = selectedBenchmarkId === prod.id;
-              return (
-                <button
-                  key={prod.id}
-                  onClick={() => setSelectedBenchmarkId(prod.id)}
-                  className={`p-3 rounded-[6px] text-left border transition-all ${
-                    isSelected
-                      ? 'bg-primary-light/60 border-primary shadow-xs ring-1 ring-primary'
-                      : 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-neutral-900 font-heading truncate">
-                      {prod.commodityName}
-                    </span>
-                    <Badge variant={prod.overallRating === 'Nutritious Choice' ? 'compliant' : 'violation'} size="sm">
-                      {prod.ratingScore}/100
-                    </Badge>
-                  </div>
-                  <div className="text-[11px] text-neutral-500 font-medium mb-1">
-                    {prod.brandName} • {prod.mrp}
-                  </div>
-                  <p className="text-[11px] text-neutral-600 leading-tight line-clamp-2">
-                    {prod.dietarySummary}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* AUDIT RESULTS DISPLAY */}
-      {currentAudit && (
-        <div className="space-y-6">
+        {/* AUDIT RESULTS DISPLAY */}
+        {currentAudit ? (
+          <div className="space-y-6">
           
           {/* Header Summary Banner */}
           <div className="bg-white border border-neutral-200 rounded-[8px] p-5 space-y-3">
@@ -709,6 +589,18 @@ export const HealthCheckPage: React.FC = () => {
             </div>
           </div>
 
+        </div>
+      ) : !isAnalyzing && (
+        <div className="bg-white border border-neutral-200 rounded-[8px] p-8 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-neutral-400">
+            <Heartbeat size={24} />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-neutral-800 font-heading">No Food Product Analyzed Yet</h3>
+            <p className="text-xs text-neutral-500 max-w-md mx-auto">
+              Upload photographs of both the front packaging and the rear nutritional facts table above, then click Run Health &amp; Nutrition Check to view an ICMR-NIN compliant health audit.
+            </p>
+          </div>
         </div>
       )}
 

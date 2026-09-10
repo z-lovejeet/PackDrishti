@@ -15,15 +15,14 @@ import {
   Heartbeat,
   TextT,
   HourglassHigh,
+  XCircle,
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
-import { Badge } from "../../components/common/Badge";
 import { AnnotatedImage } from "../../components/scanner/AnnotatedImage";
 import { Camera } from "../../components/scanner/Camera";
 import { ReportHeader } from "../../components/reports/ReportHeader";
 import { ComplianceCard } from "../../components/reports/ComplianceCard";
 import { ViolationCard } from "../../components/reports/ViolationCard";
-import { MOCK_SCANS } from "../../data/mockProducts";
 import { ProductScan, UserRole, BoundingBox, ExtractedDeclaration, StatutoryViolation } from "../../types";
 import { calculateComplianceScore } from "../../utils/complianceEngine";
 import { useScanMachine } from "../../store/scanMachine";
@@ -41,7 +40,6 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   onNavigateToHealth,
   onSaveToast,
 }) => {
-  const [activeTab, setActiveTab] = useState<"upload" | "samples">("upload");
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const [cameraTarget, setCameraTarget] = useState<"front" | "back">("front");
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
@@ -55,8 +53,6 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Selected sample tab state
-  const [selectedSampleId, setSelectedSampleId] = useState<string | null>(null);
   const [activeBoxId, setActiveBoxId] = useState<string | undefined>(undefined);
   const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
   const [subView, setSubView] = useState<"declarations" | "font_table">("declarations");
@@ -198,15 +194,15 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
     liveScan = {
       id: liveResult.scan_id,
       scanCode: `LMPC-${liveResult.scan_id.substring(0, 8).toUpperCase()}`,
-      productName: liveResult.product_name || "Audited Packaging Specimen",
-      brand: liveResult.brand_name || "Inspected Brand",
+      productName: liveResult.product_name || "Unidentified Packaged Specimen",
+      brand: liveResult.brand_name || "Unspecified Brand",
       category: "Food & Beverage",
-      barcode: "8901234567890",
+      barcode: "Not Detected",
 
       pdpAreaCm2: liveResult.pdp_area_cm2 || 150.0,
-      netQuantity: liveResult.net_quantity_value ? `${liveResult.net_quantity_value} ${liveResult.net_quantity_unit}` : "500 g",
-      mrp: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Declared on Package",
-      mfgDate: "01/2025",
+      netQuantity: liveResult.net_quantity_value ? `${liveResult.net_quantity_value} ${liveResult.net_quantity_unit}` : "Not Declared",
+      mrp: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Not Declared",
+      mfgDate: "Not Declared",
       scannedAt: "Live Field Inspection",
       scannedBy: userRole === "officer" ? "Inspector of Legal Metrology" : "Consumer Verification",
       inspectorDesignation: "Inspector of Legal Metrology",
@@ -222,13 +218,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   }
 
   // Active scan resolution
-  let currentScan: ProductScan | null = null;
-
-  if (activeTab === "upload" && liveScan) {
-    currentScan = liveScan;
-  } else if (activeTab === "samples" && selectedSampleId) {
-    currentScan = MOCK_SCANS.find((s) => s.id === selectedSampleId) || null;
-  }
+  const currentScan: ProductScan | null = liveScan;
 
   const complianceResult = currentScan 
     ? calculateComplianceScore(currentScan.declarations, currentScan.violations)
@@ -298,21 +288,6 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       } else {
         processFiles(captured, null, captured.name);
       }
-    }
-  };
-
-
-  const handleSelectPreloadedSample = (scanId: string) => {
-    setSelectedSampleId(scanId);
-    if (scanId === "scan-001") {
-      setActiveBoxId("box-5");
-      setActiveFieldId("dec-5");
-    } else if (scanId === "scan-002") {
-      setActiveBoxId("tb-3");
-      setActiveFieldId("t-4");
-    } else {
-      setActiveBoxId("cb-1");
-      setActiveFieldId("c-1");
     }
   };
 
@@ -386,36 +361,8 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         </div>
       )}
 
-      {/* Mode Switcher: Upload Image vs Benchmark Samples */}
-      <div className="flex border-b border-neutral-200 text-xs font-medium">
-        <button
-          onClick={() => setActiveTab("upload")}
-          className={`pb-3 px-4 transition-all relative font-heading ${
-            activeTab === "upload"
-              ? "text-primary font-bold border-b-2 border-primary"
-              : "text-neutral-500 hover:text-neutral-800"
-          }`}
-        >
-          Live Packaging Scanner
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("samples");
-            if (!selectedSampleId) setSelectedSampleId("scan-001");
-          }}
-          className={`pb-3 px-4 transition-all relative font-heading ${
-            activeTab === "samples"
-              ? "text-primary font-bold border-b-2 border-primary"
-              : "text-neutral-500 hover:text-neutral-800"
-          }`}
-        >
-          Benchmark Test Samples
-        </button>
-      </div>
-
-      {/* TAB 1: UPLOAD AREA */}
-      {activeTab === "upload" && (
-        <div className="bg-white border border-neutral-200 rounded-[8px] p-5 space-y-4">
+      {/* Packaging Upload Area */}
+      <div className="bg-white border border-neutral-200 rounded-[8px] p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-neutral-900 font-heading">
@@ -665,55 +612,9 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
             </div>
           )}
         </div>
-      )}
-
-      {/* TAB 2: BENCHMARK TEST SAMPLES */}
-      {activeTab === "samples" && (
-        <div className="bg-white border border-neutral-200 rounded-[8px] p-5 space-y-3">
-          <div>
-            <h2 className="text-sm font-bold text-neutral-900 font-heading">
-              Select Pre-Configured Government Benchmark Test Specimen
-            </h2>
-            <p className="text-xs text-neutral-500">
-              Test the compliance engine using verified commodity specimens with ground-truth statutory annotations.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {MOCK_SCANS.map((sample) => (
-              <button
-                key={sample.id}
-                onClick={() => handleSelectPreloadedSample(sample.id)}
-                className={`p-3.5 rounded-[6px] border text-left transition-all space-y-2 ${
-                  selectedSampleId === sample.id
-                    ? "border-primary bg-primary-light/30 ring-2 ring-primary/20"
-                    : "border-neutral-200 hover:border-neutral-300 bg-white"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 font-mono">
-                    {sample.category}
-                  </span>
-                  {sample.overallStatus === "compliant" ? (
-                    <Badge variant="compliant" size="sm">Compliant</Badge>
-                  ) : (
-                    <Badge variant="violation" size="sm">{sample.violationCount} Violations</Badge>
-                  )}
-                </div>
-                <div className="font-bold text-xs text-neutral-900 font-heading line-clamp-1">
-                  {sample.productName}
-                </div>
-                <div className="text-[11px] text-neutral-500">
-                  {sample.brand} • {sample.netQuantity}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* STRUCTURED COMPLIANCE RESULTS */}
-      {currentScan && (scanStatus === "complete" || activeTab === "samples") && (
+      {currentScan && scanStatus === "complete" && (
         <div className="space-y-6 animate-fadeIn">
           
           {/* Executive Summary Header */}
@@ -960,17 +861,12 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         </div>
       )}
 
-      {/* Clean initial empty state when on upload tab with no image */}
-      {activeTab === "upload" && !imageSrc && scanStatus === "idle" && (
+      {/* Clean initial empty state when no image is loaded */}
+      {!imageSrc && scanStatus === "idle" && (
         <div className="bg-white p-8 rounded-[8px] border border-neutral-200 text-center space-y-3 text-neutral-600">
           <p className="text-xs text-neutral-500 max-w-md mx-auto">
-            No packaging label uploaded yet. Drag and drop a product label image into the box above, click Browse Image File, or open the camera to verify declarations against Legal Metrology Rules, 2011.
+            No packaging label uploaded yet. Drag and drop product label images into the boxes above, or click Browse to upload Front and Back panels to verify declarations against Legal Metrology Rules, 2011.
           </p>
-          <div className="pt-2">
-            <span className="text-[11px] text-neutral-400">
-              Or switch to <strong className="text-primary cursor-pointer" onClick={() => { setActiveTab("samples"); setSelectedSampleId("scan-001"); }}>Benchmark Test Samples</strong> to see how compliance auditing works.
-            </span>
-          </div>
         </div>
       )}
 

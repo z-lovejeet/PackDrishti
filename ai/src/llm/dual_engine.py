@@ -87,6 +87,10 @@ class ParallelDualLLMEngine:
                     }
             except Exception as e:
                 logger.warning(f"Gemini model {model_name} failed: {e}. Falling back to next in chain.")
+                err_str = str(e).lower()
+                if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str:
+                    logger.warning("Gemini API quota exhausted. Bypassing remaining models in chain.")
+                    break
                 continue
 
         return {

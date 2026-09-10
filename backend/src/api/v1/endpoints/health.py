@@ -1,9 +1,14 @@
+import io
+import json
+import logging
 import uuid
 from decimal import Decimal
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from PIL import Image
+import pytesseract
 
 from backend.src.core.config import settings
 from backend.src.core.database import get_db_session
@@ -12,6 +17,8 @@ from backend.src.models.health import HealthAudit, ScanHistory
 from backend.src.models.scan import ProductScan
 from backend.src.services.health_engine import ICMRNutritionProfilingEngine, HealthAuditPayload
 from ai.src.rules.nutrition_parser import NutritionFactsParser, NutrientValues
+
+logger = logging.getLogger("packdrashiti.health")
 
 router = APIRouter()
 
@@ -76,31 +83,106 @@ async def analyze_health_packaging(
             detail="Uploaded image payload is empty."
         )
 
-    # 2. Derive or extract product details
-    resolved_product = product_name or front_image.filename or "Packaged Food Specimen"
-    resolved_product = resolved_product.replace(".jpg", "").replace(".jpeg", "").replace(".png", "").replace("_", " ")
-    resolved_brand = brand or "Packaged Foods Ltd."
+    # 2. Real OCR extraction from Front and Back image bytes
+    front_text = ""
+    back_text = ""
+    try:
+        if front_bytes:
+            front_img = Image.open(io.BytesIO(front_bytes))
+            front_text = pytesseract.image_to_string(front_img).strip()
+    except Exception as err:
+        logger.warning("Front image OCR extraction failed: %s", err)
+
+    try:
+        if back_bytes:
+            back_img = Image.open(io.BytesIO(back_bytes))
+            back_text = pytesseract.image_to_string(back_img).strip()
+    except Exception as err:
+        logger.warning("Back image OCR extraction failed: %s", err)
+
+    combined_text = f"FRONT PANEL:\n{front_text}\n\nBACK NUTRITIONAL PANEL:\n{back_text}".strip()
+
+    # 3. Structured parsing via Groq LLM
+    resolved_product = product_name or "Packaged Commodity"
+    resolved_brand = brand or "Unspecified Brand"
     resolved_serving = serving_size_g if serving_size_g and serving_size_g > 0 else 100.0
 
-    # 3. Simulate OCR text extraction or parse panel hints
-    # Detect known sample indicators from filename or inputs
-    name_lower = f"{resolved_product} {front_image.filename} {back_image.filename}".lower()
+    parsed_nutrients = None
+    if combined_text and settings.GROQ_API_KEY and not settings.GROQ_API_KEY.startswith("placeholder"):
+        try:
+            from groq import Groq
+            groq_client = Groq(api_key=settings.GROQ_API_KEY)
+            prompt = (
+                "You are an expert food nutritionist. Extract nutrition facts per 100g from the provided packaging OCR text.\n"
+                "Return a JSON object with EXACTLY these fields:\n"
+                "product_name (str, variant name),\n"
+                "brand (str),\n"
+                "serving_size_g (float, default 30.0),\n"
+                "energy_kcal (float),\n"
+                "total_fat_g (float),\n"
+                "saturated_fat_g (float),\n"
+                "trans_fat_g (float),\n"
+                "sodium_mg (float),\n"
+                "total_carbohydrate_g (float),\n"
+                "total_sugars_g (float),\n"
+                "added_sugars_g (float),\n"
+                "dietary_fiber_g (float, default 0.0),\n"
+                "protein_g (float),\n"
+                "ingredients_text (str)\n\n"
+                f"Packaging OCR Text:\n{combined_text}\n\n"
+                "Return ONLY valid JSON."
+            )
+            groq_resp = groq_client.chat.completions.create(
+                model="qwen/qwen3.8-27b",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                max_tokens=600,
+                temperature=0.1
+            )
+            parsed_nutrients = json.loads(groq_resp.choices[0].message.content)
+        except Exception as groq_err:
+            logger.warning("Groq nutrition parsing failed: %s", groq_err)
 
-    if "malt" in name_lower or "bournvita" in name_lower or "chocolate" in name_lower or "drink" in name_lower:
-        sample_text = "Energy 390 kcal\nTotal Fat 1.8g\nSaturated Fat 1.8g\nTrans Fat 0.0g\nSodium 155mg\nTotal Carbohydrate 85.2g\nTotal Sugars 37.0g\nAdded Sugars 32.2g\nDietary Fiber 2.5g\nProtein 7.0g"
-        ingredients_text = "Malt extract, sugar, cocoa solids, milk solids, liquid glucose, emulsifiers (INS 471, INS 322), vitamins, minerals."
-    elif "noodle" in name_lower or "maggi" in name_lower or "masala" in name_lower:
-        sample_text = "Energy 427 kcal\nTotal Fat 15.7g\nSaturated Fat 9.8g\nTrans Fat 0.1g\nSodium 1220mg\nTotal Carbohydrate 63.5g\nTotal Sugars 2.2g\nAdded Sugars 0.0g\nDietary Fiber 3.5g\nProtein 8.0g"
-        ingredients_text = "Refined wheat flour (maida), palm oil, iodized salt, wheat gluten, thickeners (INS 508, INS 412), flavor enhancer (INS 635)."
-    elif "almond" in name_lower or "nut" in name_lower or "oats" in name_lower:
-        sample_text = "Energy 579 kcal\nTotal Fat 49.9g\nSaturated Fat 3.8g\nTrans Fat 0.0g\nSodium 1.0mg\nTotal Carbohydrate 21.6g\nTotal Sugars 4.4g\nAdded Sugars 0.0g\nDietary Fiber 12.2g\nProtein 21.2g"
-        ingredients_text = "100% California whole raw almonds."
+    if product_name:
+        resolved_product = product_name
+    elif parsed_nutrients and parsed_nutrients.get("product_name") and parsed_nutrients.get("product_name").lower() not in ["unknown", "none", "null"]:
+        resolved_product = parsed_nutrients["product_name"]
     else:
-        sample_text = "Energy 350 kcal\nTotal Fat 6.0g\nSaturated Fat 2.5g\nTrans Fat 0.0g\nSodium 380mg\nTotal Carbohydrate 68.0g\nTotal Sugars 12.0g\nAdded Sugars 8.0g\nDietary Fiber 4.0g\nProtein 6.5g"
-        ingredients_text = "Wheat flour, sugar, edible vegetable oil, salt, leavening agents, permitted emulsifier."
+        resolved_product = "Packaged Commodity"
+
+    if brand:
+        resolved_brand = brand
+    elif parsed_nutrients and parsed_nutrients.get("brand") and parsed_nutrients.get("brand").lower() not in ["unknown", "none", "null"]:
+        resolved_brand = parsed_nutrients["brand"]
+    else:
+        resolved_brand = "Unspecified Brand"
+
+    if parsed_nutrients and parsed_nutrients.get("serving_size_g"):
+        try:
+            resolved_serving = float(parsed_nutrients["serving_size_g"])
+        except (ValueError, TypeError):
+            pass
+
+    if parsed_nutrients and any(k in parsed_nutrients for k in ["energy_kcal", "total_fat_g", "sodium_mg"]):
+        nutrition_table_text = (
+            f"Energy {parsed_nutrients.get('energy_kcal', 0)} kcal\n"
+            f"Total Fat {parsed_nutrients.get('total_fat_g', 0)}g\n"
+            f"Saturated Fat {parsed_nutrients.get('saturated_fat_g', 0)}g\n"
+            f"Trans Fat {parsed_nutrients.get('trans_fat_g', 0)}g\n"
+            f"Sodium {parsed_nutrients.get('sodium_mg', 0)}mg\n"
+            f"Total Carbohydrate {parsed_nutrients.get('total_carbohydrate_g', 0)}g\n"
+            f"Total Sugars {parsed_nutrients.get('total_sugars_g', 0)}g\n"
+            f"Added Sugars {parsed_nutrients.get('added_sugars_g', 0)}g\n"
+            f"Dietary Fiber {parsed_nutrients.get('dietary_fiber_g', 0)}g\n"
+            f"Protein {parsed_nutrients.get('protein_g', 0)}g"
+        )
+        ingredients_text = parsed_nutrients.get("ingredients_text") or ""
+    else:
+        nutrition_table_text = combined_text
+        ingredients_text = ""
 
     panel = NutritionFactsParser.parse_nutrition_text(
-        text=sample_text,
+        text=nutrition_table_text,
         ingredients_text=ingredients_text,
         product_name=resolved_product,
         brand=resolved_brand,
