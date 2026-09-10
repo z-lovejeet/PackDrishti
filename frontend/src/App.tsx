@@ -5,6 +5,7 @@ import { ToastContainer, ToastMessage } from "./components/common/Toast";
 import { GenerateReportModal } from "./components/reports/GenerateReportModal";
 import { AuthModal } from "./components/common/AuthModal";
 import { useAuthStore } from "./store/authStore";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
 
 // Consumer Pages
 import { LandingPage } from "./pages/consumer/LandingPage";
@@ -130,57 +131,59 @@ export function App() {
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {activePage === "landing" && (
-          <LandingPage
-            onNavigate={navigateTo}
-            userRole={userRole}
-            onSetUserRole={(role) => {
-              setUserRole(role);
-              addToast(
-                "info", 
-                role === "officer" ? "Officer Mode Active" : "Consumer Mode Active", 
-                "Interface adjusted for selected audience."
-              );
-            }}
-          />
-        )}
+        <ErrorBoundary>
+          {activePage === "landing" && (
+            <LandingPage
+              onNavigate={navigateTo}
+              userRole={userRole}
+              onSetUserRole={(role) => {
+                setUserRole(role);
+                addToast(
+                  "info", 
+                  role === "officer" ? "Officer Mode Active" : "Consumer Mode Active", 
+                  "Interface adjusted for selected audience."
+                );
+              }}
+            />
+          )}
 
-        {activePage === "scanner" && (
-          <ScannerPage 
-            userRole={userRole}
-            onOpenReportModal={() => setIsReportModalOpen(true)}
-            onNavigateToHealth={() => navigateTo("health")}
-            onSaveToast={() => addToast("success", "Saved to Repository", "Product scan record archived in compliance history.")}
-          />
-        )}
+          {activePage === "scanner" && (
+            <ScannerPage 
+              userRole={userRole}
+              onOpenReportModal={() => setIsReportModalOpen(true)}
+              onNavigateToHealth={() => navigateTo("health")}
+              onSaveToast={() => addToast("success", "Saved to Repository", "Product scan record archived in compliance history.")}
+            />
+          )}
 
-        {activePage === "health" && (
-          <HealthCheckPage />
-        )}
+          {activePage === "health" && (
+            <HealthCheckPage />
+          )}
 
-        {activePage === "history" && (
-          <ProductHistoryPage
-            onNavigateToScanner={() => navigateTo("scanner")}
-            onNavigateToHealth={() => navigateTo("health")}
-          />
-        )}
+          {activePage === "history" && (
+            <ProductHistoryPage
+              onNavigateToScanner={() => navigateTo("scanner")}
+              onNavigateToHealth={() => navigateTo("health")}
+            />
+          )}
 
-        {activePage === "dashboard" && (
-          <OfficerDashboardPage
-            onNavigate={navigateTo}
-            onOpenReportModal={() => setIsReportModalOpen(true)}
-          />
-        )}
+          {activePage === "dashboard" && (
+            <OfficerDashboardPage
+              onNavigate={navigateTo}
+              onOpenReportModal={() => setIsReportModalOpen(true)}
+            />
+          )}
 
-        {activePage === "inspections" && (
-          <InspectionsPage />
-        )}
+          {activePage === "inspections" && (
+            <InspectionsPage />
+          )}
 
-        {activePage === "reports" && (
-          <ReportViewerPage
-            onOpenNewReportModal={() => setIsReportModalOpen(true)}
-          />
-        )}
+          {activePage === "reports" && (
+            <ReportViewerPage
+              onOpenNewReportModal={() => setIsReportModalOpen(true)}
+            />
+          )}
+        </ErrorBoundary>
       </main>
 
       {/* Statutory Government Footer */}

@@ -104,26 +104,31 @@ BENCHMARK_STATUTORY_KNOWLEDGE = [
     },
 ]
 
-# Dynamically augment with the 2026 statutory dataset from dataset/cleaned_rules_2026.json
+# Dynamically augment with priority statutory dataset from dataset/cleaned_rules_2011_2026.json
 try:
     import os, json
-    _dataset_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "dataset", "cleaned_rules_2026.json")
-    if os.path.exists(_dataset_path):
-        with open(_dataset_path, "r", encoding="utf-8") as _fp:
+    _dataset_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "dataset")
+    _priority_path = os.path.join(_dataset_dir, "cleaned_rules_2011_2026.json")
+    _fallback_path = os.path.join(_dataset_dir, "cleaned_rules_2026.json")
+    _target_path = _priority_path if os.path.exists(_priority_path) else _fallback_path
+
+    if os.path.exists(_target_path):
+        with open(_target_path, "r", encoding="utf-8") as _fp:
             _rules_data = json.load(_fp)
         for _r in _rules_data:
-            _ident = _r["rule_number"].replace(" ", "_").upper()
+            _ident = _r.get("rule_id") or _r["rule_number"].replace(" ", "_").upper()
             BENCHMARK_STATUTORY_KNOWLEDGE.append({
-                "rule_identifier": f"LM_{_ident}",
+                "rule_identifier": _ident,
                 "title": f"{_r['rule_number']}: {_r['title']}",
-                "act_reference": f"{_r['statutory_act']} ({_r.get('gazette_reference', 'Gazette of India 2026')})",
+                "act_reference": f"{_r.get('statutory_act', 'Legal Metrology Act, 2009')} ({_r.get('gazette_reference', 'G.S.R. 202(E)')})",
                 "amendment_year": 2026,
                 "full_text": _r["summary"],
-                "penalty_summary": _r.get("enforcement_clause", "Statutory compliance required under Legal Metrology Act, 2009 Section 36(1)."),
+                "penalty_summary": _r.get("enforcement_clause", "Statutory compliance required under Section 36(1) of Legal Metrology Act, 2009."),
                 "compounding_amount": 10000.0,
             })
+        logger.info(f"Loaded {len(_rules_data)} statutory rules into RAG knowledge base from {_target_path}")
 except Exception as _e:
-    logger.debug(f"Dataset 2026 augmentation skipped: {_e}")
+    logger.debug(f"Dataset statutory augmentation skipped: {_e}")
 
 
 class SupabaseVectorRAG:

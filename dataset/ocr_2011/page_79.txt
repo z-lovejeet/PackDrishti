@@ -1,0 +1,31 @@
+(901 I—ave 3(i)] TT HUTT : STATI
+
+the tare package weight is equal to or less than three-tenths of the maximum permissible error for the concerned
+commodity of that quantity, it shall be assumed that the tare package weight so determined is valid for all the
+other packages in the sample, and the sample packages shall then be weighed for gross weight, and thereafter the net
+weight of commodity contained in each Package shall be obtained by subtracting the tare package weight from the gross
+package weight. If the tare package weight so determined is more than three tenths of the maximum permissible error in
+relation to the commodity for that quantity, weight of four emptier tare packages shail be determined. If the difference
+between the maximum tare package weight and the minimum tare package weight of the five samples is equal to or less
+than four tenths of the maximum permissible error allowed for that commodity for that quantity, the tare weight of
+the package shall be taken as equal to the average of the five tare package weights. The gross weight of the package in
+the sample shall then be determined and the average tare package weight shall be subtracted from the gross package
+weight to obtain the net contents of the commodity in each package, in the sample. However, when the difference in the
+five individual tare weights of the packages exceeds the limit of four tenths of the maximum permissible error specified
+above, the procedure specified in sub-paragraph (4) or sub-paragraph (5), as the case may be, shall be adopted for
+determining the net quantity of individual packages.
+
+(2) In the absence of empty tare packages, one package from the sample shail be opened and the net weight of the
+commodity and the tare weight of the package determined. If the tare weight of the package is equal to or jess than
+three-tenth of the maximum permissible error for that concerned commodity of that quantity, it shall be assumed that the
+tare weight of one package so determined is valid for all the other packages in the sample, and the remaining packages
+shall then be weighed for gross weight, and thereafter the net weight of commodity contained in each package shall be
+obtained by subtracting the tare weight from the gross weight.
+
+(3) If the tare weight of the package specified in sub-paragraph (2) is more than three-tenths of the maximum
+permissible error in relation to that commodity, four more packages in the samples shall be opened and the net
+
+weight of the commodity in each package as well as the tare weight of each package shall be determined. If the
+
+2
+

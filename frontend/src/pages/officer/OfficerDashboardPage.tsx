@@ -146,15 +146,38 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const metricsRes = await api.get<DashboardMetrics>("/dashboard/metrics");
-        if (metricsRes) setMetrics(metricsRes);
+        const res = await api.get<any>("/dashboard/metrics");
+        if (res) {
+          setMetrics({
+            totalInspections: res.total_inspections ?? res.totalInspections ?? INITIAL_METRICS.totalInspections,
+            compliantCount: res.compliant_count ?? res.compliantCount ?? INITIAL_METRICS.compliantCount,
+            violationCount: res.violations_recorded ?? res.violationCount ?? INITIAL_METRICS.violationCount,
+            compoundedCount: res.compounded_closed ?? res.compoundedCount ?? INITIAL_METRICS.compoundedCount,
+            complianceRate: res.compliance_rate ?? res.complianceRate ?? INITIAL_METRICS.complianceRate,
+            totalFinesLeviedInr: res.total_compounding_assessed_inr ?? res.totalFinesLeviedInr ?? INITIAL_METRICS.totalFinesLeviedInr,
+            monthlyScansDelta: res.monthly_scans_delta ?? res.monthlyScansDelta ?? INITIAL_METRICS.monthlyScansDelta,
+          });
+        }
       } catch {
         // Keeps graceful defaults
       }
 
       try {
-        const actRes = await api.get<EnforcementActionItem[]>("/dashboard/activity");
-        if (actRes && actRes.length > 0) setActions(actRes);
+        const actRes = await api.get<any>("/dashboard/activity");
+        const list = Array.isArray(actRes) ? actRes : (actRes?.activities ?? []);
+        if (list && list.length > 0) {
+          setActions(list.map((a: any) => ({
+            id: a.id || a.docket_number || `ACT-${Math.random()}`,
+            caseRef: a.docket_number || a.caseRef || "INSP-DEL-001",
+            productName: a.product_name || a.productName || "Packaged Commodity",
+            actionType: (a.action || a.actionType || "Show Cause Notice") as EnforcementActionItem["actionType"],
+            statutoryClause: a.statutory_clause || a.statutoryClause || "Rule 6(1)",
+            timestamp: a.timestamp || "Recent",
+            targetEstablishment: a.location || a.targetEstablishment || "Retail Market",
+            status: (a.status || "Pending Hearing") as EnforcementActionItem["status"],
+            fineAmountInr: a.fine_amount_inr ?? a.fineAmountInr,
+          })));
+        }
       } catch {
         // Keeps graceful defaults
       }
@@ -248,7 +271,7 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
             <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Total Inspections</span>
             <div className="text-3xl font-bold font-heading text-slate-950">
-              {metrics.totalInspections.toLocaleString("en-IN")}
+              {(metrics?.totalInspections ?? 0).toLocaleString("en-IN")}
             </div>
             <div className="text-xs text-slate-500">Field compliance sweeps</div>
           </div>
@@ -256,15 +279,15 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
             <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Certified Compliant</span>
             <div className="text-3xl font-bold font-heading text-slate-950">
-              {metrics.compliantCount.toLocaleString("en-IN")}
+              {(metrics?.compliantCount ?? 0).toLocaleString("en-IN")}
             </div>
-            <div className="text-xs text-slate-500">{metrics.complianceRate}% adherence rate</div>
+            <div className="text-xs text-slate-500">{metrics?.complianceRate ?? 0}% adherence rate</div>
           </div>
 
           <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
             <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Infractions Flagged</span>
             <div className="text-3xl font-bold font-heading text-slate-950">
-              {metrics.violationCount.toLocaleString("en-IN")}
+              {(metrics?.violationCount ?? 0).toLocaleString("en-IN")}
             </div>
             <div className="text-xs text-slate-500">Actionable statutory defaults</div>
           </div>
@@ -272,9 +295,9 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2">
             <span className="text-2xs font-mono uppercase tracking-wider text-slate-400">Compounding Assessed</span>
             <div className="text-3xl font-bold font-heading text-slate-950">
-              ₹{(metrics.totalFinesLeviedInr / 100000).toFixed(2)} L
+              ₹{(((metrics?.totalFinesLeviedInr ?? 0)) / 100000).toFixed(2)} L
             </div>
-            <div className="text-xs text-slate-500">{metrics.compoundedCount} cases compounded</div>
+            <div className="text-xs text-slate-500">{metrics?.compoundedCount ?? 0} cases compounded</div>
           </div>
 
         </section>
@@ -288,29 +311,29 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
             <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold font-heading text-slate-950">Compliance Distribution</h2>
-                <span className="text-xs font-mono text-slate-500">{metrics.complianceRate}%</span>
+                <span className="text-xs font-mono text-slate-500">{metrics?.complianceRate ?? 66.9}%</span>
               </div>
               
               {/* Clean Single-Themed Distribution Bar */}
               <div className="h-2 rounded-full bg-slate-100 overflow-hidden flex">
                 <div 
                   className="bg-slate-900 h-full transition-all duration-300"
-                  style={{ width: `${(metrics.compliantCount / metrics.totalInspections) * 100}%` }}
+                  style={{ width: `${(metrics?.totalInspections ? ((metrics.compliantCount / metrics.totalInspections) * 100) : 66.9)}%` }}
                 />
                 <div 
                   className="bg-slate-400 h-full transition-all duration-300"
-                  style={{ width: `${(metrics.violationCount / metrics.totalInspections) * 100}%` }}
+                  style={{ width: `${(metrics?.totalInspections ? ((metrics.violationCount / metrics.totalInspections) * 100) : 33.1)}%` }}
                 />
               </div>
 
               <div className="pt-2 flex items-center justify-between text-xs text-slate-500">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-slate-900" />
-                  <span>Compliant ({metrics.compliantCount})</span>
+                  <span>Compliant ({metrics?.compliantCount ?? 0})</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-slate-400" />
-                  <span>Infractions ({metrics.violationCount})</span>
+                  <span>Infractions ({metrics?.violationCount ?? 0})</span>
                 </div>
               </div>
             </div>

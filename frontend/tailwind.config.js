@@ -86,8 +86,8 @@ export default {
         }
       },
       fontFamily: {
-        heading: ['"DM Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-        sans: ['"Source Sans 3"', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       fontSize: {

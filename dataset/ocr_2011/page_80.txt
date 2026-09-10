@@ -1,0 +1,37 @@
+THE GAZETTE OF INDIA : EXTRAORDINARY [Part ll—See, 3(i)]
+
+difference between the maximum tare weight and the minimum tare weight of five samples is equal to or less than four-
+tenths of the maximum permissible error for that commodity of that quantity, the tare weight of the package shall be
+taken as equal to the arithmetic mean of the five tare weights. The gross weight of the packages in the sample shalt
+then be determined to the requisite accuracy and the average tare weight of the contained shall be subtracted from the
+gross weight to obtain the net contents of the commodity in each package in the sample.
+
+(4) Where it is found on examining the first package, as described in sub-paragraph (2) that the tare weight of the
+container exceeds the limits specified in sub-paragraph (2) and sub-paragraph (3) and the determination of net contents,
+cannot be carried out without opening the remaining packages, or it is not, possible to use the procedure to use the
+Procedure described in sub-paragraph (5) the size of the sample to be examined shall be restricted to that indicated in
+column (2) , in accordance with the lot indicated in column (1) of Table of the Fifth Schedule and the determination of
+net quantity shall be carried out by Opening all the packages in the sample.
+
+(5) Where it is likely that the process of determination of the actual net quantity may be destructive and it is possible to
+feed empty package into the packing process without affecting the results, the following procedure shall be used:
+
+(a) the number of empty Packages, depending upon the size of the lot, in accordance with columns (1) and (2) of Table
+of the Fifth Schedule shall be selected;
+
+(b) the empty package shall be marked suitably to identify them from the other Packages;
+
+(c) the weight of each empty Package, with its other parts which are to be fitted on it after it is filled shall be determined
+and the weight suitably recorded on the empty package and also on the Form specified in the Seventh Schedule;
+
+(d) the empty package shall then be filled by introducing them in a random manner in the packing process, and such
+introduction shall be adequately spread over the duration in accordance with which ;the size of the lot is determined;
+(e) the marked packages shall be taken out after completion of the filling and sealing operations and each such filled
+
+Package shalt be weighed again to the requisite accuracy;
+
+(f} the net quantity shall be obtained by deuucting the tare weight determined in accordance with clause (c) from the
+
+gross weight.
+
+(6) The Director, Controller or any Legal Metrology Officer shall enter results of this examination of gross weight, net
