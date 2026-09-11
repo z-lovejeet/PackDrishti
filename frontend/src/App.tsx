@@ -85,6 +85,13 @@ export function App() {
     };
   }, [activePage]);
 
+  // Restrict scanner to officer role; redirect consumer to health check
+  useEffect(() => {
+    if (userRole === "consumer" && activePage === "scanner") {
+      navigateTo("health");
+    }
+  }, [userRole, activePage, navigateTo]);
+
   const handleToggleUserRole = () => {
     if (userRole === "consumer") {
       setUserRole("officer");
@@ -95,8 +102,8 @@ export function App() {
     } else {
       setUserRole("consumer");
       addToast("info", "Consumer Mode Enabled", "Switched to Citizen retail and nutrition verification.");
-      if (activePage === "dashboard" || activePage === "reports" || activePage === "inspections") {
-        navigateTo("scanner");
+      if (activePage === "dashboard" || activePage === "reports" || activePage === "inspections" || activePage === "scanner") {
+        navigateTo("health");
       }
     }
   };
@@ -162,7 +169,7 @@ export function App() {
 
           {activePage === "history" && (
             <ProductHistoryPage
-              onNavigateToScanner={() => navigateTo("scanner")}
+              onNavigateToScanner={() => navigateTo("health")}
               onNavigateToHealth={() => navigateTo("health")}
             />
           )}

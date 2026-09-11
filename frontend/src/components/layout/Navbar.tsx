@@ -140,17 +140,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => handleNavClick("scanner")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-              activePage === "scanner"
-                ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            {userRole === "officer" ? "Field Scanner" : "Label Scanner"}
-          </button>
+          {userRole === "officer" && (
+            <button
+              type="button"
+              onClick={() => handleNavClick("scanner")}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                activePage === "scanner"
+                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+              }`}
+            >
+              Compliance Scanner
+            </button>
+          )}
 
           {userRole === "consumer" && (
             <button
@@ -162,7 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              Health Check
+              Nutrition &amp; Health Check
             </button>
           )}
 
@@ -176,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              Archived Scans
+              Health History
             </button>
           )}
 
@@ -282,14 +284,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Button
             variant="primary"
             size="sm"
-            onClick={() => handleNavClick("scanner")}
+            onClick={() => handleNavClick(userRole === "officer" ? "scanner" : "health")}
             className={`hidden md:inline-flex text-xs font-semibold px-3 py-1.5 transition-all ${
-              activePage === "scanner"
+              (userRole === "officer" ? activePage === "scanner" : activePage === "health")
                 ? "ring-2 ring-slate-900 ring-offset-2"
                 : ""
             }`}
           >
-            Scan Package
+            {userRole === "officer" ? "Compliance Scanner" : "Check Food Nutrition"}
           </Button>
 
           {/* Mobile Menu Hamburger Button */}
@@ -389,20 +391,22 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => handleNavClick("scanner")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "scanner"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>{userRole === "officer" ? "Field Scanner" : "Label Scanner"}</span>
-              {activePage === "scanner" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-white" />
-              )}
-            </button>
+            {userRole === "officer" && (
+              <button
+                type="button"
+                onClick={() => handleNavClick("scanner")}
+                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                  activePage === "scanner"
+                    ? "bg-slate-900 text-white font-semibold"
+                    : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span>Compliance Scanner</span>
+                {activePage === "scanner" && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                )}
+              </button>
+            )}
 
             {userRole === "consumer" && (
               <button
@@ -414,7 +418,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                <span>Health Check</span>
+                <span>Nutrition &amp; Health Check</span>
                 {activePage === "health" && (
                   <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
@@ -431,7 +435,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                <span>Archived Scans</span>
+                <span>Health History</span>
                 {activePage === "history" && (
                   <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
@@ -477,10 +481,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Button
             variant="primary"
             size="md"
-            onClick={() => handleNavClick("scanner")}
+            onClick={() => handleNavClick(userRole === "officer" ? "scanner" : "health")}
             className="w-full text-xs font-semibold"
           >
-            Scan Package Now
+            {userRole === "officer" ? "Scan Packaging Now" : "Check Food Nutrition"}
           </Button>
 
           {/* Mobile Auth and Status */}

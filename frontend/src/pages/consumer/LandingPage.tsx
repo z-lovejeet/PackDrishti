@@ -46,10 +46,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           
           {/* Citizen Consumer Portal */}
+          {/* Citizen Consumer Health & Nutrition Portal */}
           <div 
             onClick={() => {
               onSetUserRole("consumer");
-              onNavigate("scanner");
+              onNavigate("health");
             }}
             className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between"
           >
@@ -60,14 +61,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
                 <span className="text-xs font-mono text-slate-400">01</span>
               </div>
-              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Consumer Verification</h2>
+              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Consumer Health &amp; Nutrition</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Scan packaged food commodities to verify Maximum Retail Price, Unit Sale Price (USP), hidden industrial palm oil, sodium density, and age-specific health warnings.
+                Scan packaged food commodities to audit ICMR-NIN 2024 nutritional benchmarks, identify hidden sugars, sodium density, palm oil, and age-specific health advisories.
               </p>
             </div>
             
             <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
-              <span>Start product scan</span>
+              <span>Check food health &amp; nutrition</span>
               <ArrowRight size={14} weight="bold" />
             </div>
           </div>
@@ -144,10 +145,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
             <div className="pt-2">
               <button 
-                onClick={() => onNavigate("scanner")} 
+                onClick={() => {
+                  onSetUserRole("officer");
+                  onNavigate("scanner");
+                }} 
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
               >
-                Launch label scanner <ArrowRight size={12} weight="bold" />
+                Launch officer compliance scanner <ArrowRight size={12} weight="bold" />
               </button>
             </div>
           </div>
