@@ -5,7 +5,12 @@ import {
   FileText,
   ArrowRight,
   User,
-  ArrowSquareOut
+  ArrowSquareOut,
+  CheckCircle,
+  WarningOctagon,
+  ArrowsClockwise,
+  Database,
+  ChartBar,
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { CompoundingCalculator } from "../../components/officer/CompoundingCalculator";
@@ -60,70 +65,82 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
   const [actions, setActions] = useState<EnforcementActionItem[]>([]);
   const [violations, setViolations] = useState<ViolationCategoryBreakdown[]>([]);
   const [officer] = useState<OfficerProfile>(DEFAULT_OFFICER_PROFILE);
+  const [hoveredSegment, setHoveredSegment] = useState<"compliant" | "infraction" | null>(null);
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await api.get<any>("/dashboard/metrics?role=officer");
+      if (res) {
+        setMetrics({
+          totalInspections: res.total_inspections ?? 0,
+          compliantCount: res.compliant_count ?? 0,
+          violationCount: res.violations_recorded ?? 0,
+          compoundedCount: res.compounded_closed ?? 0,
+          complianceRate: res.compliance_rate ?? 0,
+          totalFinesLeviedInr: res.total_compounding_assessed_inr ?? 0,
+          monthlyScansDelta: res.monthly_scans_delta ?? 0,
+        });
+
+        if (res.top_violating_rules && Array.isArray(res.top_violating_rules) && res.top_violating_rules.length > 0) {
+          const totalViols = res.violations_recorded || 1;
+          setViolations(
+            res.top_violating_rules.map((r: any) => ({
+              ruleClause: r.rule || "Rule 6",
+              categoryTitle: r.title || "Statutory Non-Compliance",
+              actSection: "Section 36(1)",
+              count: r.count || 0,
+              percentage: Number(((r.count / totalViols) * 100).toFixed(1)),
+            }))
+          );
+        } else {
+          setViolations([]);
+        }
+      }
+    } catch {
+      // Real empty state retained
+    }
+
+    try {
+      const actRes = await api.get<any>("/dashboard/activity?role=officer");
+      if (actRes) {
+        const list = Array.isArray(actRes) ? actRes : (actRes?.activities ?? []);
+        if (list && list.length > 0) {
+          setActions(
+            list.map((a: any) => ({
+              id: a.id || a.docket_number || `ACT-${Math.random()}`,
+              caseRef: a.docket_number || a.caseRef || "INSP-DEL-001",
+              productName: a.product_name || a.productName || "Packaged Commodity",
+              actionType: (a.action || a.actionType || "Show Cause Notice") as EnforcementActionItem["actionType"],
+              statutoryClause: a.statutory_clause || a.statutoryClause || "LMPCR 2011",
+              timestamp: a.timestamp || "Recent",
+              targetEstablishment: a.location || a.targetEstablishment || "Retail Market",
+              status: (a.status || "Pending Hearing") as EnforcementActionItem["status"],
+              fineAmountInr: a.fine_amount_inr ?? a.fineAmountInr,
+            }))
+          );
+        } else {
+          setActions([]);
+        }
+      }
+    } catch {
+      // Real empty state retained
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const res = await api.get<any>("/dashboard/metrics");
-        if (res) {
-          setMetrics({
-            totalInspections: res.total_inspections ?? 0,
-            compliantCount: res.compliant_count ?? 0,
-            violationCount: res.violations_recorded ?? 0,
-            compoundedCount: res.compounded_closed ?? 0,
-            complianceRate: res.compliance_rate ?? 0,
-            totalFinesLeviedInr: res.total_compounding_assessed_inr ?? 0,
-            monthlyScansDelta: res.monthly_scans_delta ?? 0,
-          });
-
-          if (res.top_violating_rules && Array.isArray(res.top_violating_rules) && res.top_violating_rules.length > 0) {
-            const totalViols = res.violations_recorded || 1;
-            setViolations(
-              res.top_violating_rules.map((r: any) => ({
-                ruleClause: r.rule || "Rule 6",
-                categoryTitle: r.title || "Statutory Non-Compliance",
-                actSection: "Section 36(1)",
-                count: r.count || 0,
-                percentage: Number(((r.count / totalViols) * 100).toFixed(1)),
-              }))
-            );
-          } else {
-            setViolations([]);
-          }
-        }
-      } catch {
-        // Real empty state retained
-      }
-
-      try {
-        const actRes = await api.get<any>("/dashboard/activity");
-        if (actRes) {
-          const list = Array.isArray(actRes) ? actRes : (actRes?.activities ?? []);
-          if (list && list.length > 0) {
-            setActions(
-              list.map((a: any) => ({
-                id: a.id || a.docket_number || `ACT-${Math.random()}`,
-                caseRef: a.docket_number || a.caseRef || "INSP-DEL-001",
-                productName: a.product_name || a.productName || "Packaged Commodity",
-                actionType: (a.action || a.actionType || "Show Cause Notice") as EnforcementActionItem["actionType"],
-                statutoryClause: a.statutory_clause || a.statutoryClause || "LMPCR 2011",
-                timestamp: a.timestamp || "Recent",
-                targetEstablishment: a.location || a.targetEstablishment || "Retail Market",
-                status: (a.status || "Pending Hearing") as EnforcementActionItem["status"],
-                fineAmountInr: a.fine_amount_inr ?? a.fineAmountInr,
-              }))
-            );
-          } else {
-            setActions([]);
-          }
-        }
-      } catch {
-        // Real empty state retained
-      }
-    };
-
     fetchDashboardData();
   }, []);
+
+  const navigateToWithFilter = (status: "Resolved" | "Notice Issued" | "All") => {
+    if (status === "Resolved") {
+      window.location.hash = "#inspections?status=Resolved";
+    } else if (status === "Notice Issued") {
+      window.location.hash = "#inspections?status=Notice+Issued";
+    } else {
+      window.location.hash = "#inspections";
+    }
+    onNavigate("inspections");
+  };
 
   const handleOpenNotice = (item?: EnforcementActionItem) => {
     if (!item) return;
@@ -136,6 +153,12 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
     });
     setIsNoticeOpen(true);
   };
+
+  const totalInspections = metrics?.totalInspections ?? 0;
+  const compliantCount = metrics?.compliantCount ?? 0;
+  const infractionCount = Math.max(0, totalInspections - compliantCount);
+  const compliantPct = totalInspections > 0 ? Math.round((compliantCount / totalInspections) * 100) : 0;
+  const infractionPct = totalInspections > 0 ? (100 - compliantPct) : 0;
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
@@ -253,34 +276,142 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           {/* Left Column: Compliance Distribution & Navigation */}
           <div className="space-y-6">
             
-            <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4">
+            {/* Real & Functional Compliance Distribution Card */}
+            <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold font-heading text-slate-950">Compliance Distribution</h2>
-                <span className="text-xs font-mono text-slate-500">{metrics?.complianceRate ?? 66.9}%</span>
-              </div>
-              
-              {/* Clean Single-Themed Distribution Bar */}
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden flex">
-                <div 
-                  className="bg-slate-900 h-full transition-all duration-300"
-                  style={{ width: `${(metrics?.totalInspections ? ((metrics.compliantCount / metrics.totalInspections) * 100) : 66.9)}%` }}
-                />
-                <div 
-                  className="bg-slate-400 h-full transition-all duration-300"
-                  style={{ width: `${(metrics?.totalInspections ? ((metrics.violationCount / metrics.totalInspections) * 100) : 33.1)}%` }}
-                />
+                <div>
+                  <h2 className="text-sm font-bold font-heading text-slate-950 flex items-center gap-1.5">
+                    <ChartBar size={16} className="text-slate-700" />
+                    <span>Compliance Distribution</span>
+                  </h2>
+                  <p className="text-2xs text-slate-500 mt-0.5">
+                    {totalInspections > 0 
+                      ? `${totalInspections} audits in active cycle` 
+                      : "No active audits in current cycle"}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
+                    totalInspections === 0 
+                      ? "bg-slate-50 text-slate-500 border-slate-200" 
+                      : (metrics?.complianceRate ?? 0) >= 70 
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                      : (metrics?.complianceRate ?? 0) >= 40 
+                      ? "bg-amber-50 text-amber-700 border-amber-200" 
+                      : "bg-rose-50 text-rose-700 border-rose-200"
+                  }`}>
+                    {totalInspections > 0 ? `${metrics?.complianceRate ?? 0}% Adherence` : "0%"}
+                  </span>
+                </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-between text-xs text-slate-500">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-slate-900" />
-                  <span>Compliant ({metrics?.compliantCount ?? 0})</span>
+              {/* Dynamic Progress Bar & Action States */}
+              {totalInspections === 0 ? (
+                <div className="space-y-3 pt-1">
+                  {/* Real Empty Progress Bar (0% filled, genuine empty track) */}
+                  <div className="h-2 rounded-full bg-slate-100 overflow-hidden flex" />
+
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-slate-300" />
+                      <span>Compliant (0)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-slate-300" />
+                      <span>Infractions (0)</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-slate-400 text-2xs">0 commodities inspected yet.</span>
+                    <button
+                      onClick={() => onNavigate("scanner")}
+                      className="font-medium text-slate-900 hover:text-slate-700 inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>New Scan</span>
+                      <ArrowRight size={11} weight="bold" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-slate-400" />
-                  <span>Infractions ({metrics?.violationCount ?? 0})</span>
+              ) : (
+                <div className="space-y-3 pt-1">
+                  {/* Real Interactive Segmented Progress Bar */}
+                  <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden flex gap-0.5">
+                    {compliantPct > 0 && (
+                      <div
+                        onClick={() => navigateToWithFilter("Resolved")}
+                        onMouseEnter={() => setHoveredSegment("compliant")}
+                        onMouseLeave={() => setHoveredSegment(null)}
+                        style={{ width: `${compliantPct}%` }}
+                        className="bg-slate-900 hover:bg-slate-800 h-full transition-all duration-500 ease-out cursor-pointer"
+                        title={`Click to view ${compliantCount} compliant inspections (${compliantPct}%)`}
+                      />
+                    )}
+                    {infractionPct > 0 && (
+                      <div
+                        onClick={() => navigateToWithFilter("Notice Issued")}
+                        onMouseEnter={() => setHoveredSegment("infraction")}
+                        onMouseLeave={() => setHoveredSegment(null)}
+                        style={{ width: `${infractionPct}%` }}
+                        className="bg-slate-400 hover:bg-slate-500 h-full transition-all duration-500 ease-out cursor-pointer"
+                        title={`Click to view ${infractionCount} non-compliant inspections (${infractionPct}%)`}
+                      />
+                    )}
+                  </div>
+
+                  {/* Contextual Interactive Hover / Status Readout */}
+                  <div className="text-2xs font-mono text-slate-500 min-h-[20px] flex items-center transition-all">
+                    {hoveredSegment === "compliant" ? (
+                      <span className="text-slate-900 font-semibold">
+                        {compliantCount} compliant ({compliantPct}%) — Click to filter ledger
+                      </span>
+                    ) : hoveredSegment === "infraction" ? (
+                      <span className="text-slate-900 font-semibold">
+                        {infractionCount} non-compliant ({infractionPct}%) with {metrics?.violationCount ?? 0} violations — Click to view notices
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">Click segments or buttons to filter ledger</span>
+                    )}
+                  </div>
+
+                  {/* Real Clickable Legend Filters */}
+                  <div className="flex items-center justify-between text-xs">
+                    <button
+                      onClick={() => navigateToWithFilter("Resolved")}
+                      onMouseEnter={() => setHoveredSegment("compliant")}
+                      onMouseLeave={() => setHoveredSegment(null)}
+                      className="flex items-center gap-2 hover:opacity-75 transition-opacity cursor-pointer text-left"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-slate-900" />
+                      <span className="text-slate-700 font-medium">Compliant ({compliantCount})</span>
+                      <span className="text-2xs font-mono text-slate-400">({compliantPct}%)</span>
+                    </button>
+
+                    <button
+                      onClick={() => navigateToWithFilter("Notice Issued")}
+                      onMouseEnter={() => setHoveredSegment("infraction")}
+                      onMouseLeave={() => setHoveredSegment(null)}
+                      className="flex items-center gap-2 hover:opacity-75 transition-opacity cursor-pointer text-left"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-slate-400" />
+                      <span className="text-slate-700 font-medium">Infractions ({infractionCount})</span>
+                      <span className="text-2xs font-mono text-slate-400">({infractionPct}%)</span>
+                    </button>
+                  </div>
+
+                  {/* Action Toolbar */}
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <button
+                      onClick={() => onNavigate("inspections")}
+                      className="font-medium text-slate-900 hover:text-slate-700 inline-flex items-center gap-1 group cursor-pointer"
+                    >
+                      <span>Field Inspection Ledger</span>
+                      <ArrowRight size={11} weight="bold" className="group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                    <span className="text-2xs font-mono text-slate-400">Total: {totalInspections} audits</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Sub-Station Quick Links */}

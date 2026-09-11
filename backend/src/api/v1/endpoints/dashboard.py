@@ -4,17 +4,21 @@ Provides high-performance aggregation endpoints for Legal Metrology Officer
 dashboards, inspection ledgers, and jurisdiction-wide compliance statistics.
 """
 
+import re
+import uuid
+from decimal import Decimal
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 
 from backend.src.core.database import get_db_session
 from backend.src.models.scan import ProductScan, ComplianceStatus
-from backend.src.models.violation import StatutoryViolation, ViolationRecord
+from backend.src.models.violation import StatutoryViolation, ViolationRecord, ViolationSeverity
 from backend.src.models.report import ComplianceReport
+from backend.src.models.health import ScanHistory
 
 router = APIRouter()
 
@@ -22,6 +26,7 @@ router = APIRouter()
 class DashboardMetricsResponse(BaseModel):
     total_inspections: int
     compliant_count: int
+    non_compliant_count: int = 0
     compliance_rate: float
     violations_recorded: int
     compounded_closed: int
@@ -85,9 +90,26 @@ async def get_dashboard_metrics(
         viol_count_res = await db.execute(viol_query)
         violations_recorded = viol_count_res.scalar() or 0
 
-        compounded_closed = 0
+        # Dynamic compounding calculation from real violations
+        comp_amt_query = (
+            select(StatutoryViolation.penalty_clause)
+            .join(ProductScan, StatutoryViolation.scan_id == ProductScan.id)
+        )
+        if effective_role:
+            comp_amt_query = comp_amt_query.where(ProductScan.user_role == effective_role)
+        comp_amt_res = await db.execute(comp_amt_query)
         total_compounding_assessed = 0.0
+        for clause in comp_amt_res.scalars().all():
+            m = re.search(r"Rs\.?\s*([\d,]+(?:\.\d+)?)", clause or "", re.IGNORECASE)
+            if m:
+                try:
+                    total_compounding_assessed += float(m.group(1).replace(",", ""))
+                except ValueError:
+                    pass
+
+        compounded_closed = 0
         total_compounding_collected = 0.0
+        non_compliant_count = max(0, total_inspections - compliant_count)
 
         # Dynamic category breakdown from real scans
         cat_query = select(ProductScan.category, func.count(ProductScan.id))
@@ -138,6 +160,7 @@ async def get_dashboard_metrics(
     except Exception as err:
         total_inspections = 0
         compliant_count = 0
+        non_compliant_count = 0
         violations_recorded = 0
         compounded_closed = 0
         total_compounding_assessed = 0.0
@@ -149,6 +172,7 @@ async def get_dashboard_metrics(
     return DashboardMetricsResponse(
         total_inspections=total_inspections,
         compliant_count=compliant_count,
+        non_compliant_count=non_compliant_count,
         compliance_rate=compliance_rate,
         violations_recorded=violations_recorded,
         compounded_closed=compounded_closed,
@@ -158,6 +182,8 @@ async def get_dashboard_metrics(
         violations_by_category=category_breakdown,
         top_violating_rules=top_rules,
     )
+
+
 
 
 @router.get(

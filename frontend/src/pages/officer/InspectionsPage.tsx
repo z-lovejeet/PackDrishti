@@ -33,7 +33,12 @@ export const InspectionsPage: React.FC = () => {
     infractionsFlagged: 0,
     compoundedClosed: 0,
   });
-  const [activeStatus, setActiveStatus] = useState<string>('All');
+  const [activeStatus, setActiveStatus] = useState<string>(() => {
+    const hash = window.location.hash;
+    if (hash.includes("status=Notice%20Issued") || hash.includes("status=Notice+Issued")) return "Notice Issued";
+    if (hash.includes("status=Resolved")) return "Resolved";
+    return "All";
+  });
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCompoundingOpen, setIsCompoundingOpen] = useState(false);
@@ -55,12 +60,26 @@ export const InspectionsPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedbackToast, setFeedbackToast] = useState<{ title: string; desc: string; type: "success" | "error" } | null>(null);
 
+  useEffect(() => {
+    const syncStatusFromHash = () => {
+      const hash = window.location.hash;
+      if (hash.includes("status=Notice%20Issued") || hash.includes("status=Notice+Issued")) {
+        setActiveStatus("Notice Issued");
+      } else if (hash.includes("status=Resolved")) {
+        setActiveStatus("Resolved");
+      }
+    };
+    syncStatusFromHash();
+    window.addEventListener("hashchange", syncStatusFromHash);
+    return () => window.removeEventListener("hashchange", syncStatusFromHash);
+  }, []);
+
   const fetchInspections = async () => {
     setLoading(true);
     try {
       const [historyRes, metricsRes] = await Promise.allSettled([
         api.get<any>('/scan/history?role=officer'),
-        api.get<any>('/dashboard/metrics'),
+        api.get<any>('/dashboard/metrics?role=officer'),
       ]);
 
       if (metricsRes.status === 'fulfilled' && metricsRes.value) {
