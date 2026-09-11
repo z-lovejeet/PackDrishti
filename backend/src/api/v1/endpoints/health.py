@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, s
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from PIL import Image
-import pytesseract
 
 from backend.src.core.config import settings
 from backend.src.core.database import get_db_session

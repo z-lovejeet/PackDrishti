@@ -43,3 +43,6 @@ aiosqlite>=0.20.0
 # Statutory PDF & Image Processing
 reportlab>=4.2.0
 pillow>=10.0.0
+
+# Optical Character Recognition
+pytesseract>=0.3.10
