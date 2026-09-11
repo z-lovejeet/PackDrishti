@@ -3,8 +3,13 @@ import {
   MagnifyingGlass,
   CheckCircle,
   Warning,
+  Trash,
+  ArrowClockwise,
+  SpinnerGap,
+  WarningCircle,
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
+import { Modal } from "../../components/common/Modal";
 import { ComplianceReport } from "../../types";
 import { api } from "../../utils/apiClient";
 
@@ -22,56 +27,108 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState<ComplianceReport | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [feedbackToast, setFeedbackToast] = useState<{ title: string; desc: string; type: "success" | "error" } | null>(null);
 
-    const fetchReports = async () => {
-      setIsLoading(true);
-      try {
-        const res = await api.get<any>("/scan/history");
-        const list = Array.isArray(res) ? res : (res && res.history ? res.history : []);
+  const fetchReports = async () => {
+    setIsLoading(true);
+    try {
+      const res = await api.get<any>("/scan/history?role=officer");
+      const list = Array.isArray(res) ? res : (res && res.history ? res.history : []);
 
-        if (list && list.length > 0 && isMounted) {
-          const liveReports: ComplianceReport[] = list.map((s: any, idx: number) => {
-            const isCompliant = (s.compliance_status === "compliant" || s.compliance_status === "healthy") && !s.is_expired;
-            const violCount = s.is_expired ? 1 : (s.violations ? s.violations.length : (isCompliant ? 0 : 1));
-            return {
-              id: s.scan_id || `live-rep-${idx}`,
-              reportNumber: `REP-${s.scan_code || (s.scan_id ? s.scan_id.substring(0, 8).toUpperCase() : `2026-DEL-${String(idx + 50).padStart(3, '0')}`)}`,
-              title: `${s.is_expired ? '[EXPIRED] ' : ''}Statutory Packaging Audit: ${s.product_name || s.brand_name || 'Packaged Commodity'}`,
-              reportType: "Single Product Audit",
-              generatedDate: s.created_at || s.scanned_at ? new Date(s.created_at || s.scanned_at).toLocaleDateString('en-GB') : "10-Sep-2026",
-              generatedBy: "Sh. Rajesh Kumar Sharma",
-              designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
-              district: "Zone-1 (Central & Old Delhi), Delhi NCT",
-              totalProductsScanned: 1,
-              compliantCount: isCompliant ? 1 : 0,
-              violationCount: violCount,
-              format: "PDF",
-            };
-          });
+      if (list && list.length > 0) {
+        const liveReports: ComplianceReport[] = list.map((s: any, idx: number) => {
+          const isCompliant = (s.compliance_status === "compliant" || s.compliance_status === "healthy") && !s.is_expired;
+          const violCount = s.is_expired ? 1 : (s.violations ? s.violations.length : (isCompliant ? 0 : 1));
+          return {
+            id: s.scan_id || `live-rep-${idx}`,
+            reportNumber: `REP-${s.scan_code || (s.scan_id ? s.scan_id.substring(0, 8).toUpperCase() : `2026-DEL-${String(idx + 50).padStart(3, '0')}`)}`,
+            title: `${s.is_expired ? '[EXPIRED] ' : ''}Statutory Packaging Audit: ${s.product_name || s.brand_name || 'Packaged Commodity'}`,
+            reportType: "Single Product Audit",
+            generatedDate: s.created_at || s.scanned_at ? new Date(s.created_at || s.scanned_at).toLocaleDateString('en-GB') : "10-Sep-2026",
+            generatedBy: "Sh. Rajesh Kumar Sharma",
+            designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
+            district: "Zone-1 (Central & Old Delhi), Delhi NCT",
+            totalProductsScanned: 1,
+            compliantCount: isCompliant ? 1 : 0,
+            violationCount: violCount,
+            format: "PDF",
+          };
+        });
 
-          setReports(liveReports);
-          setActiveReport(liveReports[0]);
-        } else if (isMounted) {
-          setReports([]);
-          setActiveReport(null);
-        }
-      } catch {
-        if (isMounted) {
-          setReports([]);
-          setActiveReport(null);
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
+        setReports(liveReports);
+        setActiveReport(liveReports[0]);
+      } else {
+        setReports([]);
+        setActiveReport(null);
       }
-    };
+    } catch {
+      setReports([]);
+      setActiveReport(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const handleClearAllReports = async () => {
+    setIsClearing(true);
+    try {
+      await api.delete('/scan/history?role=officer');
+      setReports([]);
+      setActiveReport(null);
+      setIsClearModalOpen(false);
+      setFeedbackToast({
+        type: "success",
+        title: "Reports Cleared",
+        desc: "All officer inspection reports have been permanently removed.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } catch {
+      setFeedbackToast({
+        type: "error",
+        title: "Action Failed",
+        desc: "Unable to clear officer reports from database.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  const handleDeleteReport = async () => {
+    if (!reportToDelete) return;
+    setIsDeleting(true);
+    try {
+      await api.delete(`/scan/${reportToDelete.id}`);
+      const updated = reports.filter((r) => r.id !== reportToDelete.id);
+      setReports(updated);
+      if (activeReport?.id === reportToDelete.id) {
+        setActiveReport(updated.length > 0 ? updated[0] : null);
+      }
+      setFeedbackToast({
+        type: "success",
+        title: "Report Deleted",
+        desc: `Inspection report '${reportToDelete.reportNumber}' removed from database.`,
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+      setReportToDelete(null);
+    } catch {
+      setFeedbackToast({
+        type: "error",
+        title: "Deletion Failed",
+        desc: "Could not remove the selected inspection report.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  useEffect(() => {
     fetchReports();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const filteredReports = useMemo(() => {
@@ -135,7 +192,31 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          {reports.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsClearModalOpen(true)}
+              disabled={isLoading || isClearing}
+              className="text-xs font-medium text-rose-600 border-rose-200 hover:bg-rose-50 hover:border-rose-300"
+              icon={<Trash size={14} />}
+            >
+              Clear All Reports
+            </Button>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchReports}
+            disabled={isLoading}
+            className="text-xs font-medium"
+            icon={<ArrowClockwise size={14} className={isLoading ? "animate-spin" : ""} />}
+          >
+            {isLoading ? "Refreshing..." : "Refresh"}
+          </Button>
+
           <Button
             variant="primary"
             size="sm"
@@ -242,9 +323,23 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
                       </div>
                     </div>
 
-                    <span className="text-2xs font-mono text-slate-400 uppercase tracking-wider shrink-0">
-                      {rep.format}
-                    </span>
+                    <div className="flex flex-col items-end justify-between self-stretch shrink-0">
+                      <span className="text-2xs font-mono text-slate-400 uppercase tracking-wider">
+                        {rep.format}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReportToDelete(rep);
+                        }}
+                        className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        title="Delete this report"
+                        aria-label="Delete this report"
+                      >
+                        <Trash size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -458,7 +553,17 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
               </div>
 
               {/* Action Toolbar */}
-              <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3 no-print">
+              <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3 no-print flex-wrap">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setReportToDelete(activeReport)}
+                  className="text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200"
+                  icon={<Trash size={14} />}
+                >
+                  Delete Report
+                </Button>
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -467,6 +572,7 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
                 >
                   Print Certificate
                 </Button>
+
                 <Button
                   variant="primary"
                   size="sm"
@@ -494,6 +600,112 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
         </div>
 
       </div>
+
+      {/* Clear All Reports Confirmation Modal */}
+      <Modal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        title="Clear All Inspection Reports"
+        subtitle="Permanent Enforcement Register Purge"
+        maxWidth="sm"
+        icon={<Trash size={20} className="text-rose-600" />}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsClearModalOpen(false)}
+              disabled={isClearing}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleClearAllReports}
+              disabled={isClearing}
+              icon={isClearing ? <SpinnerGap size={14} className="animate-spin" /> : <Trash size={14} />}
+            >
+              {isClearing ? "Clearing..." : "Yes, Clear All"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-2 text-xs text-slate-600 leading-relaxed">
+          <p>
+            Are you sure you want to permanently clear <strong>all {reports.length} officer inspection reports</strong>?
+          </p>
+          <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-2xs space-y-1">
+            <p className="font-semibold">Legal Metrology Ledger Notice:</p>
+            <p>
+              This action will delete all archived certificates of inspection and statutory enforcement findings for this division. This operation cannot be reversed.
+            </p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Item Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(reportToDelete)}
+        onClose={() => setReportToDelete(null)}
+        title="Delete Inspection Report"
+        subtitle="Confirm Removal"
+        maxWidth="sm"
+        icon={<Trash size={20} className="text-rose-600" />}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setReportToDelete(null)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleDeleteReport}
+              disabled={isDeleting}
+              icon={isDeleting ? <SpinnerGap size={14} className="animate-spin" /> : <Trash size={14} />}
+            >
+              {isDeleting ? "Deleting..." : "Delete Report"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-2 text-xs text-slate-600 leading-relaxed">
+          <p>
+            Are you sure you want to delete report{' '}
+            <strong className="text-slate-900">{reportToDelete?.reportNumber}</strong> (
+            {reportToDelete?.title})?
+          </p>
+          <p className="text-2xs text-slate-500 font-mono">
+            District: {reportToDelete?.district}
+          </p>
+        </div>
+      </Modal>
+
+      {/* Feedback Toast */}
+      {feedbackToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-slideUp">
+          <div className={`p-4 rounded-xl shadow-lg border flex items-start gap-3 max-w-sm ${
+            feedbackToast.type === "success" 
+              ? "bg-white text-slate-900 border-emerald-300 shadow-emerald-500/10" 
+              : "bg-white text-slate-900 border-rose-300 shadow-rose-500/10"
+          }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+              feedbackToast.type === "success" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+            }`}>
+              {feedbackToast.type === "success" ? <CheckCircle size={18} weight="bold" /> : <WarningCircle size={18} weight="bold" />}
+            </div>
+            <div className="space-y-0.5 min-w-0">
+              <h4 className="text-xs font-bold text-slate-900">{feedbackToast.title}</h4>
+              <p className="text-2xs text-slate-600 leading-relaxed">{feedbackToast.desc}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

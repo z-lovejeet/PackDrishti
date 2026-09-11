@@ -3,9 +3,15 @@ import {
   MagnifyingGlass,
   CaretDown,
   CaretUp,
+  Trash,
+  ArrowClockwise,
+  CheckCircle,
+  WarningCircle,
+  SpinnerGap,
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
+import { Modal } from '../../components/common/Modal';
 import { CompoundingCalculator } from '../../components/officer/CompoundingCalculator';
 import { NoticePreviewModal } from '../../components/officer/NoticePreviewModal';
 import { ViolationRecord } from '../../types';
@@ -43,109 +49,190 @@ export const InspectionsPage: React.FC = () => {
     severity?: 'high' | 'medium' | 'low';
   } | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<ViolationRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [feedbackToast, setFeedbackToast] = useState<{ title: string; desc: string; type: "success" | "error" } | null>(null);
 
-    const fetchInspections = async () => {
-      setLoading(true);
-      try {
-        const [historyRes, metricsRes] = await Promise.allSettled([
-          api.get<any>('/scan/history'),
-          api.get<any>('/dashboard/metrics'),
-        ]);
+  const fetchInspections = async () => {
+    setLoading(true);
+    try {
+      const [historyRes, metricsRes] = await Promise.allSettled([
+        api.get<any>('/scan/history?role=officer'),
+        api.get<any>('/dashboard/metrics'),
+      ]);
 
-        if (metricsRes.status === 'fulfilled' && metricsRes.value && isMounted) {
-          const m = metricsRes.value;
-          setMetrics({
-            totalInspections: m.total_inspections || 0,
-            certifiedCompliant: m.compliant_count || 0,
-            infractionsFlagged: m.violations_recorded || 0,
-            compoundedClosed: m.compounded_closed || 0,
-          });
-        }
+      if (metricsRes.status === 'fulfilled' && metricsRes.value) {
+        const m = metricsRes.value;
+        setMetrics({
+          totalInspections: m.total_inspections || 0,
+          certifiedCompliant: m.compliant_count || 0,
+          infractionsFlagged: m.violations_recorded || 0,
+          compoundedClosed: m.compounded_closed || 0,
+        });
+      }
 
-        if (historyRes.status === 'fulfilled' && isMounted) {
-          const res = historyRes.value;
-          const historyList = Array.isArray(res) ? res : (res && res.history ? res.history : []);
+      if (historyRes.status === 'fulfilled') {
+        const res = historyRes.value;
+        const historyList = Array.isArray(res) ? res : (res && res.history ? res.history : []);
 
-          if (historyList && historyList.length > 0) {
-            const liveRecords: ViolationRecord[] = [];
-            historyList.forEach((h: any, hIdx: number) => {
-              if (h.violations && h.violations.length > 0) {
-                h.violations.forEach((v: any, vIdx: number) => {
-                  liveRecords.push({
-                    id: v.violation_id || `live-${h.scan_id || hIdx}-${vIdx}`,
-                    violationCode: `INSP-2026-DEL-${String(hIdx * 10 + vIdx + 50).padStart(3, '0')}`,
-                    productName: h.product_name || 'Audited Packaging Specimen',
-                    brand: h.brand || h.brand_name || 'Inspected Brand',
-                    category: 'Packaged Commodity',
-                    ruleReference: v.rule_clause || 'Rule 6(1)',
-                    violationType: v.description || 'Statutory Non-Compliance',
-                    severity: v.severity || 'high',
-                    dateDetected: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
-                    status: 'Notice Issued',
-                    assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-                    location: 'Delhi Enforcement Division',
-                    timeline: [
-                      {
-                        date: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleString() : '10-Sep-2026 14:00 IST',
-                        action: 'Statutory Non-Compliance Flagged via Field Optical Scan',
-                        by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-                        note: v.description || 'Statutory infraction recorded under Legal Metrology Rules, 2011.',
-                      },
-                    ],
-                  });
-                });
-              } else if (h.compliance_status === 'violation') {
+        if (historyList && historyList.length > 0) {
+          const liveRecords: ViolationRecord[] = [];
+          historyList.forEach((h: any, hIdx: number) => {
+            const scanTargetId = h.scan_id || h.id;
+            if (h.violations && h.violations.length > 0) {
+              h.violations.forEach((v: any, vIdx: number) => {
                 liveRecords.push({
-                  id: `live-scan-${h.scan_id || hIdx}`,
-                  violationCode: `INSP-2026-DEL-${String(hIdx + 60).padStart(3, '0')}`,
+                  id: v.violation_id || `live-${scanTargetId || hIdx}-${vIdx}`,
+                  scanId: scanTargetId,
+                  violationCode: `INSP-2026-DEL-${String(hIdx * 10 + vIdx + 50).padStart(3, '0')}`,
                   productName: h.product_name || 'Audited Packaging Specimen',
-                  brand: h.brand_name || h.brand || 'Inspected Commodity',
-                  category: 'Pre-Packaged Commodity',
-                  ruleReference: 'Rule 6(1)(e)',
-                  violationType: 'Missing Mandatory Declaration / Unit Sale Price Defect',
-                  severity: 'high',
-                  dateDetected: h.created_at ? new Date(h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
+                  brand: h.brand || h.brand_name || 'Inspected Brand',
+                  category: 'Packaged Commodity',
+                  ruleReference: v.rule_clause || 'Rule 6(1)',
+                  violationType: v.description || 'Statutory Non-Compliance',
+                  severity: v.severity || 'high',
+                  dateDetected: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
                   status: 'Notice Issued',
                   assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
-                  location: 'Central Delhi Market Division',
+                  location: 'Delhi Enforcement Division',
                   timeline: [
                     {
-                      date: h.created_at ? new Date(h.created_at).toLocaleString() : 'Recent',
-                      action: 'Field Inspection Notice Drafted under Section 36(1)',
+                      date: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleString() : '10-Sep-2026 14:00 IST',
+                      action: 'Statutory Non-Compliance Flagged via Field Optical Scan',
                       by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
-                      note: 'Non-compliant packaging sample logged into statutory ledger.',
+                      note: v.description || 'Statutory infraction recorded under Legal Metrology Rules, 2011.',
                     },
                   ],
                 });
-              }
-            });
-
-            setRecords(liveRecords);
-            if (liveRecords.length > 0) {
-              setExpandedId(liveRecords[0].id);
+              });
+            } else if (h.compliance_status === 'violation' || h.is_expired) {
+              liveRecords.push({
+                id: `live-scan-${scanTargetId || hIdx}`,
+                scanId: scanTargetId,
+                violationCode: `INSP-2026-DEL-${String(hIdx + 60).padStart(3, '0')}`,
+                productName: h.product_name || 'Audited Packaging Specimen',
+                brand: h.brand_name || h.brand || 'Inspected Commodity',
+                category: 'Pre-Packaged Commodity',
+                ruleReference: h.is_expired ? 'Rule 6(1)(d)' : 'Rule 6(1)(e)',
+                violationType: h.is_expired ? 'Expired Commodity - Strictly Banned from Retail Sale' : 'Missing Mandatory Declaration / Unit Sale Price Defect',
+                severity: 'high',
+                dateDetected: h.created_at ? new Date(h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
+                status: 'Notice Issued',
+                assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
+                location: 'Central Delhi Market Division',
+                timeline: [
+                  {
+                    date: h.created_at ? new Date(h.created_at).toLocaleString() : 'Recent',
+                    action: 'Field Inspection Notice Drafted under Section 36(1)',
+                    by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
+                    note: 'Non-compliant packaging sample logged into statutory ledger.',
+                  },
+                ],
+              });
+            } else {
+              liveRecords.push({
+                id: `live-scan-${scanTargetId || hIdx}`,
+                scanId: scanTargetId,
+                violationCode: `INSP-2026-DEL-${String(hIdx + 70).padStart(3, '0')}`,
+                productName: h.product_name || 'Audited Packaging Specimen',
+                brand: h.brand_name || h.brand || 'Inspected Commodity',
+                category: 'Pre-Packaged Commodity',
+                ruleReference: 'Rule 6(1) & Table-I',
+                violationType: 'Statutory Verification Complete - Passed All Rules',
+                severity: 'low',
+                dateDetected: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleDateString('en-GB') : '10-Sep-2026',
+                status: 'Resolved',
+                assignedOfficer: 'Sh. Rajesh Kumar Sharma (DL-LM-INSP-0442)',
+                location: 'Delhi Enforcement Division',
+                timeline: [
+                  {
+                    date: h.scanned_at || h.created_at ? new Date(h.scanned_at || h.created_at).toLocaleString() : 'Recent',
+                    action: 'Packaging Compliance Verified & Certified',
+                    by: 'Sh. Rajesh Kumar Sharma (Sr. Inspector)',
+                    note: 'All statutory declarations conform to LMPC Rules 2011.',
+                  },
+                ],
+              });
             }
-          } else {
-            setRecords([]);
-            setExpandedId(null);
+          });
+
+          setRecords(liveRecords);
+          if (liveRecords.length > 0) {
+            setExpandedId(liveRecords[0].id);
           }
-        }
-      } catch {
-        if (isMounted) {
+        } else {
           setRecords([]);
           setExpandedId(null);
         }
-      } finally {
-        if (isMounted) setLoading(false);
       }
-    };
+    } catch {
+      setRecords([]);
+      setExpandedId(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleClearAllInspections = async () => {
+    setIsClearing(true);
+    try {
+      await api.delete('/scan/history?role=officer');
+      setRecords([]);
+      setMetrics({
+        totalInspections: 0,
+        certifiedCompliant: 0,
+        infractionsFlagged: 0,
+        compoundedClosed: 0,
+      });
+      setIsClearModalOpen(false);
+      setFeedbackToast({
+        type: "success",
+        title: "Inspection Ledger Cleared",
+        desc: "All officer inspection dockets have been cleared from the register.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } catch {
+      setFeedbackToast({
+        type: "error",
+        title: "Action Failed",
+        desc: "Unable to clear officer inspection records from database.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  const handleDeleteRecord = async () => {
+    if (!recordToDelete) return;
+    setIsDeleting(true);
+    try {
+      const targetId = recordToDelete.scanId || recordToDelete.id;
+      await api.delete(`/scan/${targetId}`);
+      setRecords((prev) => prev.filter((r) => r.id !== recordToDelete.id));
+      setFeedbackToast({
+        type: "success",
+        title: "Docket Deleted",
+        desc: `Inspection docket '${recordToDelete.violationCode}' successfully removed.`,
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+      setRecordToDelete(null);
+    } catch {
+      setFeedbackToast({
+        type: "error",
+        title: "Deletion Failed",
+        desc: "Could not remove the selected inspection docket.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  useEffect(() => {
     fetchInspections();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const filteredRecords = useMemo(() => {
@@ -234,7 +321,31 @@ export const InspectionsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          {records.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsClearModalOpen(true)}
+              disabled={loading || isClearing}
+              className="text-xs font-medium text-rose-600 border-rose-200 hover:bg-rose-50 hover:border-rose-300"
+              icon={<Trash size={14} />}
+            >
+              Clear Ledger
+            </Button>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchInspections}
+            disabled={loading}
+            className="text-xs font-medium"
+            icon={<ArrowClockwise size={14} className={loading ? "animate-spin" : ""} />}
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -386,6 +497,19 @@ export const InspectionsPage: React.FC = () => {
                     {viol.status}
                   </span>
 
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRecordToDelete(viol);
+                    }}
+                    className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                    title="Delete this inspection docket"
+                    aria-label="Delete this inspection docket"
+                  >
+                    <Trash size={15} />
+                  </button>
+
                   <div className="text-slate-400 hover:text-slate-700 p-1">
                     {isExpanded ? (
                       <CaretUp size={16} />
@@ -448,6 +572,16 @@ export const InspectionsPage: React.FC = () => {
 
                   {/* Actions Strip */}
                   <div className="pt-3 border-t border-slate-200/70 flex items-center justify-end gap-2.5 flex-wrap">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setRecordToDelete(viol)}
+                      className="text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200"
+                      icon={<Trash size={14} />}
+                    >
+                      Delete Docket
+                    </Button>
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -571,6 +705,113 @@ export const InspectionsPage: React.FC = () => {
         assignedOfficer={activeViolationData?.assignedOfficer}
         inspectionDate={activeViolationData?.inspectionDate}
       />
+
+      {/* Clear All Inspections Confirmation Modal */}
+      <Modal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        title="Clear Inspection Ledger"
+        subtitle="Permanent Enforcement Record Deletion"
+        maxWidth="sm"
+        icon={<Trash size={20} className="text-rose-600" />}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsClearModalOpen(false)}
+              disabled={isClearing}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleClearAllInspections}
+              disabled={isClearing}
+              icon={isClearing ? <SpinnerGap size={14} className="animate-spin" /> : <Trash size={14} />}
+            >
+              {isClearing ? "Clearing..." : "Yes, Clear Ledger"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-2 text-xs text-slate-600 leading-relaxed">
+          <p>
+            Are you sure you want to clear <strong>all {records.length} field inspection records</strong> from the official ledger?
+          </p>
+          <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-2xs space-y-1">
+            <p className="font-semibold">Legal Metrology Ledger Notice:</p>
+            <p>
+              This action will permanently purge all field inspection dockets, Section 36(1) notices, and compounding tracking history for this enforcement division.
+            </p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Item Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(recordToDelete)}
+        onClose={() => setRecordToDelete(null)}
+        title="Delete Inspection Docket"
+        subtitle="Confirm Removal"
+        maxWidth="sm"
+        icon={<Trash size={20} className="text-rose-600" />}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRecordToDelete(null)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleDeleteRecord}
+              disabled={isDeleting}
+              icon={isDeleting ? <SpinnerGap size={14} className="animate-spin" /> : <Trash size={14} />}
+            >
+              {isDeleting ? "Deleting..." : "Delete Docket"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-2 text-xs text-slate-600 leading-relaxed">
+          <p>
+            Are you sure you want to delete inspection docket{' '}
+            <strong className="text-slate-900">{recordToDelete?.violationCode}</strong> for{' '}
+            <span className="text-slate-900 font-medium">{recordToDelete?.productName}</span>?
+          </p>
+          <p className="text-2xs text-slate-500">
+            Assigned: {recordToDelete?.assignedOfficer}
+          </p>
+        </div>
+      </Modal>
+
+      {/* Feedback Toast */}
+      {feedbackToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-slideUp">
+          <div className={`p-4 rounded-xl shadow-lg border flex items-start gap-3 max-w-sm ${
+            feedbackToast.type === "success" 
+              ? "bg-white text-slate-900 border-emerald-300 shadow-emerald-500/10" 
+              : "bg-white text-slate-900 border-rose-300 shadow-rose-500/10"
+          }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+              feedbackToast.type === "success" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+            }`}>
+              {feedbackToast.type === "success" ? <CheckCircle size={18} weight="bold" /> : <WarningCircle size={18} weight="bold" />}
+            </div>
+            <div className="space-y-0.5 min-w-0">
+              <h4 className="text-xs font-bold text-slate-900">{feedbackToast.title}</h4>
+              <p className="text-2xs text-slate-600 leading-relaxed">{feedbackToast.desc}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

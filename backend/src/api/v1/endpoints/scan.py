@@ -9,7 +9,7 @@ from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from backend.src.core.config import settings
 from backend.src.core.database import get_db_session
@@ -141,6 +141,7 @@ async def analyze_packaging_compliance(
     file: Optional[UploadFile] = File(None),
     back_file: Optional[UploadFile] = File(None),
     files: Optional[List[UploadFile]] = File(None),
+    user_role: Optional[str] = Form("consumer"),
     db: AsyncSession = Depends(get_db_session),
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
@@ -276,6 +277,7 @@ async def analyze_packaging_compliance(
 
     # Gracefully persist scan, declarations, and violations to database if available
     try:
+        effective_role = (user_role or "consumer").lower().strip()
         result = await db.execute(select(ProductScan).where(ProductScan.id == target_scan_id))
         scan_row = result.scalar_one_or_none()
         if not scan_row:
@@ -292,6 +294,7 @@ async def analyze_packaging_compliance(
                 mfg_date=mfg_str,
                 expiry_date=exp_str,
                 is_expired=is_expired_val,
+                user_role=effective_role,
                 overall_status=status_enum,
                 compliance_score=score_dec,
                 image_url=f"/static/uploads/{filename}",
@@ -307,6 +310,7 @@ async def analyze_packaging_compliance(
             scan_row.mfg_date = mfg_str
             scan_row.expiry_date = exp_str
             scan_row.is_expired = is_expired_val
+            scan_row.user_role = effective_role
             scan_row.overall_status = status_enum
             scan_row.compliance_score = score_dec
 
@@ -359,6 +363,7 @@ async def analyze_packaging_compliance(
             scan_id=target_scan_id,
             health_audit_id=None,
             scan_type="label_compliance",
+            user_role=effective_role,
         )
         db.add(history_record)
 
@@ -412,18 +417,24 @@ async def analyze_packaging_compliance(
 async def get_scan_history(
     limit: int = 50,
     scan_type: Optional[str] = None,
+    role: Optional[str] = None,
     db: AsyncSession = Depends(get_db_session),
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
-    Retrieves recent scan audit history across both statutory compliance checks and health checks directly from database.
+    Retrieves recent scan audit history across statutory compliance and health checks.
+    Supports role-based isolation (consumer vs officer) so audit records are never conflated.
     """
     items = []
+    effective_role = role.lower().strip() if role and role != "all" else None
 
     # 1. Fetch ProductScans (Statutory Compliance Scans)
     if not scan_type or scan_type in ("all", "label_compliance", "compliance"):
         try:
-            stmt = select(ProductScan).order_by(ProductScan.scanned_at.desc()).limit(limit)
+            stmt = select(ProductScan)
+            if effective_role:
+                stmt = stmt.where(ProductScan.user_role == effective_role)
+            stmt = stmt.order_by(ProductScan.scanned_at.desc()).limit(limit)
             result = await db.execute(stmt)
             scans = result.scalars().all()
             for s in scans:
@@ -445,9 +456,11 @@ async def get_scan_history(
                     status_val = "violation"
 
                 items.append({
+                    "id": str(s.id),
                     "scan_id": str(s.id),
                     "scan_code": s.scan_code or f"LMPC-{str(s.id)[:8].upper()}",
                     "scan_type": "label_compliance",
+                    "user_role": getattr(s, "user_role", "consumer") or "consumer",
                     "brand_name": s.brand,
                     "product_name": s.product_name,
                     "category": s.category or "Packaged Goods",
@@ -484,7 +497,10 @@ async def get_scan_history(
     # 2. Fetch HealthAudits (Consumer Health Checks)
     if not scan_type or scan_type in ("all", "health_check", "health"):
         try:
-            h_stmt = select(HealthAudit).order_by(HealthAudit.created_at.desc()).limit(limit)
+            h_stmt = select(HealthAudit)
+            if effective_role:
+                h_stmt = h_stmt.where(HealthAudit.user_role == effective_role)
+            h_stmt = h_stmt.order_by(HealthAudit.created_at.desc()).limit(limit)
             h_result = await db.execute(h_stmt)
             audits = h_result.scalars().all()
             for a in audits:
@@ -499,9 +515,11 @@ async def get_scan_history(
                     comp_status = "violation"
 
                 items.append({
+                    "id": str(a.id),
                     "scan_id": str(a.id),
                     "scan_code": f"HLTH-{str(a.id)[:8].upper()}",
                     "scan_type": "health_check",
+                    "user_role": getattr(a, "user_role", "consumer") or "consumer",
                     "brand_name": a.brand,
                     "product_name": a.product_name,
                     "category": "Packaged Food",
@@ -540,6 +558,118 @@ async def get_scan_history(
     # Sort unified results by created_at descending
     items.sort(key=lambda x: x.get("created_at") or "", reverse=True)
     return items[:limit]
+
+
+@router.delete("/history", summary="Clear scan audit history")
+async def clear_scan_history(
+    role: Optional[str] = None,
+    scan_type: Optional[str] = None,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
+):
+    """
+    Clears scan audit records with optional role-based separation (consumer vs officer).
+    Ensures safe cascading deletion across statutory violations, extracted declarations, and scan history.
+    """
+    try:
+        effective_role = role.lower().strip() if role and role != "all" else None
+
+        # 1. Target ProductScans
+        if not scan_type or scan_type in ("all", "label_compliance", "compliance"):
+            ps_query = select(ProductScan.id)
+            if effective_role:
+                ps_query = ps_query.where(ProductScan.user_role == effective_role)
+            ps_res = await db.execute(ps_query)
+            scan_ids = ps_res.scalars().all()
+
+            if scan_ids:
+                await db.execute(delete(StatutoryViolation).where(StatutoryViolation.scan_id.in_(scan_ids)))
+                await db.execute(delete(ExtractedDeclaration).where(ExtractedDeclaration.scan_id.in_(scan_ids)))
+                await db.execute(delete(ScanHistory).where(ScanHistory.scan_id.in_(scan_ids)))
+                await db.execute(delete(ProductScan).where(ProductScan.id.in_(scan_ids)))
+
+        # 2. Target HealthAudits
+        if not scan_type or scan_type in ("all", "health_check", "health"):
+            ha_query = select(HealthAudit.id)
+            if effective_role:
+                ha_query = ha_query.where(HealthAudit.user_role == effective_role)
+            ha_res = await db.execute(ha_query)
+            audit_ids = ha_res.scalars().all()
+
+            if audit_ids:
+                await db.execute(delete(ScanHistory).where(ScanHistory.health_audit_id.in_(audit_ids)))
+                await db.execute(delete(HealthAudit).where(HealthAudit.id.in_(audit_ids)))
+
+        # 3. Clean up any remaining ScanHistory entries for role
+        if effective_role:
+            await db.execute(delete(ScanHistory).where(ScanHistory.user_role == effective_role))
+        elif not scan_type or scan_type == "all":
+            await db.execute(delete(ScanHistory))
+
+        await db.commit()
+        return {
+            "status": "success",
+            "message": f"Successfully cleared scan history for role '{effective_role or 'all'}'.",
+        }
+    except Exception as err:
+        logger.error("Failed to clear scan history: %s", err)
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to clear scan history: {str(err)}",
+        )
+
+
+@router.delete("/{scan_id}", summary="Delete specific scan audit record by ID")
+async def delete_scan_by_id(
+    scan_id: str,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
+):
+    """
+    Deletes a single scan audit record (ProductScan or HealthAudit) and cascades to child tables.
+    """
+    try:
+        scan_uuid = uuid.UUID(scan_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid UUID format.")
+
+    deleted = False
+
+    # Check ProductScan
+    ps_res = await db.execute(select(ProductScan).where(ProductScan.id == scan_uuid))
+    ps_record = ps_res.scalar_one_or_none()
+    if ps_record:
+        await db.execute(delete(StatutoryViolation).where(StatutoryViolation.scan_id == scan_uuid))
+        await db.execute(delete(ExtractedDeclaration).where(ExtractedDeclaration.scan_id == scan_uuid))
+        await db.execute(delete(ScanHistory).where(ScanHistory.scan_id == scan_uuid))
+        await db.execute(delete(ProductScan).where(ProductScan.id == scan_uuid))
+        deleted = True
+
+    # Check HealthAudit
+    ha_res = await db.execute(select(HealthAudit).where(HealthAudit.id == scan_uuid))
+    ha_record = ha_res.scalar_one_or_none()
+    if ha_record:
+        await db.execute(delete(ScanHistory).where(ScanHistory.health_audit_id == scan_uuid))
+        await db.execute(delete(HealthAudit).where(HealthAudit.id == scan_uuid))
+        deleted = True
+
+    # Also clean ScanHistory if scan_uuid was passed as scan_history id
+    sh_res = await db.execute(select(ScanHistory).where(ScanHistory.id == scan_uuid))
+    sh_record = sh_res.scalar_one_or_none()
+    if sh_record:
+        await db.execute(delete(ScanHistory).where(ScanHistory.id == scan_uuid))
+        deleted = True
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Scan record '{scan_id}' not found.")
+
+    await db.commit()
+    return {
+        "status": "success",
+        "message": f"Scan record '{scan_id}' successfully deleted.",
+        "deleted_id": scan_id,
+    }
 
 
 @router.get("/{scan_id}", summary="Retrieve scan record by ID")

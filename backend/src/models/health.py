@@ -73,6 +73,11 @@ class HealthAudit(Base):
         default=False,
         nullable=False,
     )
+    user_role: Mapped[str] = mapped_column(
+        String(32),
+        default="consumer",
+        nullable=False,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -126,6 +131,11 @@ class ScanHistory(Base):
     )
     scan_type: Mapped[str] = mapped_column(
         String(50),
+        nullable=False,
+    )
+    user_role: Mapped[str] = mapped_column(
+        String(32),
+        default="consumer",
         nullable=False,
     )
     created_at: Mapped[datetime] = mapped_column(

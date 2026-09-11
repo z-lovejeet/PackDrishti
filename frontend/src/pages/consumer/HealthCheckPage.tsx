@@ -29,10 +29,15 @@ import { HealthBadgeGroup } from '../../components/health/HealthBadgeGroup';
 import { NutrientRow } from '../../components/health/NutrientRow';
 import { DietaryAdvisory } from '../../components/health/DietaryAdvisory';
 import { ProductHealthAudit } from '../../types';
+import { UserRole } from '../../types/roles';
 import { apiClient } from '../../utils/apiClient';
 import { downsampleImage, blobToFile } from '../../utils/imageProc';
 
-export const HealthCheckPage: React.FC = () => {
+interface HealthCheckPageProps {
+  userRole?: UserRole;
+}
+
+export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'consumer' }) => {
   // Dual Image Upload States
   const [frontImageSrc, setFrontImageSrc] = useState<string | null>(null);
   const [frontFileName, setFrontFileName] = useState<string>('');
@@ -203,6 +208,7 @@ export const HealthCheckPage: React.FC = () => {
 
       // Do NOT send hardcoded dummy brand or file names as hints
       // Allow the Multimodal Vision Agent to extract genuine brand and product identity directly from packaging pixels
+      formData.append('user_role', userRole || 'consumer');
 
       const response = await apiClient.post('/health/analyze', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },

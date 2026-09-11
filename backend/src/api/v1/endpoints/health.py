@@ -57,6 +57,7 @@ async def analyze_health_packaging(
     serving_size_g: Optional[float] = Form(None),
     user_profile: Optional[str] = Form("standard"),
     is_liquid: Optional[bool] = Form(False),
+    user_role: Optional[str] = Form("consumer"),
     db: AsyncSession = Depends(get_db_session),
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
@@ -150,6 +151,7 @@ async def analyze_health_packaging(
     # 4. Persist to Supabase / Database with graceful fallback
     audit_uuid = uuid.uuid4()
     try:
+        effective_role = (user_role or "consumer").lower().strip()
         audit_record = HealthAudit(
             id=audit_uuid,
             user_id=current_user.id if current_user else None,
@@ -164,6 +166,7 @@ async def analyze_health_packaging(
             mfg_date=analysis.mfgDate,
             expiry_date=analysis.expiryDate,
             is_expired=analysis.isExpired,
+            user_role=effective_role,
         )
         db.add(audit_record)
 
@@ -174,6 +177,7 @@ async def analyze_health_packaging(
             scan_id=None,
             health_audit_id=audit_uuid,
             scan_type="health_check",
+            user_role=effective_role,
         )
         db.add(history_record)
         await db.commit()

@@ -79,12 +79,13 @@ interface ScanMachineState {
   // Actions
   startCapture: () => void;
   stopCapture: () => void;
-  processFile: (fileOrBlob: File | Blob, filename?: string) => Promise<void>;
+  processFile: (fileOrBlob: File | Blob, filename?: string, userRole?: string) => Promise<void>;
   processFiles: (
     frontFile: File | Blob,
     backFile?: File | Blob | null,
     frontFilename?: string,
-    backFilename?: string
+    backFilename?: string,
+    userRole?: string
   ) => Promise<void>;
   selectToken: (index: number | null) => void;
   reset: () => void;
@@ -114,15 +115,16 @@ export const useScanMachine = create<ScanMachineState>((set, get) => ({
     }
   },
 
-  processFile: async (fileOrBlob: File | Blob, filename = 'packaging_scan.jpg') => {
-    return get().processFiles(fileOrBlob, null, filename);
+  processFile: async (fileOrBlob: File | Blob, filename = 'packaging_scan.jpg', userRole = 'consumer') => {
+    return get().processFiles(fileOrBlob, null, filename, undefined, userRole);
   },
 
   processFiles: async (
     frontFile: File | Blob,
     backFile?: File | Blob | null,
     frontFilename = 'packaging_front.jpg',
-    backFilename = 'packaging_back.jpg'
+    backFilename = 'packaging_back.jpg',
+    userRole = 'consumer'
   ) => {
     try {
       // Step 1: Compressing
@@ -142,6 +144,7 @@ export const useScanMachine = create<ScanMachineState>((set, get) => ({
       const compressedFront = blobToFile(frontDownsample.blob, frontFilename);
       const formData = new FormData();
       formData.append('file', compressedFront);
+      formData.append('user_role', userRole || 'consumer');
 
       let backDataUrl: string | null = null;
       if (backFile) {

@@ -273,7 +273,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
     if (!f && !b) return;
     const primary = f || b!;
     const secondary = f ? b : null;
-    processFiles(primary, secondary, primary.name, secondary?.name);
+    processFiles(primary, secondary, primary.name, secondary?.name, userRole);
   };
 
   const handleUnifiedDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -288,15 +288,15 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         setBackFile(f2);
         setFrontPreview(URL.createObjectURL(f1));
         setBackPreview(URL.createObjectURL(f2));
-        processFiles(f1, f2, f1.name, f2.name);
+        processFiles(f1, f2, f1.name, f2.name, userRole);
       } else {
         const f1 = filesArray[0];
         setFrontFile(f1);
         setFrontPreview(URL.createObjectURL(f1));
         if (backFile) {
-          processFiles(f1, backFile, f1.name, backFile.name);
+          processFiles(f1, backFile, f1.name, backFile.name, userRole);
         } else {
-          processFiles(f1, null, f1.name);
+          processFiles(f1, null, f1.name, undefined, userRole);
         }
       }
     }
@@ -309,15 +309,17 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       setFrontFile(captured);
       setFrontPreview(URL.createObjectURL(captured));
       if (backFile) {
-        processFiles(captured, backFile, captured.name, backFile.name);
+        processFiles(captured, backFile, captured.name, backFile.name, userRole);
+      } else {
+        processFiles(captured, null, captured.name, undefined, userRole);
       }
     } else {
       setBackFile(captured);
       setBackPreview(URL.createObjectURL(captured));
       if (frontFile) {
-        processFiles(frontFile, captured, frontFile.name, captured.name);
+        processFiles(frontFile, captured, frontFile.name, captured.name, userRole);
       } else {
-        processFiles(captured, null, captured.name);
+        processFiles(captured, null, captured.name, undefined, userRole);
       }
     }
   };
@@ -536,7 +538,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                 setBackFile(arr[1]);
                 setFrontPreview(URL.createObjectURL(arr[0]));
                 setBackPreview(URL.createObjectURL(arr[1]));
-                processFiles(arr[0], arr[1], arr[0].name, arr[1].name);
+                processFiles(arr[0], arr[1], arr[0].name, arr[1].name, userRole);
               } else {
                 handleFrontFileSelected(arr[0]);
               }

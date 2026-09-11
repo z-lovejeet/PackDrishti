@@ -12,10 +12,13 @@ import {
   Heartbeat, 
   X, 
   ShieldCheck, 
-  FileText
+  FileText,
+  Trash,
+  WarningCircle
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { Badge } from "../../components/common/Badge";
+import { Modal } from "../../components/common/Modal";
 import { ScanHistoryItem } from "../../types";
 import { apiClient } from "../../utils/apiClient";
 
@@ -60,10 +63,16 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
   const [scanTypeFilter, setScanTypeFilter] = useState<string>("all");
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
 
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<ScanHistoryItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [feedbackToast, setFeedbackToast] = useState<{ title: string; desc: string; type: "success" | "error" } | null>(null);
+
   const fetchLiveHistory = async () => {
     setIsLoading(true);
     try {
-      const response = await apiClient.get<ApiHistoryRecord[]>("/scan/history");
+      const response = await apiClient.get<ApiHistoryRecord[]>("/scan/history?role=consumer");
       if (response.data && response.data.length > 0) {
         const mappedItems: ScanHistoryItem[] = response.data.map((record) => {
           const isCompliant =
@@ -137,6 +146,55 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
       setIsLiveSource(false);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleClearAllHistory = async () => {
+    setIsClearing(true);
+    try {
+      await apiClient.delete("/scan/history?role=consumer");
+      setHistoryItems([]);
+      setIsClearModalOpen(false);
+      setFeedbackToast({
+        type: "success",
+        title: "Repository Cleared",
+        desc: "All consumer scan history records have been permanently cleared.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } catch {
+      setFeedbackToast({
+        type: "error",
+        title: "Action Failed",
+        desc: "Unable to clear consumer scan records from database.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
+    setIsDeleting(true);
+    try {
+      await apiClient.delete(`/scan/${itemToDelete.id}`);
+      setHistoryItems((prev) => prev.filter((x) => x.id !== itemToDelete.id));
+      setFeedbackToast({
+        type: "success",
+        title: "Record Deleted",
+        desc: `Scan record '${itemToDelete.productName}' deleted from repository.`,
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+      setItemToDelete(null);
+    } catch {
+      setFeedbackToast({
+        type: "error",
+        title: "Deletion Failed",
+        desc: "Could not remove the selected scan record.",
+      });
+      setTimeout(() => setFeedbackToast(null), 4000);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -228,13 +286,27 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
         </div>
 
         {/* Header Action Buttons */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          {historyItems.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsClearModalOpen(true)}
+              disabled={isLoading || isClearing}
+              className="text-xs font-medium text-rose-600 border-rose-200 hover:bg-rose-50 hover:border-rose-300"
+              icon={<Trash size={14} />}
+            >
+              Clear All History
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
             onClick={fetchLiveHistory}
             disabled={isLoading}
             className="text-xs font-medium"
+            icon={<ArrowClockwise size={14} className={isLoading ? "animate-spin" : ""} />}
           >
             {isLoading ? "Refreshing..." : "Refresh"}
           </Button>
@@ -575,7 +647,17 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
                   <span>Audited on {item.scanDate}</span>
                 </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setItemToDelete(item)}
+                    className="text-2xs h-8 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200"
+                    icon={<Trash size={14} />}
+                  >
+                    Delete
+                  </Button>
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -652,6 +734,111 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
             >
               Scan Package Now
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Clear All Confirmation Modal */}
+      <Modal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        title="Clear All Consumer History"
+        subtitle="Permanent Database Deletion"
+        maxWidth="sm"
+        icon={<Trash size={20} className="text-rose-600" />}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsClearModalOpen(false)}
+              disabled={isClearing}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleClearAllHistory}
+              disabled={isClearing}
+              icon={isClearing ? <SpinnerGap size={14} className="animate-spin" /> : <Trash size={14} />}
+            >
+              {isClearing ? "Clearing..." : "Yes, Clear All"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-2 text-xs text-slate-600 leading-relaxed">
+          <p>
+            Are you sure you want to clear <strong>all {historyItems.length} consumer audit records</strong> from the central repository?
+          </p>
+          <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-2xs space-y-1">
+            <p className="font-semibold">Statutory Ledger Notice:</p>
+            <p>
+              This action permanently purges all packaging evaluations, nutrition audits, and violation records registered under consumer mode. This cannot be undone.
+            </p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Item Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(itemToDelete)}
+        onClose={() => setItemToDelete(null)}
+        title="Delete Scan Record"
+        subtitle="Confirm Removal"
+        maxWidth="sm"
+        icon={<Trash size={20} className="text-rose-600" />}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setItemToDelete(null)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleDeleteItem}
+              disabled={isDeleting}
+              icon={isDeleting ? <SpinnerGap size={14} className="animate-spin" /> : <Trash size={14} />}
+            >
+              {isDeleting ? "Deleting..." : "Delete Record"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-2 text-xs text-slate-600 leading-relaxed">
+          <p>
+            Are you sure you want to delete the scan report for{' '}
+            <strong className="text-slate-900">{itemToDelete?.productName}</strong> ({itemToDelete?.brand})?
+          </p>
+          <p className="text-2xs text-slate-500 font-mono">
+            Docket ID: {itemToDelete?.scanCode}
+          </p>
+        </div>
+      </Modal>
+
+      {/* Feedback Toast */}
+      {feedbackToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-slideUp">
+          <div className={`p-4 rounded-xl shadow-lg border flex items-start gap-3 max-w-sm ${
+            feedbackToast.type === "success" 
+              ? "bg-white text-slate-900 border-emerald-300 shadow-emerald-500/10" 
+              : "bg-white text-slate-900 border-rose-300 shadow-rose-500/10"
+          }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+              feedbackToast.type === "success" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+            }`}>
+              {feedbackToast.type === "success" ? <CheckCircle size={18} weight="bold" /> : <WarningCircle size={18} weight="bold" />}
+            </div>
+            <div className="space-y-0.5 min-w-0">
+              <h4 className="text-xs font-bold text-slate-900">{feedbackToast.title}</h4>
+              <p className="text-2xs text-slate-600 leading-relaxed">{feedbackToast.desc}</p>
+            </div>
           </div>
         </div>
       )}

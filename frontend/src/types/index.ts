@@ -71,6 +71,7 @@ export interface ProductScan {
 
 export interface ViolationRecord {
   id: string;
+  scanId?: string;
   violationCode: string;
   productName: string;
   brand: string;

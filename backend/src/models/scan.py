@@ -85,6 +85,11 @@ class ProductScan(Base):
         default=False,
         nullable=False,
     )
+    user_role: Mapped[str] = mapped_column(
+        String(32),
+        default="consumer",
+        nullable=False,
+    )
     overall_status: Mapped[ComplianceStatus] = mapped_column(
         SQLEnum(ComplianceStatus, name="compliance_status", native_enum=False, values_callable=lambda x: [e.value for e in x]),
         nullable=False,

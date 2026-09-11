@@ -55,23 +55,34 @@ class DashboardActivityResponse(BaseModel):
     summary="Jurisdiction Enforcement Metrics & KPIs",
 )
 async def get_dashboard_metrics(
+    role: Optional[str] = None,
     db: AsyncSession = Depends(get_db_session),
 ):
     """
     Returns aggregated KPIs for officer dashboard:
     total audits, compliance rates, compounding totals, and violation categories.
     Aggregated strictly from real inspection and violation records.
+    Supports role-based isolation (e.g. role='officer').
     """
     try:
-        scan_count_res = await db.execute(select(func.count(ProductScan.id)))
+        effective_role = role.lower().strip() if role and role != "all" else None
+
+        scan_query = select(func.count(ProductScan.id))
+        if effective_role:
+            scan_query = scan_query.where(ProductScan.user_role == effective_role)
+        scan_count_res = await db.execute(scan_query)
         total_inspections = scan_count_res.scalar() or 0
 
-        comp_count_res = await db.execute(
-            select(func.count(ProductScan.id)).where(ProductScan.overall_status == ComplianceStatus.COMPLIANT)
-        )
+        comp_query = select(func.count(ProductScan.id)).where(ProductScan.overall_status == ComplianceStatus.COMPLIANT)
+        if effective_role:
+            comp_query = comp_query.where(ProductScan.user_role == effective_role)
+        comp_count_res = await db.execute(comp_query)
         compliant_count = comp_count_res.scalar() or 0
 
-        viol_count_res = await db.execute(select(func.count(StatutoryViolation.id)))
+        viol_query = select(func.count(StatutoryViolation.id)).join(ProductScan, StatutoryViolation.scan_id == ProductScan.id)
+        if effective_role:
+            viol_query = viol_query.where(ProductScan.user_role == effective_role)
+        viol_count_res = await db.execute(viol_query)
         violations_recorded = viol_count_res.scalar() or 0
 
         compounded_closed = 0
@@ -79,20 +90,27 @@ async def get_dashboard_metrics(
         total_compounding_collected = 0.0
 
         # Dynamic category breakdown from real scans
-        cat_res = await db.execute(
-            select(ProductScan.category, func.count(ProductScan.id))
-            .group_by(ProductScan.category)
-        )
+        cat_query = select(ProductScan.category, func.count(ProductScan.id))
+        if effective_role:
+            cat_query = cat_query.where(ProductScan.user_role == effective_role)
+        cat_query = cat_query.group_by(ProductScan.category)
+        cat_res = await db.execute(cat_query)
         category_breakdown = {row[0]: row[1] for row in cat_res.all() if row[0]}
 
         # Dynamic top violating rules from real violations
-        rule_res = await db.execute(
+        rule_query = (
             select(
                 StatutoryViolation.rule_reference,
                 StatutoryViolation.title,
                 StatutoryViolation.severity,
                 func.count(StatutoryViolation.id),
             )
+            .join(ProductScan, StatutoryViolation.scan_id == ProductScan.id)
+        )
+        if effective_role:
+            rule_query = rule_query.where(ProductScan.user_role == effective_role)
+        rule_query = (
+            rule_query
             .group_by(
                 StatutoryViolation.rule_reference,
                 StatutoryViolation.title,
@@ -101,6 +119,7 @@ async def get_dashboard_metrics(
             .order_by(func.count(StatutoryViolation.id).desc())
             .limit(5)
         )
+        rule_res = await db.execute(rule_query)
         top_rules = [
             {
                 "rule": r[0] or "General Provision",
@@ -147,14 +166,20 @@ async def get_dashboard_metrics(
     summary="Recent Enforcement Activity Log",
 )
 async def get_dashboard_activity(
+    role: Optional[str] = None,
     db: AsyncSession = Depends(get_db_session),
 ):
     """
     Returns recent enforcement activities and case milestones across the jurisdiction
     derived from real scan records.
+    Supports role-based isolation (e.g. role='officer').
     """
     try:
-        stmt = select(ProductScan).order_by(ProductScan.scanned_at.desc()).limit(15)
+        effective_role = role.lower().strip() if role and role != "all" else None
+        stmt = select(ProductScan)
+        if effective_role:
+            stmt = stmt.where(ProductScan.user_role == effective_role)
+        stmt = stmt.order_by(ProductScan.scanned_at.desc()).limit(15)
         res = await db.execute(stmt)
         scans = res.scalars().all()
 

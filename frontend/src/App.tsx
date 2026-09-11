@@ -157,7 +157,7 @@ export function App() {
           )}
 
           {activePage === "health" && (
-            <HealthCheckPage />
+            <HealthCheckPage userRole={userRole} />
           )}
 
           {activePage === "history" && (
