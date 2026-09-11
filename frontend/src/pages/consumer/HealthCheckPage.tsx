@@ -767,17 +767,36 @@ export const HealthCheckPage: React.FC = () => {
 
             </div>
 
-            {/* Health Warning Badges Strip using HealthBadgeGroup */}
-            <div className="pt-3 border-t border-neutral-100 space-y-2">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-xs font-bold text-neutral-800 font-heading uppercase tracking-wide flex items-center gap-1.5">
-                  <ShieldCheck size={16} className="text-neutral-900" weight="bold" />
-                  <span>Identified Nutritional Health Badges:</span>
-                </span>
-                <span className="text-2xs text-neutral-500 font-medium">
-                  Audited per ICMR-NIN 2024 thresholds
-                </span>
+            {/* Health Warning Badges: Premium Centerpiece Showcase */}
+            <div className="pt-6 border-t border-slate-200/90 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <ShieldCheck size={18} weight="bold" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-950 font-heading uppercase tracking-wider">
+                        Identified Nutritional Health Badges
+                      </h3>
+                      <span className="text-2xs font-mono font-bold bg-rose-100 text-rose-900 px-2.5 py-0.5 rounded-full border border-rose-200">
+                        {currentAudit.badges.length} Critical Indicators
+                      </span>
+                    </div>
+                    <p className="text-2xs text-slate-500 font-medium mt-0.5">
+                      Clinical risk detection audited against ICMR-NIN 2024 &amp; WHO dietary thresholds
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-2xs font-mono font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded border border-slate-200">
+                    ICMR-NIN 2024 Standards
+                  </span>
+                </div>
               </div>
+
+              {/* Large Premium Badges Grid */}
               <HealthBadgeGroup badges={currentAudit.badges} />
             </div>
           </div>
