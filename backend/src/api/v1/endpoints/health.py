@@ -116,7 +116,7 @@ async def analyze_health_packaging(
     resolved_serving = 30.0
 
     # 3. Format badges and dietary advisory for database persistence
-    db_badges = [{"label": b.label, "type": b.type, "description": b.description or ""} for b in analysis.badges]
+    db_badges = [b.model_dump() for b in analysis.badges]
     db_nutrients = [
         {
             "name": n.name,
@@ -141,6 +141,8 @@ async def analyze_health_packaging(
         "has_palm_oil": analysis.hasPalmOil,
         "palm_oil_details": analysis.palmOilDetails,
         "flagged_ingredients": analysis.flaggedIngredients,
+        "artificial_colors": [c.model_dump() for c in analysis.artificialColors],
+        "what_is_high": [w.model_dump() for w in analysis.whatIsHigh],
         "mfg_date": analysis.mfgDate,
         "expiry_date": analysis.expiryDate,
         "is_expired": analysis.isExpired,
@@ -228,6 +230,8 @@ async def analyze_health_packaging(
             "has_artificial_additives": analysis.hasArtificialAdditives,
             "ingredients_list": analysis.ingredientsList,
             "flagged_ingredients": analysis.flaggedIngredients,
+            "artificial_colors": [c.model_dump() for c in analysis.artificialColors],
+            "what_is_high": [w.model_dump() for w in analysis.whatIsHigh],
             "nutrients": [n.model_dump() for n in analysis.nutrients],
             "healthier_alternatives": analysis.healthierAlternatives,
             "dietary_advisory": db_advisory,

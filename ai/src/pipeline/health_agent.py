@@ -13,6 +13,11 @@ class HealthBadge(BaseModel):
     label: str = "Health Marker"
     type: str = "warning"  # 'danger' | 'warning' | 'good' | 'neutral'
     description: Optional[str] = None
+    whatIsIt: Optional[str] = None
+    whyUsed: Optional[str] = None
+    healthConsequences: Optional[str] = None
+    safeDailyLimit: Optional[str] = None
+    whoShouldAvoid: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -24,6 +29,28 @@ class HealthBadge(BaseModel):
                 s = str(data["severity"]).lower()
                 data["type"] = "danger" if s == "danger" else ("good" if s == "good" else "warning")
         return data
+
+
+class ArtificialColorAuditItem(BaseModel):
+    name: str = "Food Colorant"
+    insCode: Optional[str] = None
+    colorType: str = "synthetic"  # 'natural' | 'permitted_synthetic' | 'high_risk_azo'
+    grade: str = "Grade B"  # 'Grade A (Wholesome Natural)' | 'Grade B (Permitted Synthetic)' | 'Grade C (High Concern Azo Dye)'
+    quality: str = "Standard Synthetic"
+    isOkayToEat: str = "Caution / Limit"  # 'Safe to Eat' | 'Consume in Moderation' | 'Avoid / High Risk'
+    whyAdded: str = "Used for visual cosmetic coloration."
+    healthConsequences: str = "Potential hypersensitivity or hyperactivity."
+    regulatoryStatus: str = "Permitted under FSSAI with upper limits."
+
+
+class HighNutrientRiskItem(BaseModel):
+    nutrient: str = "Nutrient"
+    measuredValue: str = "0.0"
+    icmrLimit: str = "ICMR Limit"
+    severity: str = "high"  # 'critical' | 'high' | 'moderate'
+    whatIsIt: str = "Nutrient description"
+    whatItCauses: str = "Health consequences"
+    immediateEffects: str = "Immediate physiological response"
 
 
 class NutrientAuditItem(BaseModel):
@@ -133,6 +160,236 @@ class NutrientAuditItem(BaseModel):
         return data
 
 
+BADGE_EDUCATIONAL_DATABASE = {
+    "caffeine": {
+        "whatIsIt": "A central nervous system stimulant extracted from coffee/tea or chemically synthesized to artificially increase alertness and heart rate.",
+        "whyUsed": "Added to energy drinks and colas to deliver a quick stimulant surge, heighten focus, and drive repeat consumption.",
+        "healthConsequences": "Triggers rapid heart palpitations, elevated blood pressure spikes, tremors, acid reflux, insomnia, and acute anxiety. In children and teenagers, it impairs neurological sleep architecture and risks cardiac arrhythmias.",
+        "safeDailyLimit": "0mg for children & teenagers (< 16 yrs); max 400mg/day for healthy non-pregnant adults.",
+        "whoShouldAvoid": "Children under 16, pregnant & lactating women, individuals with heart arrhythmias, hypertension, or chronic panic/anxiety disorders.",
+    },
+    "sugar": {
+        "whatIsIt": "Refined industrial sugars (sucrose, liquid glucose, high fructose corn syrup, maltodextrin) stripped of all dietary fiber and micronutrients.",
+        "whyUsed": "Used by manufacturers to create intense sweetness, trigger dopamine pleasure receptors in the brain, act as an inexpensive preservative, and drive cravings.",
+        "healthConsequences": "Causes rapid glycemic surges, insulin resistance, Non-Alcoholic Fatty Liver Disease (NAFLD), visceral belly fat, accelerated dental caries, and heightened Type-2 diabetes risk.",
+        "safeDailyLimit": "Under 25g/day (~5-6 teaspoons) for adults; under 15g/day for children (ICMR-NIN 2024).",
+        "whoShouldAvoid": "Type-2 diabetics, pre-diabetics, individuals with fatty liver, insulin resistance, or metabolic syndrome.",
+    },
+    "palm": {
+        "whatIsIt": "A heavily refined tropical vegetable oil derived from the fruit of oil palms, containing approximately 50% saturated palmitic acid.",
+        "whyUsed": "The cheapest commercial frying oil available globally; possesses high thermal stability for factory deep-frying and extends shelf-life without going rancid.",
+        "healthConsequences": "High palmitic acid directly drives serum LDL ('bad') cholesterol, stiffens arterial walls, promotes atherogenic plaque deposition, and increases coronary heart disease risk.",
+        "safeDailyLimit": "Keep total saturated fats under 8-10% of total daily energy (~20g/day) under ICMR-NIN 2024 guidelines.",
+        "whoShouldAvoid": "Individuals with high cholesterol (LDL > 100 mg/dL), cardiovascular disease history, coronary stents, hypertension, or fatty liver.",
+    },
+    "saturated": {
+        "whatIsIt": "Dietary fatty acids with single chemical bonds that remain solid at room temperature, predominantly found in palm oil, vanaspati, and processed dairy.",
+        "whyUsed": "Provides a rich, crispy mouthfeel and resists chemical oxidation during transport and retail display.",
+        "healthConsequences": "Elevates circulating LDL cholesterol and apolipoprotein B, accelerating coronary artery narrowing and vascular stiffness.",
+        "safeDailyLimit": "Maximum 20g/day for an average 2000 kcal diet (ICMR-NIN 2024).",
+        "whoShouldAvoid": "Cardiovascular patients, individuals with hypercholesterolemia, and stroke survivors.",
+    },
+    "sodium": {
+        "whatIsIt": "Sodium chloride (table salt) combined with industrial sodium-based flavor compounds such as Monosodium Glutamate (MSG) and Disodium Inosinate.",
+        "whyUsed": "Used as an inexpensive flavor enhancer to stimulate salivary appetite, mask stale ingredients, and inhibit bacterial spoilage.",
+        "healthConsequences": "Forces the vascular system to retain water, expanding intravascular blood volume and elevating systolic blood pressure. Over time, it damages kidney nephrons and arterial linings.",
+        "safeDailyLimit": "Maximum 2000mg/day (approximately 5g or 1 level teaspoon of table salt) for adults (ICMR-NIN & WHO).",
+        "whoShouldAvoid": "Hypertensive individuals, chronic kidney disease (CKD) patients, heart failure patients, and people suffering from fluid retention.",
+    },
+    "ultra-processed": {
+        "whatIsIt": "NOVA Group 4 industrial formulations made from food-derived substances (protein isolates, hydrogenated oils, modified starches) combined with synthetic additives, colors, and emulsifiers.",
+        "whyUsed": "Engineered in food science laboratories to achieve the 'bliss point'—an artificial balance of fat, sugar, and salt designed to bypass natural fullness signals so consumers overconsume.",
+        "healthConsequences": "Extensively linked in clinical studies to metabolic syndrome, gut microbiome depletion, chronic systemic inflammation, insulin resistance, and increased risk of colorectal cancer.",
+        "safeDailyLimit": "Should represent less than 10-15% of total caloric intake; should never replace whole-food grains, vegetables, and pulses.",
+        "whoShouldAvoid": "Growing children, adolescents, individuals with irritable bowel syndrome (IBS), fatty liver, or autoimmune conditions.",
+    },
+    "color": {
+        "whatIsIt": "Synthetic chemical dyes derived from petroleum and coal-tar distillates used exclusively for cosmetic coloring.",
+        "whyUsed": "Used to make cheap, dull ingredients look bright, fresh, and appetizing, or to deceive consumers into thinking real fruit is present.",
+        "healthConsequences": "Synthetic azo dyes (like Tartrazine Yellow 5 and Sunset Yellow 6) provoke acute histamine release, allergic skin hives (urticaria), asthma exacerbation, and attention deficit hyperactivity in children.",
+        "safeDailyLimit": "0mg of synthetic coal-tar dyes is recommended for children and sensitive individuals.",
+        "whoShouldAvoid": "Children under 16, individuals with asthma, aspirin sensitivity, or chronic skin allergies.",
+    },
+    "trans": {
+        "whatIsIt": "Chemically altered unsaturated fatty acids formed when hydrogen gas is bubbled through vegetable oils to create solid fats (vanaspati / partially hydrogenated fats).",
+        "whyUsed": "Provides a flaky, melt-in-the-mouth texture for bakery biscuits, cakes, and fried foods at very low production cost.",
+        "healthConsequences": "The most dangerous fat known in nutritional medicine. It simultaneously elevates LDL ('bad') cholesterol AND lowers protective HDL ('good') cholesterol, accelerating coronary blockages.",
+        "safeDailyLimit": "Statutory limit under FSSAI is < 0.2g per 100g. Recommended dietary intake is strictly ZERO grams.",
+        "whoShouldAvoid": "Everyone without exception. Strict medical contraindication for cardiovascular patients.",
+    },
+    "maida": {
+        "whatIsIt": "Refined wheat flour that has been stripped of its fibrous outer bran layer and nutrient-dense germ, leaving only pure starchy endosperm.",
+        "whyUsed": "Gives processed breads, noodles, and biscuits a soft, uniform, and light texture while preventing spoilage.",
+        "healthConsequences": "Rapidly converts into pure blood glucose within 15 to 20 minutes of ingestion, causing immediate insulin surges, abdominal fat storage, and chronic constipation due to zero dietary fiber.",
+        "safeDailyLimit": "Substitute with unrefined whole wheat, ragi, foxtail millets, or oats.",
+        "whoShouldAvoid": "Type-2 diabetics, pre-diabetics, obese individuals, and people prone to sluggish bowel motility.",
+    },
+    "calorie": {
+        "whatIsIt": "Concentrated dietary energy exceeding 500 kcal per 100g, driven by high fat and sugar content.",
+        "whyUsed": "A consequence of deep-frying in industrial fats and adding concentrated sweeteners.",
+        "healthConsequences": "Leads to rapid positive energy balance, accelerating visceral adiposity, hepatic steatosis (fatty liver), and metabolic syndrome.",
+        "safeDailyLimit": "Single snack portions should not exceed 150-200 kcal.",
+        "whoShouldAvoid": "Sedentary individuals, obese patients, and those managing metabolic syndrome.",
+    },
+    "sweetener": {
+        "whatIsIt": "Synthetic non-nutritive chemicals (such as Sucralose, Aspartame, and Acesulfame Potassium) that stimulate sweetness receptors up to 600 times more intensely than sugar.",
+        "whyUsed": "Allows manufacturers to market products as 'Sugar-Free' or 'Diet' while maintaining intense sweetness.",
+        "healthConsequences": "Disrupts natural satiety cues, triggers gut dysbiosis by altering beneficial microbiome bacteria, and may stimulate compensatory sugar cravings. WHO advises against non-sugar sweeteners for weight loss.",
+        "safeDailyLimit": "Strictly limit; avoid routine daily consumption.",
+        "whoShouldAvoid": "Pregnant women, young children, and individuals suffering from digestive dysbiosis or phenylketonuria (for aspartame).",
+    },
+    "expired": {
+        "whatIsIt": "A packaged commodity that has exceeded its statutory shelf-life, best-before, or expiry date.",
+        "whyUsed": "Illegal retail offering of unsold inventory in violation of Legal Metrology Rule 18(1) and FSSAI Section 59.",
+        "healthConsequences": "Severe microbiological contamination from bacterial pathogens (Salmonella, Clostridium, Staphylococcus), enterotoxins, and toxic oxidized rancid fats.",
+        "safeDailyLimit": "ZERO. Strictly banned from human consumption.",
+        "whoShouldAvoid": "ALL CONSUMERS WITHOUT EXCEPTION. Immediate disposal is mandatory.",
+    },
+    "biological": {
+        "whatIsIt": "Active microbiological pathogen proliferation, mold growth, or lipid peroxidation hazard resulting from expired or broken packaging.",
+        "whyUsed": "Severe post-shelf-life degradation.",
+        "healthConsequences": "Causes acute gastrointestinal inflammation, vomiting, diarrhea, systemic enterotoxicity, and potentially life-threatening food poisoning.",
+        "safeDailyLimit": "ZERO. Unfit for consumption.",
+        "whoShouldAvoid": "ALL CONSUMERS.",
+    },
+}
+
+KNOWN_COLORS_DATABASE = [
+    {
+        "keywords": ["102", "tartrazine", "yellow 5", "yellow no. 5", "ins 102"],
+        "name": "Tartrazine (Yellow 5)",
+        "insCode": "INS 102",
+        "colorType": "high_risk_azo",
+        "grade": "Grade C (High Concern Azo Dye)",
+        "quality": "Low Quality Synthetic Petroleum / Coal-Tar Dye",
+        "isOkayToEat": "Avoid or Strictly Limit",
+        "whyAdded": "Used by manufacturers to create an artificial lemon-yellow hue, simulating butter, cheese, or lemon flavor at near-zero cost.",
+        "healthConsequences": "Provokes hyperactivity and attention-deficit behavior in children. Known trigger for acute urticaria (hives), asthma, and angioedema. In the European Union, products with Tartrazine MUST carry a mandatory warning: 'May have an adverse effect on activity and attention in children'.",
+        "regulatoryStatus": "Permitted in India under FSSAI with a ceiling of 100 mg/kg; strictly regulated or warning-mandated across Europe.",
+    },
+    {
+        "keywords": ["110", "sunset yellow", "yellow 6", "yellow no. 6", "ins 110"],
+        "name": "Sunset Yellow FCF (Yellow 6)",
+        "insCode": "INS 110",
+        "colorType": "high_risk_azo",
+        "grade": "Grade C (High Concern Azo Dye)",
+        "quality": "Petroleum-Derived Synthetic Azo Dye",
+        "isOkayToEat": "Avoid or Strictly Limit",
+        "whyAdded": "Imparts an intense, glowing orange-yellow appearance to savory snacks, cheese crisps, and mango/orange-flavored beverages.",
+        "healthConsequences": "Induces histamine release causing skin allergies, eczema, and exacerbates childhood restlessness. Banned or heavily restricted in Norway and Finland.",
+        "regulatoryStatus": "Permitted under FSSAI within prescribed limits; banned in select European countries.",
+    },
+    {
+        "keywords": ["129", "allura red", "red 40", "red no. 40", "ins 129"],
+        "name": "Allura Red AC (Red 40)",
+        "insCode": "INS 129",
+        "colorType": "high_risk_azo",
+        "grade": "Grade C (High Concern Azo Dye)",
+        "quality": "Synthetic Coal-Tar Derivative",
+        "isOkayToEat": "Avoid or Strictly Limit",
+        "whyAdded": "Produces vivid synthetic cherry/strawberry red coloration in confectionery, snacks, and sweet drinks.",
+        "healthConsequences": "Clinical studies link Allura Red to gut inflammation, disruption of the intestinal mucus barrier, and pediatric behavioral disruptions. Banned in Denmark, Belgium, and Switzerland.",
+        "regulatoryStatus": "Permitted under FSSAI; banned or restricted in several European nations.",
+    },
+    {
+        "keywords": ["133", "brilliant blue", "blue 1", "blue no. 1", "ins 133"],
+        "name": "Brilliant Blue FCF (Blue 1)",
+        "insCode": "INS 133",
+        "colorType": "high_risk_azo",
+        "grade": "Grade C (High Concern Synthetic)",
+        "quality": "Synthetic Triphenylmethane Dye",
+        "isOkayToEat": "Caution / Strictly Limit",
+        "whyAdded": "Imparts electric blue hues to candies, sports drinks, and frostings.",
+        "healthConsequences": "Linked to hypersensitivity, skin reactions, and mild neurotoxicity at elevated dosages.",
+        "regulatoryStatus": "Permitted under FSSAI; restricted in pediatric foods across the EU.",
+    },
+    {
+        "keywords": ["150d", "caramel iv", "caramel color iv", "ammonia sulphite caramel", "ins 150d"],
+        "name": "Caramel Color Class IV (Ammonia Sulphite)",
+        "insCode": "INS 150d",
+        "colorType": "high_risk_azo",
+        "grade": "Grade C (High Concern Chemical Additive)",
+        "quality": "Chemically Synthesized Dark Colorant",
+        "isOkayToEat": "Avoid or Strictly Limit",
+        "whyAdded": "Provides the characteristic deep brown-to-black color in colas, dark soft drinks, and soy sauces.",
+        "healthConsequences": "Manufactured using ammonia and sulphite compounds, creating the chemical byproduct 4-MEI (4-Methylimidazole). The WHO International Agency for Research on Cancer (IARC) classifies 4-MEI as Group 2B: 'possibly carcinogenic to humans'.",
+        "regulatoryStatus": "Permitted under FSSAI; requires Proposition 65 cancer warning in California if 4-MEI exceeds 29 mcg/day.",
+    },
+    {
+        "keywords": ["150a", "150b", "150c", "caramel color", "caramel i", "caramel ii", "ins 150"],
+        "name": "Caramel Color (Class I / II / III)",
+        "insCode": "INS 150a/b/c",
+        "colorType": "permitted_synthetic",
+        "grade": "Grade B (Permitted Synthetic)",
+        "quality": "Controlled Thermal Sugar Colorant",
+        "isOkayToEat": "Consume in Moderation",
+        "whyAdded": "Provides golden-brown color in baked goods, cookies, and syrups.",
+        "healthConsequences": "An empty additive that provides no nutrition, but is free from the carcinogenic 4-MEI ammonia compounds found in Class IV.",
+        "regulatoryStatus": "Permitted worldwide under FSSAI, US FDA, and EFSA.",
+    },
+    {
+        "keywords": ["171", "titanium dioxide", "ins 171"],
+        "name": "Titanium Dioxide",
+        "insCode": "INS 171",
+        "colorType": "high_risk_azo",
+        "grade": "Grade C (Banned in EU / Genotoxic Concern)",
+        "quality": "Nanoparticle Mineral Colorant",
+        "isOkayToEat": "Strictly Avoid",
+        "whyAdded": "Used as an opaque whitening agent in chewing gums, icing, and sauces.",
+        "healthConsequences": "European Food Safety Authority (EFSA) officially banned Titanium Dioxide in food in 2022 after concluding that nanoparticle accumulation causes DNA damage (genotoxicity).",
+        "regulatoryStatus": "Banned across the European Union (2022); currently under regulatory re-examination in India.",
+    },
+    {
+        "keywords": ["100", "curcumin", "turmeric", "haldi", "ins 100"],
+        "name": "Curcumin / Turmeric Extract",
+        "insCode": "INS 100(i)",
+        "colorType": "natural",
+        "grade": "Grade A (Wholesome Natural)",
+        "quality": "Pure Botanical Polyphenol Extract",
+        "isOkayToEat": "Safe to Eat (Beneficial)",
+        "whyAdded": "Imparts an authentic golden-yellow color extracted directly from turmeric roots (Curcuma longa).",
+        "healthConsequences": "Completely safe with proven anti-inflammatory, antioxidant, and cellular protective benefits.",
+        "regulatoryStatus": "Globally recognized as safe by FSSAI, WHO, and FDA with zero health restrictions.",
+    },
+    {
+        "keywords": ["162", "beetroot", "betanin", "ins 162"],
+        "name": "Beetroot Red (Betanin)",
+        "insCode": "INS 162",
+        "colorType": "natural",
+        "grade": "Grade A (Wholesome Natural)",
+        "quality": "Natural Vegetable Juice Extract",
+        "isOkayToEat": "Safe to Eat",
+        "whyAdded": "Provides vibrant red and magenta coloration extracted from red beets (Beta vulgaris).",
+        "healthConsequences": "Safe for all age groups, containing natural dietary nitrates and betalain antioxidants.",
+        "regulatoryStatus": "Approved worldwide as a natural wholesome food colorant.",
+    },
+    {
+        "keywords": ["160c", "paprika", "capsanthin", "ins 160c"],
+        "name": "Paprika Extract (Capsanthin)",
+        "insCode": "INS 160c",
+        "colorType": "natural",
+        "grade": "Grade A (Wholesome Natural)",
+        "quality": "Natural Spice Carotenoid Extract",
+        "isOkayToEat": "Safe to Eat",
+        "whyAdded": "Provides deep orange-red color extracted naturally from sweet red peppers.",
+        "healthConsequences": "Natural carotenoid antioxidant with zero toxicity or behavioral side effects.",
+        "regulatoryStatus": "Approved worldwide as a safe natural food colorant.",
+    },
+    {
+        "keywords": ["140", "chlorophyll", "chlorophyllin", "ins 140"],
+        "name": "Chlorophyllin (Plant Green)",
+        "insCode": "INS 140",
+        "colorType": "natural",
+        "grade": "Grade A (Wholesome Natural)",
+        "quality": "Natural Plant Pigment",
+        "isOkayToEat": "Safe to Eat",
+        "whyAdded": "Provides natural green color extracted from alfalfa, spinach, or nettles.",
+        "healthConsequences": "Natural plant pigment with antioxidant properties and zero toxicity.",
+        "regulatoryStatus": "Approved worldwide as a natural food color.",
+    },
+]
+
+
 class MultimodalHealthAnalysis(BaseModel):
     commodityName: str = "Verified Packaged Commodity"
     brandName: str = "Packaged Goods"
@@ -170,6 +427,12 @@ class MultimodalHealthAnalysis(BaseModel):
 
     # Direct Badges
     badges: List[HealthBadge] = Field(default_factory=list)
+
+    # Artificial Colors & Additives Inspection
+    artificialColors: List[ArtificialColorAuditItem] = Field(default_factory=list)
+
+    # What is High & Consequences
+    whatIsHigh: List[HighNutrientRiskItem] = Field(default_factory=list)
 
     # Specific Ingredient Inspection
     hasPalmOil: bool = False
@@ -519,6 +782,180 @@ class MultimodalHealthAnalysis(BaseModel):
                 filtered_b = [b for b in existing_badges if (b.get("label") if isinstance(b, dict) else getattr(b, "label", "")) not in ["EXPIRED PRODUCT", "BIOLOGICAL HAZARD"]]
                 data["badges"] = [expired_badge, bio_badge] + filtered_b
 
+            # 7. Deep Educational Enrichment for All Health Badges
+            raw_badges = data.get("badges", [])
+            enriched_badges = []
+            for b in raw_badges:
+                b_dict = b if isinstance(b, dict) else b.model_dump()
+                label_l = str(b_dict.get("label", "")).lower()
+
+                # Match against educational database
+                matched_edu = None
+                for edu_key, edu_info in BADGE_EDUCATIONAL_DATABASE.items():
+                    if edu_key in label_l:
+                        matched_edu = edu_info
+                        break
+
+                if matched_edu:
+                    if not b_dict.get("whatIsIt"):
+                        b_dict["whatIsIt"] = matched_edu["whatIsIt"]
+                    if not b_dict.get("whyUsed"):
+                        b_dict["whyUsed"] = matched_edu["whyUsed"]
+                    if not b_dict.get("healthConsequences"):
+                        b_dict["healthConsequences"] = matched_edu["healthConsequences"]
+                    if not b_dict.get("safeDailyLimit"):
+                        b_dict["safeDailyLimit"] = matched_edu["safeDailyLimit"]
+                    if not b_dict.get("whoShouldAvoid"):
+                        b_dict["whoShouldAvoid"] = matched_edu["whoShouldAvoid"]
+                else:
+                    if not b_dict.get("whatIsIt"):
+                        b_dict["whatIsIt"] = f"Monitored packaging ingredient and dietary marker ({b_dict.get('label')})."
+                    if not b_dict.get("whyUsed"):
+                        b_dict["whyUsed"] = "Formulation component used in industrial food manufacturing."
+                    if not b_dict.get("healthConsequences"):
+                        b_dict["healthConsequences"] = "May contribute to metabolic or digestive imbalance if consumed frequently."
+                    if not b_dict.get("safeDailyLimit"):
+                        b_dict["safeDailyLimit"] = "Align with ICMR-NIN 2024 dietary guidelines."
+                    if not b_dict.get("whoShouldAvoid"):
+                        b_dict["whoShouldAvoid"] = "Individuals with specific food sensitivities or metabolic conditions."
+
+                enriched_badges.append(b_dict)
+
+            data["badges"] = enriched_badges
+
+            # 8. Detection & 3-Tier Quality Grading of Artificial Colors & Food Additives
+            combined_search_text = " ".join([
+                str(data.get("commodityName") or ""),
+                str(data.get("brandName") or ""),
+                str(data.get("category") or ""),
+                str(data.get("howBadIsIt") or ""),
+                " ".join(str(i) for i in data.get("ingredientsList", [])),
+                " ".join(str(f.get("name", "") if isinstance(f, dict) else f) for f in data.get("flaggedIngredients", [])),
+                " ".join(str(f.get("reason", "") if isinstance(f, dict) else "") for f in data.get("flaggedIngredients", [])),
+                " ".join(str(b.get("label", "") if isinstance(b, dict) else "") for b in enriched_badges),
+                " ".join(str(b.get("description", "") if isinstance(b, dict) else "") for b in enriched_badges),
+            ]).lower()
+
+            detected_colors = []
+            seen_color_names = set()
+
+            for col in KNOWN_COLORS_DATABASE:
+                if any(kw in combined_search_text for kw in col["keywords"]):
+                    if col["name"] not in seen_color_names:
+                        seen_color_names.add(col["name"])
+                        detected_colors.append({
+                            "name": col["name"],
+                            "insCode": col["insCode"],
+                            "colorType": col["colorType"],
+                            "grade": col["grade"],
+                            "quality": col["quality"],
+                            "isOkayToEat": col["isOkayToEat"],
+                            "whyAdded": col["whyAdded"],
+                            "healthConsequences": col["healthConsequences"],
+                            "regulatoryStatus": col["regulatoryStatus"],
+                        })
+
+            # Check for generic color declarations if no specific dye matched
+            if not detected_colors:
+                if any(term in combined_search_text for term in ["color", "colour", "added color", "synthetic color", "food color"]):
+                    detected_colors.append({
+                        "name": "Permitted Synthetic Food Color",
+                        "insCode": "Synthetic Color",
+                        "colorType": "permitted_synthetic",
+                        "grade": "Grade B (Permitted Synthetic)",
+                        "quality": "Industrial Food Dye",
+                        "isOkayToEat": "Consume in Moderation",
+                        "whyAdded": "Added for artificial visual tinting to make product appear colorful or ripe.",
+                        "healthConsequences": "Synthetic dyes may provoke allergic skin reactions or hyperactivity in sensitive children.",
+                        "regulatoryStatus": "Must conform to FSSAI prescribed purity limits.",
+                    })
+
+            data["artificialColors"] = detected_colors
+
+            # 9. Compute 'whatIsHigh' for Direct Consumer Clarity
+            what_is_high = []
+            seen_high_nutrients = set()
+
+            # A. Check Caffeine
+            has_caffeine = (
+                any("caffeine" in str(b.get("label", "")).lower() for b in enriched_badges)
+                or "caffeine" in combined_search_text
+                or "energy drink" in str(data.get("category", "")).lower()
+            )
+            if has_caffeine and "Caffeine" not in seen_high_nutrients:
+                seen_high_nutrients.add("Caffeine")
+                what_is_high.append({
+                    "nutrient": "Caffeine (Central Stimulant)",
+                    "measuredValue": "Elevated / Active Stimulant Dosage",
+                    "icmrLimit": "0 mg/day for children/teens; max 400 mg/day for healthy adults",
+                    "severity": "critical" if any(age in str(data.get("notEatableForAge", "")).lower() for age in ["child", "adolescent", "teen"]) else "high",
+                    "whatIsIt": "A central nervous system stimulant added to artificially heighten alertness and heart rate.",
+                    "whatItCauses": "Insomnia, elevated systolic blood pressure, tremors, acid reflux, anxiety, and accelerated heart rate. Strictly unsafe for pediatric neurological development.",
+                    "immediateEffects": "Rapid spike in heart rate and adrenaline within 20-30 minutes followed by acute restlessness.",
+                })
+
+            # B. Check Added Sugars
+            sugar_item = nutr_map.get("added sugars") or nutr_map.get("added sugar") or nutr_map.get("sugar") or nutr_map.get("total sugars")
+            sugar_val = _get_nutr_val(sugar_item) if sugar_item else 0.0
+            if (sugar_val > 10.0 or data.get("hasAddedSugar")) and "Added Sugars" not in seen_high_nutrients:
+                seen_high_nutrients.add("Added Sugars")
+                what_is_high.append({
+                    "nutrient": "Added Sugars",
+                    "measuredValue": f"{sugar_val:.1f}g per 100g" if sugar_val > 0 else "High Added Sugar Content",
+                    "icmrLimit": "Max 25g / day (~5-6 teaspoons) under ICMR-NIN 2024",
+                    "severity": "critical" if sugar_val > 20.0 else "high",
+                    "whatIsIt": "Refined industrial sweeteners stripped of all dietary fiber, causing instant bloodstream glucose surges.",
+                    "whatItCauses": "Visceral belly fat accumulation, insulin resistance, Non-Alcoholic Fatty Liver Disease (NAFLD), and Type-2 Diabetes.",
+                    "immediateEffects": "Rapid blood glucose surge triggering high insulin release, followed by an acute energy crash within 90 minutes.",
+                })
+
+            # C. Check Saturated Fats / Palm Oil
+            sat_item = nutr_map.get("saturated fat") or nutr_map.get("saturated fatty acids") or nutr_map.get("saturated fats")
+            sat_val = _get_nutr_val(sat_item) if sat_item else 0.0
+            if (sat_val > 8.0 or data.get("hasPalmOil")) and "Saturated Fat" not in seen_high_nutrients:
+                seen_high_nutrients.add("Saturated Fat")
+                what_is_high.append({
+                    "nutrient": "Saturated Palm Fat (Palmolein)",
+                    "measuredValue": f"{sat_val:.1f}g per 100g" if sat_val > 0 else "High Saturated Fat",
+                    "icmrLimit": "Max 20g / day (< 8-10% of total calories) under ICMR-NIN 2024",
+                    "severity": "critical" if sat_val > 14.0 or data.get("hasPalmOil") else "high",
+                    "whatIsIt": "Saturated palmitic acid from industrial palm olein used for low-cost deep-frying.",
+                    "whatItCauses": "Elevates circulating LDL ('bad') cholesterol, drives arterial wall inflammation, and accelerates coronary atherosclerosis.",
+                    "immediateEffects": "Delayed gastric emptying, postprandial vascular stiffness, and prolonged digestive load.",
+                })
+
+            # D. Check Sodium
+            sod_item = nutr_map.get("sodium")
+            sod_val = _get_nutr_val(sod_item) if sod_item else 0.0
+            if (sod_val > 650.0 or data.get("hasHighSodium")) and "Sodium" not in seen_high_nutrients:
+                seen_high_nutrients.add("Sodium")
+                what_is_high.append({
+                    "nutrient": "Sodium Chloride (Industrial Salt)",
+                    "measuredValue": f"{sod_val:.0f}mg per 100g" if sod_val > 0 else "High Sodium Density",
+                    "icmrLimit": "Max 2000mg / day (~1 level teaspoon salt) under ICMR-NIN & WHO",
+                    "severity": "critical" if sod_val > 1000.0 else "high",
+                    "whatIsIt": "Refined salt combined with industrial sodium flavor compounds (MSG, sodium guanylate).",
+                    "whatItCauses": "Arterial stiffness, chronic hypertension, cardiovascular strain, and glomerular kidney damage.",
+                    "immediateEffects": "Intravascular water retention, temporary puffiness/bloating, and acute arterial pressure rise.",
+                })
+
+            # E. Check Calories
+            cal_item = nutr_map.get("energy") or nutr_map.get("calories")
+            cal_val = _get_nutr_val(cal_item) if cal_item else 0.0
+            if cal_val > 480.0 and "Caloric Density" not in seen_high_nutrients:
+                seen_high_nutrients.add("Caloric Density")
+                what_is_high.append({
+                    "nutrient": "Caloric Density",
+                    "measuredValue": f"{cal_val:.0f} kcal per 100g",
+                    "icmrLimit": "Snack portion should not exceed 150-200 kcal",
+                    "severity": "moderate",
+                    "whatIsIt": "Concentrated food energy resulting from refined frying fats and starches.",
+                    "whatItCauses": "Rapid positive caloric surplus accelerating visceral adipose accumulation and weight gain.",
+                    "immediateEffects": "Requires substantial metabolic exertion to process; often followed by sluggishness.",
+                })
+
+            data["whatIsHigh"] = what_is_high
+
         return data
 
 
@@ -623,7 +1060,9 @@ class MultimodalHealthAgent:
             "26. 'hasAddedSugar', 'hasHighSodium', 'hasArtificialAdditives': Booleans with details.\n"
             "27. 'ingredientsList': Array of strings of all declared ingredients in descending order of weight.\n"
             "28. 'flaggedIngredients': Array of objects with 'name' and 'reason'.\n"
-            "29. 'healthierAlternatives': Array of 3-4 clean, traditional whole-food Indian alternatives.\n\n"
+            "29. 'healthierAlternatives': Array of 3-4 clean, traditional whole-food Indian alternatives.\n"
+            "30. 'artificialColors': Array of objects for any detected colors/dyes: {'name', 'insCode', 'colorType', 'grade', 'quality', 'isOkayToEat', 'whyAdded', 'healthConsequences', 'regulatoryStatus'}.\n"
+            "31. 'whatIsHigh': Array of objects for any elevated nutrients exceeding ICMR limits: {'nutrient', 'measuredValue', 'icmrLimit', 'severity', 'whatIsIt', 'whatItCauses', 'immediateEffects'}.\n\n"
             "CRITICAL INSTRUCTIONS FOR NUTRIENTS ARRAY:\n"
             "'nutrients' MUST be a JSON array of objects. DO NOT return a table or a dict with 'columns' and 'data'.\n"
             "Each object in 'nutrients' MUST have this exact structure:\n"

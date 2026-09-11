@@ -136,6 +136,33 @@ export interface HealthBadge {
   label: string;
   type: 'danger' | 'warning' | 'good' | 'neutral';
   description?: string;
+  whatIsIt?: string;
+  whyUsed?: string;
+  healthConsequences?: string;
+  safeDailyLimit?: string;
+  whoShouldAvoid?: string;
+}
+
+export interface ArtificialColorAudit {
+  name: string;
+  insCode?: string;
+  colorType: 'natural' | 'permitted_synthetic' | 'high_risk_azo';
+  grade: 'Grade A' | 'Grade B' | 'Grade C' | string;
+  quality: string;
+  isOkayToEat: 'Safe to Eat' | 'Consume in Moderation' | 'Avoid or Strictly Limit' | string;
+  whyAdded: string;
+  healthConsequences: string;
+  regulatoryStatus: string;
+}
+
+export interface HighNutrientRisk {
+  nutrient: string;
+  measuredValue: string;
+  icmrLimit: string;
+  severity: 'critical' | 'high' | 'moderate';
+  whatIsIt: string;
+  whatItCauses: string;
+  immediateEffects: string;
 }
 
 export interface ProductHealthAudit {
@@ -176,6 +203,8 @@ export interface ProductHealthAudit {
   hasArtificialAdditives?: boolean;
   ingredientsList?: string[];
   flaggedIngredients?: { name: string; reason: string }[];
+  artificialColors?: ArtificialColorAudit[];
+  whatIsHigh?: HighNutrientRisk[];
 }
 
 export interface EnforcementActionItem {
