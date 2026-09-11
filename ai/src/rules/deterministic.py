@@ -392,6 +392,36 @@ class DeterministicRuleEngine:
                 )
             )
 
+        # 4b. Expiry & Shelf-Life Enforcement (Rule 6(1)(d) & Rule 18(1) read with FSSAI Section 59)
+        if getattr(extraction, "is_expired", False):
+            exp_disp = getattr(extraction, "expiry_date_str", None) or (
+                f"{extraction.expiry_month:02d}/{extraction.expiry_year}"
+                if getattr(extraction, "expiry_month", None) and getattr(extraction, "expiry_year", None)
+                else "Exceeded"
+            )
+            mfg_disp = getattr(extraction, "mfg_date_str", None) or (
+                f"{extraction.mfg_month:02d}/{extraction.mfg_year}"
+                if getattr(extraction, "mfg_month", None) and getattr(extraction, "mfg_year", None)
+                else "Declared Date"
+            )
+            violations.append(
+                StatutoryRuleViolation(
+                    rule_code="PCR_RULE_6_1_D_EXPIRED",
+                    rule_name="Expired Commodity - Banned from Retail Sale",
+                    severity="critical",
+                    description=(
+                        f"The commodity has exceeded its declared shelf-life / expiry date (Expiry: {exp_disp}, Mfg: {mfg_disp}). "
+                        "Retail sale and distribution of expired commodities is strictly prohibited under Rule 18(1) & Rule 6(1)(d) "
+                        "of the Legal Metrology (Packaged Commodities) Rules 2011 read with Section 59 of the Food Safety and Standards Act 2006. "
+                        "Mandatory seizure of retail inventory and statutory compounding prosecution warranted."
+                    ),
+                    expected_value="Unexpired Commodity with Valid Shelf Life",
+                    actual_value=f"EXPIRED (Expiry: {exp_disp}, Mfg: {mfg_disp})",
+                    statutory_reference="Rule 6(1)(d) & Rule 18(1), PCR 2011 read with FSSAI Sec 59",
+                    compounding_amount=50000.0,
+                )
+            )
+
         # 5. Maximum Retail Price (MRP)
         if extraction.mrp is None or extraction.mrp <= 0:
             violations.append(
@@ -507,9 +537,14 @@ class DeterministicRuleEngine:
 
         # Compute Compliance Score:
         # Start at 100. Deduct 25 for critical, 15 for major, 5 for minor.
+        # Expired food attracts an immediate 50-point penalty and score capping.
         score = 100.0
+        has_expired_violation = False
         for v in violations:
-            if v.severity == "critical":
+            if v.rule_code == "PCR_RULE_6_1_D_EXPIRED":
+                score -= 50.0
+                has_expired_violation = True
+            elif v.severity == "critical":
                 score -= 25.0
             elif v.severity == "major":
                 score -= 15.0
@@ -517,6 +552,8 @@ class DeterministicRuleEngine:
                 score -= 5.0
 
         final_score = max(0.0, min(100.0, score))
+        if has_expired_violation:
+            final_score = min(25.0, final_score)
         is_compliant = len(violations) == 0
 
         return RuleEngineEvaluationResult(

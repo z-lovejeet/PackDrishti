@@ -140,6 +140,11 @@ async def analyze_health_packaging(
         "has_palm_oil": analysis.hasPalmOil,
         "palm_oil_details": analysis.palmOilDetails,
         "flagged_ingredients": analysis.flaggedIngredients,
+        "mfg_date": analysis.mfgDate,
+        "expiry_date": analysis.expiryDate,
+        "is_expired": analysis.isExpired,
+        "expiry_status": analysis.expiryStatus,
+        "expiry_warning": analysis.expiryWarning,
     }
 
     # 4. Persist to Supabase / Database with graceful fallback
@@ -156,6 +161,9 @@ async def analyze_health_packaging(
             nutrients_json=db_nutrients,
             badges_json=db_badges,
             dietary_advisory_json=db_advisory,
+            mfg_date=analysis.mfgDate,
+            expiry_date=analysis.expiryDate,
+            is_expired=analysis.isExpired,
         )
         db.add(audit_record)
 
@@ -191,6 +199,11 @@ async def analyze_health_packaging(
             "price_per_100g": analysis.pricePer100g,
             "price_rating": analysis.priceRating,
             "price_analysis": analysis.priceAnalysis,
+            "mfg_date": analysis.mfgDate,
+            "expiry_date": analysis.expiryDate,
+            "is_expired": analysis.isExpired,
+            "expiry_status": analysis.expiryStatus,
+            "expiry_warning": analysis.expiryWarning,
             "health_score": analysis.ratingScore,
             "score_band": analysis.overallRating,
             "overall_rating": analysis.overallRating,

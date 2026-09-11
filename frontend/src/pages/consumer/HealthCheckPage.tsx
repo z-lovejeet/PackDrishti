@@ -255,6 +255,11 @@ export const HealthCheckPage: React.FC = () => {
           servingSize: apiData.serving_size || 'Declared on Panel',
           netQuantity: apiData.net_quantity || 'Declared on Panel',
           mrp: apiData.mrp || 'Declared on Package',
+          mfgDate: apiData.mfg_date || 'Declared on Package',
+          expiryDate: apiData.expiry_date || 'Not Declared',
+          isExpired: Boolean(apiData.is_expired),
+          expiryStatus: apiData.expiry_status,
+          expiryWarning: apiData.expiry_warning,
           pricePer100g: apiData.price_per_100g || 'Standard Basis',
           priceRating: apiData.price_rating || 'Fair Market Rate',
           priceAnalysis:
@@ -338,6 +343,14 @@ export const HealthCheckPage: React.FC = () => {
 
   const getVerdictDisplay = () => {
     if (!currentAudit) return null;
+    if (currentAudit.isExpired || currentAudit.overallRating === 'Critical Hazard - Expired Food' || currentAudit.ratingScore === 0) {
+      return {
+        label: 'Critical Hazard - Expired Food',
+        badgeClass: 'bg-rose-950 text-white border-rose-600',
+        icon: <XCircle size={16} weight="fill" className="text-rose-400" />,
+        desc: currentAudit.expiryWarning || 'Strictly unfit for human consumption. Commodity has passed its declared shelf life and poses severe microbiological risk.',
+      };
+    }
     if (currentAudit.overallRating === 'Nutritious Choice' || currentAudit.ratingScore >= 70) {
       return {
         label: 'Nutritious Choice',
@@ -667,6 +680,57 @@ export const HealthCheckPage: React.FC = () => {
       {currentAudit ? (
         <div className="space-y-6 animate-fadeIn">
           
+          {/* Expiry Hazard Danger Banner */}
+          {currentAudit.isExpired && (
+            <div className="bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 border-2 border-rose-600 rounded-lg p-5 shadow-lg text-white space-y-3">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-rose-600/70 border border-rose-400 flex items-center justify-center text-white shrink-0 mt-0.5">
+                    <ShieldWarning size={24} weight="fill" />
+                  </div>
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-600 text-2xs font-bold uppercase tracking-wider text-rose-100 mb-1">
+                      Severe Health Hazard
+                    </div>
+                    <h3 className="text-base sm:text-lg font-bold font-heading text-white">
+                      STRICTLY DO NOT CONSUME - EXPIRED FOOD HAZARD
+                    </h3>
+                    <p className="text-xs text-rose-200 mt-0.5">
+                      {currentAudit.expiryWarning || 'This packaged commodity has passed its declared shelf life and poses severe risk of microbial food poisoning.'}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="inline-block px-3 py-1 rounded bg-rose-600 text-white font-mono text-xs font-bold shadow-xs">
+                    HEALTH SCORE: 0/100
+                  </span>
+                  <p className="text-2xs text-rose-300 mt-1 font-mono">
+                    Rating: Critical Hazard
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-rose-800/80 text-xs">
+                <div className="bg-rose-900/60 p-2.5 rounded border border-rose-700/60">
+                  <span className="text-rose-300 text-2xs block uppercase tracking-wider font-semibold">Manufacture Date</span>
+                  <strong className="text-white text-xs block mt-0.5">{currentAudit.mfgDate || 'Declared on Package'}</strong>
+                </div>
+                <div className="bg-rose-900/60 p-2.5 rounded border border-rose-700/60">
+                  <span className="text-rose-300 text-2xs block uppercase tracking-wider font-semibold">Expiry / Best Before</span>
+                  <strong className="text-rose-200 text-xs block mt-0.5">{currentAudit.expiryDate || 'Not Declared'}</strong>
+                </div>
+                <div className="bg-rose-900/60 p-2.5 rounded border border-rose-700/60">
+                  <span className="text-rose-300 text-2xs block uppercase tracking-wider font-semibold">Shelf Life Audit</span>
+                  <strong className="text-rose-300 text-xs font-mono block mt-0.5">{currentAudit.expiryStatus || 'Expired past shelf life'}</strong>
+                </div>
+              </div>
+
+              <div className="bg-rose-900/40 p-2.5 rounded border border-rose-800 text-2xs text-rose-100 leading-relaxed">
+                <strong>Medical Warning:</strong> Consumption of expired packaged commodities poses acute risks of bacterial food poisoning, gastrointestinal distress, and enterotoxin ingestion. Immediate disposal is strongly recommended.
+              </div>
+            </div>
+          )}
+
           {/* 1. Health Summary Banner */}
           <div className="bg-white border border-neutral-200 rounded-lg p-6 shadow-xs space-y-5">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
@@ -692,7 +756,7 @@ export const HealthCheckPage: React.FC = () => {
                 </h2>
 
                 {/* Structured Packaging Declaration Tiles */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 max-w-xl">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1 max-w-2xl">
                   <div className="bg-neutral-50/80 rounded-md p-2.5 border border-neutral-200/80 text-xs">
                     <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wider block">Serving Portion</span>
                     <strong className="text-neutral-900 font-mono block text-xs mt-0.5">{currentAudit.servingSize}</strong>
@@ -704,6 +768,24 @@ export const HealthCheckPage: React.FC = () => {
                   <div className="bg-neutral-50/80 rounded-md p-2.5 border border-neutral-200/80 text-xs">
                     <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wider block">Declared MRP</span>
                     <strong className="text-neutral-900 font-mono block text-xs mt-0.5">{currentAudit.mrp}</strong>
+                  </div>
+                  <div className="bg-neutral-50/80 rounded-md p-2.5 border border-neutral-200/80 text-xs">
+                    <span className="text-2xs font-medium text-neutral-500 uppercase tracking-wider block">Mfg Date</span>
+                    <strong className="text-neutral-900 font-mono block text-xs mt-0.5">{currentAudit.mfgDate || 'Declared'}</strong>
+                  </div>
+                  <div className={`rounded-md p-2.5 border text-xs ${
+                    currentAudit.isExpired 
+                      ? 'bg-rose-50 border-rose-300 text-rose-900' 
+                      : 'bg-neutral-50/80 border-neutral-200/80 text-neutral-900'
+                  }`}>
+                    <span className={`text-2xs font-medium uppercase tracking-wider block ${
+                      currentAudit.isExpired ? 'text-rose-700 font-bold' : 'text-neutral-500'
+                    }`}>
+                      {currentAudit.isExpired ? 'Expired' : 'Expiry Date'}
+                    </span>
+                    <strong className={`font-mono block text-xs mt-0.5 ${currentAudit.isExpired ? 'text-rose-700 font-bold' : 'text-neutral-900'}`}>
+                      {currentAudit.expiryDate || 'Not Declared'}
+                    </strong>
                   </div>
                 </div>
               </div>

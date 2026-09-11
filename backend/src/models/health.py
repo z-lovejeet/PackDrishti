@@ -61,6 +61,18 @@ class HealthAudit(Base):
         JSON,
         nullable=False,
     )
+    mfg_date: Mapped[Optional[str]] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+    expiry_date: Mapped[Optional[str]] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+    is_expired: Mapped[bool] = mapped_column(
+        default=False,
+        nullable=False,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),

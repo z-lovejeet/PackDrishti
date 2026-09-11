@@ -27,13 +27,25 @@ interface ProductHistoryPageProps {
 interface ApiHistoryRecord {
   scan_id: string;
   scan_code: string;
+  scan_type?: string;
   brand_name: string;
   product_name: string;
+  category?: string;
   mrp: number;
-  net_quantity: string;
+  mrp_str?: string;
+  net_quantity?: string;
+  mfg_date?: string;
+  expiry_date?: string;
+  is_expired?: boolean;
+  expiry_status?: string;
   compliance_status: string;
   overall_score: number;
   created_at: string | null;
+  image_url?: string;
+  violations?: any[];
+  badges?: any[];
+  nutrients?: any[];
+  dietary_advisory?: any;
 }
 
 export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
@@ -55,13 +67,40 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
       if (response.data && response.data.length > 0) {
         const mappedItems: ScanHistoryItem[] = response.data.map((record) => {
           const isCompliant =
-            record.compliance_status?.toUpperCase() === "COMPLIANT";
+            record.compliance_status?.toLowerCase() === "compliant" ||
+            record.compliance_status?.toLowerCase() === "healthy";
+          const isExpired = Boolean(record.is_expired);
+          const scanType = (record.scan_type === "health_check" || record.scan_type === "consumer_health") 
+            ? "consumer_health" 
+            : "label_compliance";
+          const violCount = record.violations?.length ?? (isCompliant ? 0 : 1);
+
+          let statusVal: ScanHistoryItem["status"] = "compliant";
+          if (isExpired) {
+            statusVal = "violation";
+          } else if (scanType === "consumer_health") {
+            statusVal = (record.overall_score >= 70) ? "healthy" : (record.overall_score >= 40) ? "caution" : "violation";
+          } else {
+            statusVal = isCompliant ? "compliant" : "violation";
+          }
+
+          let summary = "";
+          if (isExpired) {
+            summary = `CRITICAL HAZARD: Expired commodity (Mfg: ${record.mfg_date || 'Declared'}, Exp: ${record.expiry_date || 'Expired'}). Past legal shelf life under Rule 6(1)(d) & Section 59 FSSAI. Strictly banned from sale.`;
+          } else if (scanType === "consumer_health") {
+            summary = `Nutritional Health Index: ${Math.round(record.overall_score || 50)}/100. Audited against ICMR-NIN 2024 Dietary Limits.`;
+          } else if (isCompliant) {
+            summary = "Full statutory compliance verified under Legal Metrology (Packaged Commodities) Rules 2011.";
+          } else {
+            summary = `Statutory infractions detected (${violCount} non-conformances) under Section 36(1).`;
+          }
+
           return {
             id: record.scan_id,
             scanCode: record.scan_code || `LMPC-${record.scan_id.substring(0, 8).toUpperCase()}`,
             productName: record.product_name || "Verified Packaging Unit",
             brand: record.brand_name || "Unspecified Brand",
-            category: "Packaged Goods",
+            category: record.category || (scanType === "consumer_health" ? "Packaged Food" : "Packaged Goods"),
             scanDate: record.created_at
               ? new Date(record.created_at).toLocaleDateString("en-IN", {
                   day: "2-digit",
@@ -69,15 +108,22 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
                   year: "numeric",
                 })
               : "Recent",
-            scanType: "label_compliance",
-            status: isCompliant ? "compliant" : "violation",
-            declaredMrp: record.mrp ? `INR ${record.mrp.toFixed(2)}` : "Declared on Package",
-            thumbnailUrl: "",
-            summaryNote: isCompliant
-              ? "Full statutory compliance verified under Legal Metrology (Packaged Commodities) Rules 2011."
-              : "Statutory infractions detected during automated optical verification under Section 36(1).",
-            violationsCount: isCompliant ? 0 : 2,
-            healthScore: Math.round(record.overall_score || 85),
+            scanType: scanType,
+            status: statusVal,
+            declaredMrp: record.mrp_str || (record.mrp ? `INR ${record.mrp.toFixed(2)}` : "Declared on Package"),
+            thumbnailUrl: record.image_url || "",
+            summaryNote: summary,
+            violationsCount: violCount,
+            healthScore: Math.round(record.overall_score || 0),
+            mfgDate: record.mfg_date,
+            expiryDate: record.expiry_date,
+            isExpired: isExpired,
+            expiryStatus: record.expiry_status,
+            netQuantity: record.net_quantity,
+            violations: record.violations || [],
+            badges: record.badges || [],
+            nutrients: record.nutrients || [],
+            dietaryAdvisory: record.dietary_advisory,
           };
         });
         setHistoryItems(mappedItems);
@@ -135,6 +181,9 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
   const violationPct = totalScans > 0 ? Math.round((violationCount / totalScans) * 100) : 0;
 
   const getItemBadge = (item: ScanHistoryItem) => {
+    if (item.isExpired) {
+      return <Badge variant="violation" size="sm" dot>EXPIRED PRODUCT</Badge>;
+    }
     switch (item.status) {
       case "compliant":
         return <Badge variant="compliant" size="sm" dot>LMPC Compliant</Badge>;
@@ -455,12 +504,39 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
                   </div>
 
                   {/* Pricing & Compliance Indicators */}
-                  <div className="flex items-center gap-3 text-2xs text-neutral-700 font-medium pt-1 flex-wrap">
+                  <div className="flex items-center gap-2 text-2xs text-neutral-700 font-medium pt-1 flex-wrap">
                     <span className="bg-neutral-50 px-2 py-0.5 rounded border border-neutral-200">
-                      Declared MRP: <strong className="text-neutral-900">{item.declaredMrp}</strong>
+                      MRP: <strong className="text-neutral-900">{item.declaredMrp}</strong>
                     </span>
 
-                    {item.violationsCount !== undefined && item.violationsCount > 0 ? (
+                    {item.netQuantity && (
+                      <span className="bg-neutral-50 px-2 py-0.5 rounded border border-neutral-200">
+                        Qty: <strong className="text-neutral-900">{item.netQuantity}</strong>
+                      </span>
+                    )}
+
+                    {item.mfgDate && (
+                      <span className="bg-neutral-50 px-2 py-0.5 rounded border border-neutral-200">
+                        Mfg: <strong className="text-neutral-900">{item.mfgDate}</strong>
+                      </span>
+                    )}
+
+                    {item.expiryDate && (
+                      <span className={`px-2 py-0.5 rounded border ${
+                        item.isExpired 
+                          ? "bg-rose-50 border-rose-300 text-rose-800 font-bold" 
+                          : "bg-neutral-50 border-neutral-200"
+                      }`}>
+                        Exp: <strong className={item.isExpired ? "text-rose-900" : "text-neutral-900"}>{item.expiryDate}</strong>
+                      </span>
+                    )}
+
+                    {item.isExpired ? (
+                      <span className="text-violation font-bold font-mono inline-flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                        <XCircle size={14} weight="fill" className="text-rose-600" />
+                        <span>Banned from Retail Sale</span>
+                      </span>
+                    ) : item.violationsCount !== undefined && item.violationsCount > 0 ? (
                       <span className="text-violation font-bold font-mono inline-flex items-center gap-1">
                         <XCircle size={14} weight="bold" />
                         <span>{item.violationsCount} Statutory Infractions</span>
@@ -478,10 +554,16 @@ export const ProductHistoryPage: React.FC<ProductHistoryPageProps> = ({
               </div>
 
               {/* Statutory Note Box */}
-              <div className="p-3 bg-neutral-50 rounded-md border border-neutral-200/80 text-xs text-neutral-700 leading-relaxed space-y-1">
-                <div className="flex items-center gap-1.5 font-bold text-2xs uppercase tracking-wider text-neutral-500 font-mono">
-                  <ShieldCheck size={14} className="text-navy-800 shrink-0" />
-                  <span>Statutory Inspection Findings</span>
+              <div className={`p-3 rounded-md border text-xs leading-relaxed space-y-1 ${
+                item.isExpired 
+                  ? "bg-rose-50/90 border-rose-300 text-rose-950 font-medium" 
+                  : "bg-neutral-50 border-neutral-200/80 text-neutral-700"
+              }`}>
+                <div className={`flex items-center gap-1.5 font-bold text-2xs uppercase tracking-wider font-mono ${
+                  item.isExpired ? "text-rose-800" : "text-neutral-500"
+                }`}>
+                  <ShieldCheck size={14} className={item.isExpired ? "text-rose-700 shrink-0" : "text-navy-800 shrink-0"} />
+                  <span>{item.isExpired ? "Critical Enforcement Infraction" : "Statutory Inspection Findings"}</span>
                 </div>
                 <p>{item.summaryNote}</p>
               </div>

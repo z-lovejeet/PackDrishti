@@ -144,6 +144,13 @@ class MultimodalHealthAnalysis(BaseModel):
     priceRating: str = "Fair Market Rate"
     priceAnalysis: str = "Standard market pricing."
 
+    # Expiry & Shelf-Life Information
+    mfgDate: Optional[str] = None
+    expiryDate: Optional[str] = None
+    isExpired: bool = False
+    expiryStatus: str = "valid"  # 'expired' | 'near_expiry' | 'valid'
+    expiryWarning: Optional[str] = None
+
     # Comprehensive Health Verdict & Questions
     shouldWeEatIt: str = "Consume in Strict Moderation"
     howBadIsIt: str = "Ultra-processed packaged food commodity."
@@ -426,6 +433,92 @@ class MultimodalHealthAnalysis(BaseModel):
             else:
                 data["overallRating"] = "High Health Concern"
 
+            # 6. Expiry & Shelf-Life Safety Verification (Current Date: September 2026)
+            CURRENT_YEAR = 2026
+            CURRENT_MONTH = 9
+
+            mfg_date_val = str(data.get("mfgDate") or data.get("mfg_date") or "").strip()
+            exp_date_val = str(data.get("expiryDate") or data.get("expiry_date") or "").strip()
+
+            mfg_m, mfg_y = None, None
+            if mfg_date_val:
+                m_match = re.search(r"(\d{1,2})[\s/.-]+(\d{2,4})", mfg_date_val)
+                if m_match:
+                    try:
+                        mfg_m = int(m_match.group(1))
+                        raw_y = int(m_match.group(2))
+                        mfg_y = 2000 + raw_y if raw_y < 100 else raw_y
+                    except Exception:
+                        pass
+
+            exp_m, exp_y = None, None
+            if exp_date_val:
+                e_match = re.search(r"(\d{1,2})[\s/.-]+(\d{2,4})", exp_date_val)
+                if e_match:
+                    try:
+                        exp_m = int(e_match.group(1))
+                        raw_y = int(e_match.group(2))
+                        exp_y = 2000 + raw_y if raw_y < 100 else raw_y
+                    except Exception:
+                        pass
+
+            # Check relative shelf life in text
+            all_text = f"{mfg_date_val} {exp_date_val} {str(data.get('howBadIsIt') or '')}".lower()
+            bb_match = re.search(r"best before\s*(\d+)\s*(months?|days?|years?)", all_text)
+            if bb_match and mfg_m and mfg_y and not exp_y:
+                qty = int(bb_match.group(1))
+                unit = bb_match.group(2)
+                if "month" in unit:
+                    tot = (mfg_y * 12 + (mfg_m - 1)) + qty
+                    exp_y = tot // 12
+                    exp_m = (tot % 12) + 1
+                    data["expiryDate"] = f"{exp_m:02d}/{exp_y}"
+
+            cur_total = CURRENT_YEAR * 12 + CURRENT_MONTH
+            is_expired = data.get("isExpired") is True or data.get("is_expired") is True
+
+            if exp_y and exp_m:
+                exp_total = exp_y * 12 + exp_m
+                if exp_total < cur_total:
+                    is_expired = True
+                    data["expiryStatus"] = "expired"
+                    months_past = cur_total - exp_total
+                    data["expiryWarning"] = f"CRITICAL HAZARD: Product expired in {exp_m:02d}/{exp_y} ({months_past} months past shelf life)."
+                elif exp_total == cur_total:
+                    data["expiryStatus"] = "near_expiry"
+                    data["expiryWarning"] = f"NOTICE: Product expires this month ({exp_m:02d}/{exp_y})."
+            elif mfg_y and mfg_y < CURRENT_YEAR:
+                mfg_total = mfg_y * 12 + (mfg_m or 1)
+                months_since_mfg = cur_total - mfg_total
+                if months_since_mfg > 12:
+                    is_expired = True
+                    data["expiryStatus"] = "expired"
+                    data["expiryWarning"] = f"CRITICAL HAZARD: Manufactured in {mfg_m or 'XX'}/{mfg_y} ({months_since_mfg} months ago). Exceeds standard maximum 12-month shelf life."
+
+            if is_expired:
+                data["isExpired"] = True
+                data["expiryStatus"] = "expired"
+                data["ratingScore"] = 0
+                data["overallRating"] = "Critical Hazard - Expired Food"
+                data["shouldWeEatIt"] = "STRICTLY DO NOT CONSUME - EXPIRED FOOD HAZARD"
+                warning_note = data.get("expiryWarning") or "Exceeded safe shelf-life."
+                data["howBadIsIt"] = (
+                    f"CRITICAL BIOLOGICAL HAZARD: This packaged commodity has expired. {warning_note} "
+                    "Consumption poses acute risks of bacterial and fungal proliferation, microbial enterotoxins, "
+                    "lipid rancidity/peroxidation, and severe gastrointestinal food poisoning."
+                )
+                data["whoCanConsume"] = ["NOBODY - Strictly unfit for human consumption"]
+                avoid_list = data.get("whoShouldAvoid", [])
+                if "ALL CONSUMERS (Immediate food poisoning danger)" not in avoid_list:
+                    data["whoShouldAvoid"] = ["ALL CONSUMERS (Immediate food poisoning danger)"] + avoid_list
+
+                # Add danger badges at the top
+                existing_badges = data.get("badges", [])
+                expired_badge = {"label": "EXPIRED PRODUCT", "type": "danger", "description": "Commodity has passed its shelf life / expiry date. Critical biological food poisoning risk."}
+                bio_badge = {"label": "BIOLOGICAL HAZARD", "type": "danger", "description": "Microbial toxin and lipid peroxidation hazard. Strictly banned from consumption."}
+                filtered_b = [b for b in existing_badges if (b.get("label") if isinstance(b, dict) else getattr(b, "label", "")) not in ["EXPIRED PRODUCT", "BIOLOGICAL HAZARD"]]
+                data["badges"] = [expired_badge, bio_badge] + filtered_b
+
         return data
 
 
@@ -509,22 +602,28 @@ class MultimodalHealthAgent:
             "7. 'pricePer100g': Calculate the Unit Sale Price per 100g = (MRP / Net Quantity in grams) * 100 (e.g., 'Rs. 42.86 / 100g').\n"
             "8. 'priceRating': 'Budget' if USP < Rs. 25/100g, 'Fair Market Rate' if between Rs. 25-55/100g, 'Premium' if > Rs. 55/100g.\n"
             "9. 'priceAnalysis': Plain-language analysis of pricing fairness and statutory compliance under Rule 6(1)(e).\n\n"
+            "CRITICAL INSTRUCTIONS FOR DATE & EXPIRY DETECTION (Current Reference Date: September 2026):\n"
+            "10. 'mfgDate': Exact date of manufacture printed on the package (e.g., '08/2024', '15/04/2024', 'AUG 2024').\n"
+            "11. 'expiryDate': Exact expiry date or calculated best before date (e.g., '12/2024', '15/10/2024'). If packaging states 'Best before 4 months from manufacture' and mfg is 08/2024, expiryDate is '12/2024'.\n"
+            "12. 'isExpired': Boolean. TODAY'S DATE IS SEPTEMBER 2026. If the package was manufactured in 2023 or 2024 with a 4-12 month shelf life, or if expiryDate has passed relative to September 2026, this MUST BE true!\n"
+            "13. 'expiryWarning': If expired, declare: 'CRITICAL HEALTH HAZARD: Product expired. Strict microbial food poisoning risk.'\n"
+            "14. If expired: 'ratingScore' MUST be 0, 'overallRating' MUST be 'Critical Hazard - Expired Food', 'shouldWeEatIt' MUST be 'STRICTLY DO NOT CONSUME - EXPIRED FOOD HAZARD', 'whoCanConsume' MUST be ['NOBODY - Strictly unfit for human consumption'], and 'badges' MUST include 'EXPIRED PRODUCT' and 'BIOLOGICAL HAZARD'.\n\n"
             "CRITICAL INSTRUCTIONS FOR HEALTH EVALUATION (ICMR-NIN 2024):\n"
-            "10. 'ratingScore': Calibrated integer between 0 and 100. Start at 100: deduct 25-30 points for high sodium (> 650mg/100g), deduct 15-20 points for palm oil/palmolein, deduct 15-25 points for saturated fat (> 10g/100g), deduct 15-25 points for added sugars (> 10g/100g), deduct 10 points for synthetic additives/NOVA 4 ultra-processing. Ultra-processed savoury snacks with palm oil should score in the 20 to 40 range.\n"
-            "11. 'overallRating': 'Nutritious Choice' (70-100), 'Consume in Moderation' (45-69), or 'High Health Concern' (0-44).\n"
-            "12. 'shouldWeEatIt': A direct, punchy answer. E.g. 'Strictly Avoid for Daily Diet', 'Consume Only Rarely / Treat Only', or 'Safe & Wholesome'.\n"
-            "13. 'howBadIsIt': Explain in direct, plain terms exactly what is wrong or right with this product. Cite percentages of palm oil, added sugar, sodium, or ultra-processed chemicals.\n"
-            "14. 'notEatableForAge': Array of strings specifying exact age groups for which this product is not eatable or harmful (e.g., ['Infants and children under 5 years', 'Adolescents prone to metabolic syndrome']).\n"
-            "15. 'whoShouldAvoid': Medical conditions that must strictly avoid this (e.g., ['Type-2 Diabetics', 'Hypertensive individuals', 'Fatty liver / NAFLD patients']).\n"
-            "16. 'whoCanConsume': Who can safely eat it and with what restrictions.\n"
-            "17. 'healthProblemsIfEatenMore': Array of exact metabolic and clinical diseases caused by frequent consumption (e.g., ['Atherosclerosis and arterial plaque from palmitic acid', 'Elevated systolic blood pressure from high sodium', 'Rapid insulin spikes']).\n"
-            "18. 'badges': Array of objects with 'label' and 'type' ('danger' | 'warning' | 'good' | 'neutral') and 'description'. Include: 'High Palm Oil', 'High Saturated Fat', 'High Sodium', 'High Calories', 'Ultra-Processed (UPF)'.\n"
-            "19. 'hasPalmOil': Boolean. True if palmolein, palm oil, or fractionated palm fat is present in ingredients.\n"
-            "20. 'palmOilDetails': Explanation of the palm oil used and its cardiovascular hazards.\n"
-            "21. 'hasAddedSugar', 'hasHighSodium', 'hasArtificialAdditives': Booleans with details.\n"
-            "22. 'ingredientsList': Array of strings of all declared ingredients in descending order of weight.\n"
-            "23. 'flaggedIngredients': Array of objects with 'name' and 'reason'.\n"
-            "24. 'healthierAlternatives': Array of 3-4 clean, traditional whole-food Indian alternatives.\n\n"
+            "15. 'ratingScore': Calibrated integer between 0 and 100 (0 if expired). Start at 100: deduct 25-30 points for high sodium (> 650mg/100g), deduct 15-20 points for palm oil/palmolein, deduct 15-25 points for saturated fat (> 10g/100g), deduct 15-25 points for added sugars (> 10g/100g), deduct 10 points for synthetic additives/NOVA 4 ultra-processing. Ultra-processed savoury snacks with palm oil should score in the 20 to 40 range.\n"
+            "16. 'overallRating': 'Nutritious Choice' (70-100), 'Consume in Moderation' (45-69), or 'High Health Concern' (0-44). If expired, 'Critical Hazard - Expired Food'.\n"
+            "17. 'shouldWeEatIt': A direct, punchy answer. E.g. 'Strictly Avoid for Daily Diet', 'Consume Only Rarely / Treat Only', or 'Safe & Wholesome'. If expired: 'STRICTLY DO NOT CONSUME - EXPIRED FOOD HAZARD'.\n"
+            "18. 'howBadIsIt': Explain in direct, plain terms exactly what is wrong or right with this product. Cite percentages of palm oil, added sugar, sodium, or ultra-processed chemicals.\n"
+            "19. 'notEatableForAge': Array of strings specifying exact age groups for which this product is not eatable or harmful (e.g., ['Infants and children under 5 years', 'Adolescents prone to metabolic syndrome']).\n"
+            "20. 'whoShouldAvoid': Medical conditions that must strictly avoid this (e.g., ['Type-2 Diabetics', 'Hypertensive individuals', 'Fatty liver / NAFLD patients']).\n"
+            "21. 'whoCanConsume': Who can safely eat it and with what restrictions. If expired: ['NOBODY - Strictly unfit for human consumption'].\n"
+            "22. 'healthProblemsIfEatenMore': Array of exact metabolic and clinical diseases caused by frequent consumption (e.g., ['Atherosclerosis and arterial plaque from palmitic acid', 'Elevated systolic blood pressure from high sodium', 'Rapid insulin spikes']).\n"
+            "23. 'badges': Array of objects with 'label' and 'type' ('danger' | 'warning' | 'good' | 'neutral') and 'description'. Include: 'High Palm Oil', 'High Saturated Fat', 'High Sodium', 'High Calories', 'Ultra-Processed (UPF)'. If expired, also include 'EXPIRED PRODUCT' and 'BIOLOGICAL HAZARD'.\n"
+            "24. 'hasPalmOil': Boolean. True if palmolein, palm oil, or fractionated palm fat is present in ingredients.\n"
+            "25. 'palmOilDetails': Explanation of the palm oil used and its cardiovascular hazards.\n"
+            "26. 'hasAddedSugar', 'hasHighSodium', 'hasArtificialAdditives': Booleans with details.\n"
+            "27. 'ingredientsList': Array of strings of all declared ingredients in descending order of weight.\n"
+            "28. 'flaggedIngredients': Array of objects with 'name' and 'reason'.\n"
+            "29. 'healthierAlternatives': Array of 3-4 clean, traditional whole-food Indian alternatives.\n\n"
             "CRITICAL INSTRUCTIONS FOR NUTRIENTS ARRAY:\n"
             "'nutrients' MUST be a JSON array of objects. DO NOT return a table or a dict with 'columns' and 'data'.\n"
             "Each object in 'nutrients' MUST have this exact structure:\n"

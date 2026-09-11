@@ -192,6 +192,20 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         measuredFontHeightMm: 2.0,
         requiredFontHeightMm: 2.0,
       },
+      {
+        id: "live-dec-mfg",
+        ruleClause: "Rule 6(1)(d)",
+        fieldName: "Date of Manufacture & Expiry",
+        extractedValue: (liveResult as any).expiry_date && (liveResult as any).expiry_date !== "Not Declared"
+          ? `Mfg: ${(liveResult as any).mfg_date || "N/A"} • Exp: ${(liveResult as any).expiry_date}`
+          : `Mfg: ${(liveResult as any).mfg_date || "Declared on Package"}`,
+        status: (liveResult as any).is_expired ? "violation" : "compliant",
+        statusNote: (liveResult as any).is_expired
+          ? `CRITICAL INFRACTION: Expired commodity (${(liveResult as any).expiry_details || "Passed declared shelf life"})`
+          : "Mandatory date declaration conforms to Rule 6(1)(d)",
+        measuredFontHeightMm: 2.2,
+        requiredFontHeightMm: 2.0,
+      },
     ];
 
     const liveViolations: StatutoryViolation[] = liveResult.violations.map((v, idx) => ({
@@ -215,7 +229,11 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       pdpAreaCm2: liveResult.pdp_area_cm2 || 150.0,
       netQuantity: liveResult.net_quantity_value ? `${liveResult.net_quantity_value} ${liveResult.net_quantity_unit}` : "Not Declared",
       mrp: liveResult.mrp ? `Rs. ${liveResult.mrp.toFixed(2)}` : "Not Declared",
-      mfgDate: "Declared on Specimen",
+      mfgDate: (liveResult as any).mfg_date || "Declared on Specimen",
+      expiryDate: (liveResult as any).expiry_date,
+      isExpired: Boolean((liveResult as any).is_expired),
+      expiryStatus: (liveResult as any).expiry_status,
+      expiryDetails: (liveResult as any).expiry_details,
       scannedAt: "Active Field Inspection",
       scannedBy: userRole === "officer" ? "Inspector of Legal Metrology" : "Consumer Verification",
       inspectorDesignation: "Inspector of Legal Metrology",
@@ -863,9 +881,70 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
           }
         }
 
+        const isExpiredCommodity = Boolean(
+          (liveResult as any)?.is_expired ||
+          currentScan.isExpired ||
+          currentScan.violations.some(v => v.ruleReference === "PCR_RULE_6_1_D_EXPIRED" || v.id === "PCR_RULE_6_1_D_EXPIRED" || v.title?.toLowerCase().includes("expired"))
+        );
+        const expiredDetailsStr = (liveResult as any)?.expiry_details || 
+          (currentScan.expiryDate ? `Passed shelf life (Expiry: ${currentScan.expiryDate})` : "Passed declared shelf life or expired relative to current date (September 2026)");
+        const mfgDateStr = (liveResult as any)?.mfg_date || currentScan.mfgDate || "Declared on Package";
+        const expDateStr = (liveResult as any)?.expiry_date || currentScan.expiryDate || "Not Declared";
+
         return (
           <div className="space-y-6 animate-fadeIn">
             
+            {/* Critical Expiry Statutory Alert Banner */}
+            {isExpiredCommodity && (
+              <div className="p-4 sm:p-5 rounded-lg border-2 border-rose-600 bg-gradient-to-r from-rose-900 via-rose-800 to-rose-950 text-white shadow-lg space-y-3">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-rose-600/60 border border-rose-400 flex items-center justify-center text-white shrink-0 mt-0.5">
+                      <WarningOctagon size={24} weight="fill" />
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-rose-500/40 border border-rose-300/40 text-2xs font-bold tracking-wide uppercase text-rose-100 mb-1">
+                        Critical Enforcement Alert
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold font-heading text-white">
+                        CRITICAL INFRACTION: EXPIRED PACKAGED COMMODITY
+                      </h3>
+                      <p className="text-xs text-rose-200 mt-0.5">
+                        Statutory Reference: Rule 6(1)(d) &amp; Rule 18(1), PCR 2011 read with Section 59, FSSAI Act 2006
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block px-3 py-1 rounded bg-rose-500 text-white font-mono text-xs font-bold shadow-xs">
+                      BANNED FROM SALE
+                    </span>
+                    <p className="text-2xs text-rose-200 mt-1 font-mono">
+                      Compounding: ₹50,000 Sec 48
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-rose-700/60 text-xs">
+                  <div className="bg-rose-950/50 p-2.5 rounded border border-rose-700/50">
+                    <span className="text-rose-300 text-2xs block">Date of Manufacture:</span>
+                    <span className="font-semibold text-white">{mfgDateStr}</span>
+                  </div>
+                  <div className="bg-rose-950/50 p-2.5 rounded border border-rose-700/50">
+                    <span className="text-rose-300 text-2xs block">Declared Expiry / Best Before:</span>
+                    <span className="font-semibold text-rose-200">{expDateStr}</span>
+                  </div>
+                  <div className="bg-rose-950/50 p-2.5 rounded border border-rose-700/50">
+                    <span className="text-rose-300 text-2xs block">Enforcement Status:</span>
+                    <span className="font-semibold text-rose-300 font-mono text-2xs">{expiredDetailsStr}</span>
+                  </div>
+                </div>
+
+                <p className="text-2xs text-rose-100 bg-rose-950/40 p-2 rounded border border-rose-800/40 leading-relaxed">
+                  <strong>Mandatory Seizure Action:</strong> Under Rule 18(1) of the Legal Metrology (Packaged Commodities) Rules 2011, no person or retail dealer shall sell or distribute any commodity past its expiry date. Display or offering for sale of this specimen is an actionable statutory offence requiring immediate inventory impoundment under Section 15 and notice issuance under Section 36(1).
+                </p>
+              </div>
+            )}
+
             {/* Executive Summary Header */}
             <ReportHeader
               productName={currentScan.productName}

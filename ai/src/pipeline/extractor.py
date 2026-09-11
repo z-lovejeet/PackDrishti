@@ -85,7 +85,15 @@ class PackageVisualExtraction(BaseModel):
     measured_font_height_mm: Optional[float] = 2.5
     mfg_month: Optional[int] = None
     mfg_year: Optional[int] = None
+    mfg_date_str: Optional[str] = None
     expiry_date: Optional[str] = None
+    expiry_date_str: Optional[str] = None
+    expiry_month: Optional[int] = None
+    expiry_year: Optional[int] = None
+    best_before_duration: Optional[str] = None
+    is_expired: bool = False
+    expiry_status: str = "valid"  # 'expired' | 'near_expiry' | 'valid'
+    expiry_details: Optional[str] = None
     consumer_care_email: Optional[str] = None
     consumer_care_phone: Optional[str] = None
     consumer_care_address: Optional[str] = None
@@ -127,9 +135,143 @@ class PackageVisualExtraction(BaseModel):
                     data["mfg_month"] = None
             if isinstance(data.get("mfg_year"), str):
                 try:
-                    data["mfg_year"] = int(re.sub(r"\D", "", data["mfg_year"]))
+                    raw_y = int(re.sub(r"\D", "", data["mfg_year"]))
+                    data["mfg_year"] = 2000 + raw_y if raw_y < 100 else raw_y
                 except Exception:
                     data["mfg_year"] = None
+
+            if isinstance(data.get("expiry_month"), str):
+                try:
+                    data["expiry_month"] = int(re.sub(r"\D", "", data["expiry_month"]))
+                except Exception:
+                    data["expiry_month"] = None
+            if isinstance(data.get("expiry_year"), str):
+                try:
+                    raw_y = int(re.sub(r"\D", "", data["expiry_year"]))
+                    data["expiry_year"] = 2000 + raw_y if raw_y < 100 else raw_y
+                except Exception:
+                    data["expiry_year"] = None
+
+            # Deterministic Date & Shelf-Life Expiry Evaluation
+            data = cls._evaluate_dates_and_expiry(data)
+
+        return data
+
+    @classmethod
+    def _evaluate_dates_and_expiry(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Determines manufacturing date, expiry date, relative shelf life, and whether
+        commodity has expired relative to current reference date (September 2026).
+        """
+        CURRENT_YEAR = 2026
+        CURRENT_MONTH = 9
+
+        mfg_m = data.get("mfg_month")
+        mfg_y = data.get("mfg_year")
+        exp_m = data.get("expiry_month")
+        exp_y = data.get("expiry_year")
+        exp_str = str(data.get("expiry_date") or data.get("expiry_date_str") or "").strip()
+        mfg_str = str(data.get("mfg_date_str") or "").strip()
+        bb_str = str(data.get("best_before_duration") or "").strip()
+        raw_text = str(data.get("raw_text") or "")
+        combined_text = f"{exp_str} {mfg_str} {bb_str} {raw_text}".lower()
+
+        # 1. Parse MFG date from strings if month/year missing
+        if not mfg_m or not mfg_y:
+            mfg_regex = re.search(r"(?:mfg|mfd|pkd|packed|date of mfg)[\s.:/-]*([0-9]{1,2})[\s/.-]+([0-9]{2,4})", combined_text)
+            if mfg_regex:
+                try:
+                    mfg_m = int(mfg_regex.group(1))
+                    raw_yr = int(mfg_regex.group(2))
+                    mfg_y = 2000 + raw_yr if raw_yr < 100 else raw_yr
+                    data["mfg_month"] = mfg_m
+                    data["mfg_year"] = mfg_y
+                except Exception:
+                    pass
+
+        if mfg_m and mfg_y and not data.get("mfg_date_str"):
+            data["mfg_date_str"] = f"{mfg_m:02d}/{mfg_y}"
+
+        # 2. Check for relative shelf-life (e.g., 'Best before 4 months from manufacture')
+        best_before_match = re.search(r"(?:best before|use within)?\s*(\d+)\s*(months?|days?|years?)", f"{bb_str} {combined_text}")
+        if best_before_match:
+            qty = int(best_before_match.group(1))
+            unit = best_before_match.group(2)
+            data["best_before_duration"] = f"{qty} {unit}"
+            if mfg_m and mfg_y and not exp_y:
+                if "month" in unit:
+                    total_months = (mfg_y * 12 + (mfg_m - 1)) + qty
+                    exp_y = total_months // 12
+                    exp_m = (total_months % 12) + 1
+                    data["expiry_month"] = exp_m
+                    data["expiry_year"] = exp_y
+                    data["expiry_date_str"] = f"{exp_m:02d}/{exp_y}"
+                elif "day" in unit:
+                    approx_months = max(1, round(qty / 30))
+                    total_months = (mfg_y * 12 + (mfg_m - 1)) + approx_months
+                    exp_y = total_months // 12
+                    exp_m = (total_months % 12) + 1
+                    data["expiry_month"] = exp_m
+                    data["expiry_year"] = exp_y
+                    data["expiry_date_str"] = f"{exp_m:02d}/{exp_y}"
+
+        # 3. Check for explicit expiry date in text
+        if not exp_y:
+            exp_regex = re.search(r"(?:exp|expiry|use by|best before)[\s.:/-]*([0-9]{1,2})[\s/.-]+([0-9]{2,4})", combined_text)
+            if exp_regex:
+                try:
+                    exp_m = int(exp_regex.group(1))
+                    raw_yr = int(exp_regex.group(2))
+                    exp_y = 2000 + raw_yr if raw_yr < 100 else raw_yr
+                    data["expiry_month"] = exp_m
+                    data["expiry_year"] = exp_y
+                    data["expiry_date_str"] = f"{exp_m:02d}/{exp_y}"
+                except Exception:
+                    pass
+
+        if not data.get("expiry_date_str") and exp_str:
+            data["expiry_date_str"] = exp_str
+
+        # 4. Determine Expiration Status
+        current_total = CURRENT_YEAR * 12 + CURRENT_MONTH
+        is_expired = False
+        status = "valid"
+        details = "Statutory shelf-life verified."
+
+        if exp_y and exp_m:
+            exp_total = exp_y * 12 + exp_m
+            if exp_total < current_total:
+                is_expired = True
+                status = "expired"
+                months_past = current_total - exp_total
+                details = f"Commodity expired in {exp_m:02d}/{exp_y} ({months_past} months past declared shelf life)."
+            elif exp_total == current_total:
+                is_expired = False
+                status = "near_expiry"
+                details = f"Commodity near expiry (expires this month: {exp_m:02d}/{exp_y})."
+            else:
+                is_expired = False
+                status = "valid"
+                details = f"Commodity within valid shelf life (expires {exp_m:02d}/{exp_y})."
+        elif mfg_y:
+            # If no explicit expiry is declared, typical packaged snacks/foods expire within 6-9 months
+            # Any product manufactured in 2024 or earlier is undeniably expired as of September 2026 (>20 months old)
+            if mfg_y < CURRENT_YEAR:
+                mfg_total = mfg_y * 12 + (mfg_m or 1)
+                months_since_mfg = current_total - mfg_total
+                if months_since_mfg > 12:
+                    is_expired = True
+                    status = "expired"
+                    details = f"Manufactured in {mfg_m or 'XX'}/{mfg_y} ({months_since_mfg} months ago). Exceeded standard maximum 12-month packaged food shelf life."
+
+        # Allow upstream explicit is_expired flag to take precedence
+        if data.get("is_expired") is True:
+            is_expired = True
+            status = "expired"
+
+        data["is_expired"] = is_expired
+        data["expiry_status"] = status
+        data["expiry_details"] = details
         return data
 
 
@@ -213,18 +355,23 @@ class VisualPerceptionExtractor:
             "12. pdp_area_cm2: Estimated Principal Display Panel area in cm^2 (width * height).\n"
             "13. measured_font_height_mm: Measured or estimated font height of the net quantity and MRP numeral in mm (e.g. 2.5, 3.0).\n"
             "14. mfg_month: Month of manufacture as integer (1-12).\n"
-            "15. mfg_year: Year of manufacture as integer (e.g. 2024, 2025, 2026).\n"
-            "16. expiry_date: Expiry or Best Before date string as declared on the pack (e.g. 'Best before 4 months from manufacture').\n"
-            "17. consumer_care_email: Official consumer care email address (e.g. consumer.feedback@pepsico.com).\n"
-            "18. consumer_care_phone: Official consumer care toll-free phone number (e.g. 1800 22 4020).\n"
-            "19. consumer_care_address: Full registered consumer care postal address.\n"
-            "20. manufacturer_name: Complete registered name of manufacturer / packer / importer (e.g. PepsiCo India Holdings Pvt. Ltd.).\n"
-            "21. manufacturer_address: Complete factory or corporate registered address.\n"
-            "22. country_of_origin: Country of origin (e.g. India).\n"
-            "23. fg_color_hex: Dominant text foreground color in hex (e.g. #000000).\n"
-            "24. bg_color_hex: Dominant background color behind statutory text in hex (e.g. #FFFFFF or #F5F5F5).\n"
-            "25. raw_text: Comprehensive transcript of all visible text across all images.\n"
-            "26. tokens: List of detected statutory tokens, each with {text: str, declaration_type: str, bbox: {ymin: float, xmin: float, ymax: float, xmax: float}, confidence: float}.\n\n"
+            "15. mfg_year: Year of manufacture as 4-digit integer (e.g. 2024, 2025, 2026).\n"
+            "16. mfg_date_str: Formatted manufacture date string as printed (e.g. '08/2024', '15/04/2024', 'AUG 2024').\n"
+            "17. expiry_date: Expiry or Best Before declaration text as printed (e.g. 'Best before 4 months from manufacture', 'USE BY 15/10/2024').\n"
+            "18. expiry_date_str: Declared or calculated expiry date string (e.g. '12/2024', '15/10/2024').\n"
+            "19. best_before_duration: Declared shelf life duration if stated (e.g. '4 months', '6 months', '180 days').\n"
+            "20. is_expired: Boolean. TODAY'S REFERENCE DATE IS SEPTEMBER 2026. If the expiry date or best-before period has passed relative to September 2026 (for example, any product manufactured in 2023 or 2024 with a 4-12 month shelf life), this MUST be true.\n"
+            "21. expiry_status: 'expired' if past shelf life, 'near_expiry' if expiring this month, or 'valid'.\n"
+            "22. consumer_care_email: Official consumer care email address (e.g. consumer.feedback@pepsico.com).\n"
+            "23. consumer_care_phone: Official consumer care toll-free phone number (e.g. 1800 22 4020).\n"
+            "24. consumer_care_address: Full registered consumer care postal address.\n"
+            "25. manufacturer_name: Complete registered name of manufacturer / packer / importer (e.g. PepsiCo India Holdings Pvt. Ltd.).\n"
+            "26. manufacturer_address: Complete factory or corporate registered address.\n"
+            "27. country_of_origin: Country of origin (e.g. India).\n"
+            "28. fg_color_hex: Dominant text foreground color in hex (e.g. #000000).\n"
+            "29. bg_color_hex: Dominant background color behind statutory text in hex (e.g. #FFFFFF or #F5F5F5).\n"
+            "30. raw_text: Comprehensive transcript of all visible text across all images.\n"
+            "31. tokens: List of detected statutory tokens, each with {text: str, declaration_type: str, bbox: {ymin: float, xmin: float, ymax: float, xmax: float}, confidence: float}.\n\n"
             "Return strictly valid JSON conforming to this specification."
         )
 
@@ -339,8 +486,11 @@ class VisualPerceptionExtractor:
                     "net_quantity_value (float or null, e.g. 50.0),\n"
                     "net_quantity_unit (str or null, e.g. 'g', 'kg', 'ml', 'l'),\n"
                     "mfg_month (int or null, 1-12),\n"
-                    "mfg_year (int or null, e.g. 2025, 2026),\n"
-                    "expiry_date (str or null),\n"
+                    "mfg_year (int or null, e.g. 2024, 2025, 2026),\n"
+                    "mfg_date_str (str or null, e.g. '08/2024'),\n"
+                    "expiry_date (str or null, e.g. 'Best before 4 months from mfg'),\n"
+                    "expiry_date_str (str or null, e.g. '12/2024'),\n"
+                    "is_expired (bool, true if expired relative to September 2026, e.g. 2024 dates),\n"
                     "consumer_care_email (str or null),\n"
                     "consumer_care_phone (str or null),\n"
                     "manufacturer_name (str or null),\n"

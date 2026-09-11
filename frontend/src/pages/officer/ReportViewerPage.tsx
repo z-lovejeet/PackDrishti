@@ -32,20 +32,24 @@ export const ReportViewerPage: React.FC<ReportViewerPageProps> = ({
         const list = Array.isArray(res) ? res : (res && res.history ? res.history : []);
 
         if (list && list.length > 0 && isMounted) {
-          const liveReports: ComplianceReport[] = list.map((s: any, idx: number) => ({
-            id: s.scan_id || `live-rep-${idx}`,
-            reportNumber: `REP-${s.scan_code || (s.scan_id ? s.scan_id.substring(0, 8).toUpperCase() : `2026-DEL-${String(idx + 50).padStart(3, '0')}`)}`,
-            title: `Statutory Packaging Audit: ${s.product_name || s.brand_name || 'Packaged Commodity'}`,
-            reportType: "Single Product Audit",
-            generatedDate: s.created_at || s.scanned_at ? new Date(s.created_at || s.scanned_at).toLocaleDateString('en-GB') : "10-Sep-2026",
-            generatedBy: "Sh. Rajesh Kumar Sharma",
-            designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
-            district: "Zone-1 (Central & Old Delhi), Delhi NCT",
-            totalProductsScanned: 1,
-            compliantCount: s.compliance_status === "compliant" ? 1 : 0,
-            violationCount: s.compliance_status === "compliant" ? 0 : 1,
-            format: "PDF",
-          }));
+          const liveReports: ComplianceReport[] = list.map((s: any, idx: number) => {
+            const isCompliant = (s.compliance_status === "compliant" || s.compliance_status === "healthy") && !s.is_expired;
+            const violCount = s.is_expired ? 1 : (s.violations ? s.violations.length : (isCompliant ? 0 : 1));
+            return {
+              id: s.scan_id || `live-rep-${idx}`,
+              reportNumber: `REP-${s.scan_code || (s.scan_id ? s.scan_id.substring(0, 8).toUpperCase() : `2026-DEL-${String(idx + 50).padStart(3, '0')}`)}`,
+              title: `${s.is_expired ? '[EXPIRED] ' : ''}Statutory Packaging Audit: ${s.product_name || s.brand_name || 'Packaged Commodity'}`,
+              reportType: "Single Product Audit",
+              generatedDate: s.created_at || s.scanned_at ? new Date(s.created_at || s.scanned_at).toLocaleDateString('en-GB') : "10-Sep-2026",
+              generatedBy: "Sh. Rajesh Kumar Sharma",
+              designation: "Senior Legal Metrology Inspector (DL-LM-INSP-0442)",
+              district: "Zone-1 (Central & Old Delhi), Delhi NCT",
+              totalProductsScanned: 1,
+              compliantCount: isCompliant ? 1 : 0,
+              violationCount: violCount,
+              format: "PDF",
+            };
+          });
 
           setReports(liveReports);
           setActiveReport(liveReports[0]);

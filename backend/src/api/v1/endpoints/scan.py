@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import hashlib
 import time
@@ -14,6 +15,7 @@ from backend.src.core.config import settings
 from backend.src.core.database import get_db_session
 from backend.src.core.security import get_optional_current_user, CurrentUser
 from backend.src.models.scan import ProductScan, ExtractedDeclaration, ComplianceStatus
+from backend.src.models.health import HealthAudit, ScanHistory
 from backend.src.models.violation import StatutoryViolation, ViolationSeverity
 from ai.src.pipeline.langgraph_workflow import run_packaging_scan_workflow
 
@@ -38,6 +40,11 @@ class ScanAnalysisResponse(BaseModel):
     mrp: Optional[float]
     net_quantity_value: Optional[float]
     net_quantity_unit: Optional[str]
+    mfg_date: Optional[str] = None
+    expiry_date: Optional[str] = None
+    is_expired: bool = False
+    expiry_status: str = "valid"
+    expiry_details: Optional[str] = None
     is_compliant: bool
     compliance_score: float
     pdp_area_cm2: float
@@ -234,12 +241,21 @@ async def analyze_packaging_compliance(
         else "Not Declared"
     )
     mrp_str = f"Rs. {extraction.mrp:.2f}" if (extraction and extraction.mrp is not None) else "Not Declared"
-    mfg_str = (
+    mfg_str = getattr(extraction, "mfg_date_str", None) or (
         f"{extraction.mfg_month:02d}/{extraction.mfg_year}"
         if (extraction and extraction.mfg_month and extraction.mfg_year)
         else "Not Declared"
     )
-    status_enum = ComplianceStatus.COMPLIANT if (evaluation and evaluation.is_compliant) else ComplianceStatus.VIOLATION
+    exp_str = getattr(extraction, "expiry_date_str", None) or (
+        getattr(extraction, "expiry_date", None)
+        if extraction
+        else None
+    ) or "Not Declared"
+    is_expired_val = bool(getattr(extraction, "is_expired", False)) if extraction else False
+    expiry_status_val = getattr(extraction, "expiry_status", "valid") if extraction else "valid"
+    expiry_details_val = getattr(extraction, "expiry_details", None) if extraction else None
+
+    status_enum = ComplianceStatus.COMPLIANT if (evaluation and evaluation.is_compliant and not is_expired_val) else ComplianceStatus.VIOLATION
 
     # Serialize violations for response
     serialized_violations = []
@@ -274,6 +290,8 @@ async def analyze_packaging_compliance(
                 net_quantity=net_qty_str,
                 mrp=mrp_str,
                 mfg_date=mfg_str,
+                expiry_date=exp_str,
+                is_expired=is_expired_val,
                 overall_status=status_enum,
                 compliance_score=score_dec,
                 image_url=f"/static/uploads/{filename}",
@@ -287,6 +305,8 @@ async def analyze_packaging_compliance(
             scan_row.net_quantity = net_qty_str
             scan_row.mrp = mrp_str
             scan_row.mfg_date = mfg_str
+            scan_row.expiry_date = exp_str
+            scan_row.is_expired = is_expired_val
             scan_row.overall_status = status_enum
             scan_row.compliance_score = score_dec
 
@@ -304,6 +324,8 @@ async def analyze_packaging_compliance(
                 bounding_box_json={
                     "tokens_count": len(extraction.tokens),
                     "mfg_date": mfg_str,
+                    "expiry_date": exp_str,
+                    "is_expired": is_expired_val,
                     "consumer_care": extraction.consumer_care_email,
                 },
             )
@@ -329,6 +351,16 @@ async def analyze_packaging_compliance(
                     corrective_action=f"Amend package label to declare expected value: {v.expected_value}",
                 )
                 db.add(violation_record)
+
+        # Log into ScanHistory
+        history_record = ScanHistory(
+            id=uuid.uuid4(),
+            user_id=user_uuid,
+            scan_id=target_scan_id,
+            health_audit_id=None,
+            scan_type="label_compliance",
+        )
+        db.add(history_record)
 
         await db.commit()
     except Exception as db_err:
@@ -358,6 +390,11 @@ async def analyze_packaging_compliance(
         mrp=extraction.mrp if extraction else None,
         net_quantity_value=extraction.net_quantity_value if extraction else None,
         net_quantity_unit=extraction.net_quantity_unit if extraction else None,
+        mfg_date=mfg_str,
+        expiry_date=exp_str,
+        is_expired=is_expired_val,
+        expiry_status=expiry_status_val,
+        expiry_details=expiry_details_val,
         is_compliant=evaluation.is_compliant if evaluation else True,
         compliance_score=evaluation.compliance_score if evaluation else 100.0,
         pdp_area_cm2=evaluation.pdp_area_cm2 if evaluation else 150.0,
@@ -373,35 +410,136 @@ async def analyze_packaging_compliance(
 
 @router.get("/history", summary="Retrieve scan history")
 async def get_scan_history(
-    limit: int = 20,
+    limit: int = 50,
+    scan_type: Optional[str] = None,
     db: AsyncSession = Depends(get_db_session),
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
-    Retrieves recent scan audit history.
+    Retrieves recent scan audit history across both statutory compliance checks and health checks directly from database.
     """
-    try:
-        stmt = select(ProductScan).order_by(ProductScan.scanned_at.desc()).limit(limit)
-        result = await db.execute(stmt)
-        scans = result.scalars().all()
-    except Exception as db_err:
-        logger.warning("Database query failed during history retrieval: %s", db_err)
-        return []
+    items = []
 
-    return [
-        {
-            "scan_id": str(s.id),
-            "scan_code": s.scan_code,
-            "brand_name": s.brand,
-            "product_name": s.product_name,
-            "mrp": s.mrp,
-            "net_quantity": s.net_quantity,
-            "compliance_status": s.overall_status.value if hasattr(s.overall_status, "value") else str(s.overall_status),
-            "overall_score": float(s.compliance_score),
-            "created_at": s.scanned_at.isoformat() if s.scanned_at else None,
-        }
-        for s in scans
-    ]
+    # 1. Fetch ProductScans (Statutory Compliance Scans)
+    if not scan_type or scan_type in ("all", "label_compliance", "compliance"):
+        try:
+            stmt = select(ProductScan).order_by(ProductScan.scanned_at.desc()).limit(limit)
+            result = await db.execute(stmt)
+            scans = result.scalars().all()
+            for s in scans:
+                # Load violations for this scan
+                viol_res = await db.execute(select(StatutoryViolation).where(StatutoryViolation.scan_id == s.id))
+                violations = viol_res.scalars().all()
+
+                mrp_num = 0.0
+                if s.mrp:
+                    m = re.search(r"(\d+(?:\.\d+)?)", str(s.mrp))
+                    if m:
+                        try:
+                            mrp_num = float(m.group(1))
+                        except Exception:
+                            pass
+
+                status_val = s.overall_status.value if hasattr(s.overall_status, "value") else str(s.overall_status)
+                if getattr(s, "is_expired", False):
+                    status_val = "violation"
+
+                items.append({
+                    "scan_id": str(s.id),
+                    "scan_code": s.scan_code or f"LMPC-{str(s.id)[:8].upper()}",
+                    "scan_type": "label_compliance",
+                    "brand_name": s.brand,
+                    "product_name": s.product_name,
+                    "category": s.category or "Packaged Goods",
+                    "mrp": mrp_num,
+                    "mrp_str": s.mrp,
+                    "net_quantity": s.net_quantity,
+                    "mfg_date": s.mfg_date,
+                    "expiry_date": getattr(s, "expiry_date", None) or "Not Declared",
+                    "is_expired": bool(getattr(s, "is_expired", False)),
+                    "expiry_status": "expired" if getattr(s, "is_expired", False) else "valid",
+                    "compliance_status": status_val,
+                    "overall_score": float(s.compliance_score),
+                    "created_at": s.scanned_at.isoformat() if s.scanned_at else None,
+                    "image_url": s.image_url,
+                    "violations": [
+                        {
+                            "violation_id": str(v.id),
+                            "rule_clause": v.act_section,
+                            "rule_code": v.rule_reference,
+                            "rule_name": v.title,
+                            "severity": v.severity.value if hasattr(v.severity, "value") else str(v.severity),
+                            "description": v.description,
+                            "penalty_clause": v.penalty_clause,
+                            "compounding_amount": 50000.0 if "EXPIRED" in (v.rule_reference or "") else 10000.0,
+                            "expected_value": "Mandatory Standard Declaration",
+                            "actual_value": "Non-Conforming",
+                        }
+                        for v in violations
+                    ],
+                })
+        except Exception as db_err:
+            logger.warning("Database query failed during product scan history retrieval: %s", db_err)
+
+    # 2. Fetch HealthAudits (Consumer Health Checks)
+    if not scan_type or scan_type in ("all", "health_check", "health"):
+        try:
+            h_stmt = select(HealthAudit).order_by(HealthAudit.created_at.desc()).limit(limit)
+            h_result = await db.execute(h_stmt)
+            audits = h_result.scalars().all()
+            for a in audits:
+                advisory = a.dietary_advisory_json or {}
+                badges = a.badges_json or []
+                nutrients = a.nutrients_json or []
+                is_exp = bool(getattr(a, "is_expired", False) or advisory.get("is_expired") or any(b.get("label") == "EXPIRED PRODUCT" for b in badges))
+
+                h_score = float(a.health_score)
+                comp_status = "healthy" if h_score >= 70 else ("caution" if h_score >= 40 else "violation")
+                if is_exp:
+                    comp_status = "violation"
+
+                items.append({
+                    "scan_id": str(a.id),
+                    "scan_code": f"HLTH-{str(a.id)[:8].upper()}",
+                    "scan_type": "health_check",
+                    "brand_name": a.brand,
+                    "product_name": a.product_name,
+                    "category": "Packaged Food",
+                    "mrp": 0.0,
+                    "mrp_str": "Declared on Pack",
+                    "net_quantity": "Standard Package",
+                    "mfg_date": getattr(a, "mfg_date", None) or advisory.get("mfg_date") or "Audited Pack",
+                    "expiry_date": getattr(a, "expiry_date", None) or advisory.get("expiry_date") or ("Expired" if is_exp else "Valid"),
+                    "is_expired": is_exp,
+                    "expiry_status": "expired" if is_exp else "valid",
+                    "compliance_status": comp_status,
+                    "overall_score": h_score,
+                    "created_at": a.created_at.isoformat() if a.created_at else None,
+                    "image_url": a.front_image_url,
+                    "badges": badges,
+                    "nutrients": nutrients,
+                    "dietary_advisory": advisory,
+                    "violations": [
+                        {
+                            "violation_id": str(uuid.uuid4()),
+                            "rule_clause": "FSSAI Section 59",
+                            "rule_code": "EXPIRED_FOOD_PRODUCT",
+                            "rule_name": "Expired Food Product - Microbial Hazard",
+                            "severity": "critical",
+                            "description": "Commodity is expired. Unfit for human consumption due to acute food poisoning hazard.",
+                            "penalty_clause": "FSSAI Seizure Notice",
+                            "compounding_amount": 50000.0,
+                            "expected_value": "Fresh / Within Shelf-Life",
+                            "actual_value": "EXPIRED",
+                        }
+                    ] if is_exp else [],
+                })
+        except Exception as h_err:
+            logger.warning("Database query failed during health audit history retrieval: %s", h_err)
+
+    # Sort unified results by created_at descending
+    items.sort(key=lambda x: x.get("created_at") or "", reverse=True)
+    return items[:limit]
 
 
 @router.get("/{scan_id}", summary="Retrieve scan record by ID")
@@ -411,44 +549,76 @@ async def get_scan_by_id(
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
-    Fetches scan record and all associated violations.
+    Fetches scan record and all associated violations from ProductScan or HealthAudit.
     """
     try:
         scan_uuid = uuid.UUID(scan_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid UUID format.")
 
+    # 1. Try ProductScan
     result = await db.execute(select(ProductScan).where(ProductScan.id == scan_uuid))
     scan = result.scalar_one_or_none()
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan record not found.")
+    if scan:
+        viol_res = await db.execute(
+            select(StatutoryViolation).where(StatutoryViolation.scan_id == scan_uuid)
+        )
+        violations = viol_res.scalars().all()
 
-    viol_res = await db.execute(
-        select(StatutoryViolation).where(StatutoryViolation.scan_id == scan_uuid)
-    )
-    violations = viol_res.scalars().all()
+        return {
+            "scan_id": str(scan.id),
+            "scan_code": scan.scan_code,
+            "scan_type": "label_compliance",
+            "brand_name": scan.brand,
+            "product_name": scan.product_name,
+            "category": scan.category,
+            "mrp": scan.mrp,
+            "net_quantity": scan.net_quantity,
+            "mfg_date": scan.mfg_date,
+            "expiry_date": getattr(scan, "expiry_date", None) or "Not Declared",
+            "is_expired": bool(getattr(scan, "is_expired", False)),
+            "compliance_status": scan.overall_status.value if hasattr(scan.overall_status, "value") else str(scan.overall_status),
+            "overall_score": float(scan.compliance_score),
+            "created_at": scan.scanned_at.isoformat() if scan.scanned_at else None,
+            "violations": [
+                {
+                    "id": str(v.id),
+                    "rule_name": v.title,
+                    "rule_section": v.act_section,
+                    "severity": v.severity.value if hasattr(v.severity, "value") else str(v.severity),
+                    "description": v.description,
+                    "penalty_clause": v.penalty_clause,
+                    "corrective_action": v.corrective_action,
+                }
+                for v in violations
+            ],
+        }
 
-    return {
-        "scan_id": str(scan.id),
-        "scan_code": scan.scan_code,
-        "brand_name": scan.brand,
-        "product_name": scan.product_name,
-        "category": scan.category,
-        "mrp": scan.mrp,
-        "net_quantity": scan.net_quantity,
-        "compliance_status": scan.overall_status.value if hasattr(scan.overall_status, "value") else str(scan.overall_status),
-        "overall_score": float(scan.compliance_score),
-        "created_at": scan.scanned_at.isoformat() if scan.scanned_at else None,
-        "violations": [
-            {
-                "id": str(v.id),
-                "rule_name": v.title,
-                "rule_section": v.act_section,
-                "severity": v.severity.value if hasattr(v.severity, "value") else str(v.severity),
-                "description": v.description,
-                "penalty_clause": v.penalty_clause,
-                "corrective_action": v.corrective_action,
-            }
-            for v in violations
-        ],
-    }
+    # 2. Try HealthAudit
+    h_result = await db.execute(select(HealthAudit).where(HealthAudit.id == scan_uuid))
+    health_audit = h_result.scalar_one_or_none()
+    if health_audit:
+        return {
+            "scan_id": str(health_audit.id),
+            "scan_code": f"HLTH-{str(health_audit.id)[:8].upper()}",
+            "scan_type": "health_check",
+            "brand_name": health_audit.brand,
+            "product_name": health_audit.product_name,
+            "category": "Packaged Food",
+            "mrp": "Declared on Pack",
+            "net_quantity": "Standard Package",
+            "mfg_date": getattr(health_audit, "mfg_date", None) or "Audited Pack",
+            "expiry_date": getattr(health_audit, "expiry_date", None) or "Passed",
+            "is_expired": bool(getattr(health_audit, "is_expired", False)),
+            "compliance_status": "violation" if getattr(health_audit, "is_expired", False) else "healthy",
+            "overall_score": float(health_audit.health_score),
+            "created_at": health_audit.created_at.isoformat() if health_audit.created_at else None,
+            "front_image_url": health_audit.front_image_url,
+            "back_image_url": health_audit.back_image_url,
+            "nutrients": health_audit.nutrients_json,
+            "badges": health_audit.badges_json,
+            "dietary_advisory": health_audit.dietary_advisory_json,
+            "violations": [],
+        }
+
+    raise HTTPException(status_code=404, detail="Scan record not found.")

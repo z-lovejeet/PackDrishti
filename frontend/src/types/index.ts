@@ -51,6 +51,10 @@ export interface ProductScan {
   netQuantity: string;
   mrp: string;
   mfgDate: string;
+  expiryDate?: string;
+  isExpired?: boolean;
+  expiryStatus?: string;
+  expiryDetails?: string;
   scannedAt: string;
   scannedBy: string;
   inspectorDesignation: string;
@@ -141,10 +145,15 @@ export interface ProductHealthAudit {
   servingSize: string;
   netQuantity: string;
   mrp: string;
+  mfgDate?: string;
+  expiryDate?: string;
+  isExpired?: boolean;
+  expiryStatus?: string;
+  expiryWarning?: string;
   pricePer100g: string;
   priceRating: 'Budget' | 'Fair Market Rate' | 'Premium';
   priceAnalysis: string;
-  overallRating: 'Nutritious Choice' | 'Consume in Moderation' | 'High Health Concern';
+  overallRating: 'Nutritious Choice' | 'Consume in Moderation' | 'High Health Concern' | 'Critical Hazard - Expired Food' | string;
   ratingScore: number;
   frontImageUrl: string;
   backImageUrl: string;
