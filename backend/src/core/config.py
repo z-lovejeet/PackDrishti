@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # Supabase Unified Relational Database & Vector Store (pgvector)
     SUPABASE_URL: str = "https://placeholder.supabase.co"
+    SUPABASE_KEY: str = ""
     SUPABASE_ANON_KEY: str = ""
     SUPABASE_SERVICE_ROLE_KEY: str = ""
     SUPABASE_JWT_SECRET: str = "4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650"
