@@ -7,8 +7,17 @@ import axios, {
 } from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-const BASE_URL: string =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const getNormalizedBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) return 'http://localhost:8000/api/v1';
+  let cleaned = envUrl.trim().replace(/\/+$/, '');
+  if (!cleaned.endsWith('/api/v1')) {
+    cleaned += '/api/v1';
+  }
+  return cleaned;
+};
+
+const BASE_URL: string = getNormalizedBaseUrl();
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
