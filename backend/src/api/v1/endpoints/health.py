@@ -86,11 +86,28 @@ async def analyze_health_packaging(
     # 2. Direct Multimodal Health Agent Analysis (Direct vision image ingestion)
     from ai.src.pipeline.health_agent import MultimodalHealthAgent
     agent = MultimodalHealthAgent()
+
+    # Sanitize incoming client hints: ignore filenames and generic placeholder strings
+    sanitized_product_hint = None
+    if product_name and product_name.strip():
+        pn = product_name.strip()
+        is_filename = any(ext in pn.lower() for ext in [".jpg", ".jpeg", ".png", ".webp", "media_", "screenshot", "img_"])
+        is_placeholder = any(ph in pn.lower() for ph in ["packaged commodity", "packaged food", "front label", "placeholder", "dummy"])
+        if not is_filename and not is_placeholder:
+            sanitized_product_hint = pn
+
+    sanitized_brand_hint = None
+    if brand and brand.strip():
+        b = brand.strip()
+        is_placeholder = any(ph in b.lower() for ph in ["packaged foods ltd", "packaged goods", "commercial brand", "placeholder", "dummy", "brand name"])
+        if not is_placeholder:
+            sanitized_brand_hint = b
+
     analysis = await agent.analyze_packaging(
         front_bytes=front_bytes,
         back_bytes=back_bytes,
-        product_name_hint=product_name,
-        brand_hint=brand,
+        product_name_hint=sanitized_product_hint,
+        brand_hint=sanitized_brand_hint,
     )
 
     resolved_product = analysis.commodityName
