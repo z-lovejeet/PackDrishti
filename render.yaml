@@ -5,15 +5,17 @@ services:
     region: singapore
     plan: free
     buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.src.main:app --host 0.0.0.0 --port 
+    startCommand: uvicorn backend.src.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: APP_ENV
         value: production
       - key: DEBUG
         value: 'false'
-      - key: PORT
-        value: 8000
+      - key: PYTHONPATH
+        value: .
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: CORS_ORIGINS
         value: http://localhost:5173,https://packdrashiti.vercel.app
       - key: SUPABASE_URL
@@ -26,3 +28,5 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
