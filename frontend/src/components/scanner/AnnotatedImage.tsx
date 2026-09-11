@@ -4,58 +4,54 @@ import { BoundingBox } from '../../types';
 
 interface AnnotatedImageProps {
   imageUrl: string;
-  boxes: BoundingBox[];
+  boxes?: BoundingBox[];
   activeBoxId?: string;
   onBoxClick?: (boxId: string, fieldId: string) => void;
   title?: string;
+  badge?: string;
   pdpAreaCm2?: number;
+  showOverlay?: boolean;
 }
 
 export const AnnotatedImage: React.FC<AnnotatedImageProps> = ({
   imageUrl,
-  boxes,
+  boxes = [],
   activeBoxId,
   onBoxClick,
-  title = 'Packaging Label (Principal Display Panel)',
-  pdpAreaCm2 = 148,
+  title = 'Packaging Specimen',
+  badge,
+  pdpAreaCm2,
+  showOverlay = false,
 }) => {
   const [hoveredBoxId, setHoveredBoxId] = useState<string | null>(null);
 
   const getBoxColors = (status: 'compliant' | 'violation' | 'warning', isSelected: boolean) => {
     if (isSelected) {
       return {
-        stroke: '#1B365D', // Navy for active
+        stroke: '#1B365D',
         strokeWidth: 2.2,
-        fill: 'rgba(27, 54, 93, 0.35)',
-        textBg: '#1B365D',
-        textColor: '#FFFFFF',
+        fill: 'rgba(27, 54, 93, 0.25)',
       };
     }
     switch (status) {
       case 'violation':
         return {
-          stroke: '#DC2626', // Crimson for violation
+          stroke: '#DC2626',
           strokeWidth: 1.2,
-          fill: 'rgba(220, 38, 38, 0.22)',
-          textBg: '#DC2626',
-          textColor: '#FFFFFF',
+          fill: 'rgba(220, 38, 38, 0.15)',
         };
       case 'warning':
         return {
-          stroke: '#D97706', // Amber for warning
+          stroke: '#D97706',
           strokeWidth: 1.2,
-          fill: 'rgba(217, 119, 6, 0.22)',
-          textBg: '#D97706',
-          textColor: '#FFFFFF',
+          fill: 'rgba(217, 119, 6, 0.15)',
         };
       case 'compliant':
       default:
         return {
-          stroke: '#059669', // Emerald for compliant
+          stroke: '#059669',
           strokeWidth: 1.0,
-          fill: 'rgba(5, 150, 105, 0.20)',
-          textBg: '#059669',
-          textColor: '#FFFFFF',
+          fill: 'rgba(5, 150, 105, 0.15)',
         };
     }
   };
@@ -66,120 +62,102 @@ export const AnnotatedImage: React.FC<AnnotatedImageProps> = ({
 
   return (
     <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden flex flex-col shadow-xs">
-      {/* Visual Header */}
-      <div className="px-4 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between gap-2 text-xs flex-wrap">
+      {/* Clean Specimen Header */}
+      <div className="px-3.5 py-2.5 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between gap-2 text-xs flex-wrap">
         <div className="flex items-center gap-2 min-w-0">
-          <Scan size={16} className="text-navy-800 shrink-0" />
+          <Scan size={16} className="text-navy-800 shrink-0" weight="bold" />
           <span className="font-bold text-neutral-900 font-heading truncate">{title}</span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-2xs px-2.5 py-0.5 rounded-md bg-neutral-200/90 font-mono font-medium text-neutral-800 border border-neutral-300/70">
-            PDP: {pdpAreaCm2} cm²
-          </span>
-          <span className="text-2xs px-2.5 py-0.5 rounded-md bg-navy-50 text-navy-800 font-mono font-semibold border border-navy-200">
-            Scale: 4.8 px/mm
-          </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {badge && (
+            <span className="text-2xs px-2 py-0.5 rounded font-mono font-semibold bg-navy-100/90 text-navy-900 border border-navy-200">
+              {badge}
+            </span>
+          )}
+          {pdpAreaCm2 !== undefined && (
+            <span className="text-2xs px-2 py-0.5 rounded bg-neutral-200/80 font-mono font-medium text-neutral-700 border border-neutral-300/70">
+              PDP: {pdpAreaCm2} cm²
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Main Specimen Surface with SVG Overlay */}
-      <div className="relative w-full aspect-[4/3] bg-neutral-950 overflow-hidden flex items-center justify-center select-none group">
+      {/* Main Specimen Surface - Clean packaging view with zero text labeling */}
+      <div className="relative w-full aspect-[4/3] bg-neutral-900 overflow-hidden flex items-center justify-center select-none group">
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover opacity-95 transition-opacity duration-200"
+          className="w-full h-full object-contain transition-opacity duration-200"
         />
 
-        {/* Interactive Accessible SVG Bounding Boxes */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-auto"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          role="region"
-          aria-label="Interactive packaging bounding boxes overlay"
-        >
-          {boxes.map((box) => {
-            const isSelected = activeBoxId === box.id || hoveredBoxId === box.id;
-            const colors = getBoxColors(box.status, isSelected);
+        {/* Optional Clean Outlines (Only rendered if showOverlay is explicitly true; NO text labels are ever rendered) */}
+        {showOverlay && boxes.length > 0 && (
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-auto"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            role="region"
+            aria-label="Packaging bounding outlines overlay"
+          >
+            {boxes.map((box) => {
+              const isSelected = activeBoxId === box.id || hoveredBoxId === box.id;
+              const colors = getBoxColors(box.status, isSelected);
 
-            return (
-              <g
-                key={box.id}
-                role="button"
-                tabIndex={0}
-                aria-pressed={isSelected}
-                aria-label={`Declaration box: ${box.label}. Statutory Status: ${box.status}. Click or press Enter to inspect details.`}
-                className="cursor-pointer outline-hidden transition-all duration-150 focus-visible:outline-2 focus-visible:outline-white"
-                onClick={() => onBoxClick?.(box.id, box.fieldId)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onBoxClick?.(box.id, box.fieldId);
-                  }
-                }}
-                onMouseEnter={() => setHoveredBoxId(box.id)}
-                onMouseLeave={() => setHoveredBoxId(null)}
-              >
-                {/* Bounding Rectangle */}
-                <rect
-                  x={box.x}
-                  y={box.y}
-                  width={box.width}
-                  height={box.height}
-                  fill={colors.fill}
-                  stroke={colors.stroke}
-                  strokeWidth={colors.strokeWidth}
-                  rx="0.8"
-                />
-
-                {/* Box Label Tag Background */}
-                <rect
-                  x={box.x}
-                  y={Math.max(1, box.y - 4.6)}
-                  width={Math.min(box.width + 5, 42)}
-                  height="4.4"
-                  fill={colors.textBg}
-                  rx="0.5"
-                />
-                <text
-                  x={box.x + 1}
-                  y={Math.max(4.0, box.y - 1.4)}
-                  fill={colors.textColor}
-                  fontSize="2.4"
-                  fontWeight="700"
-                  fontFamily="'DM Sans', system-ui, sans-serif"
+              return (
+                <g
+                  key={box.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
+                  aria-label={`Region: ${box.label}. Status: ${box.status}`}
+                  className="cursor-pointer outline-hidden transition-all duration-150"
+                  onClick={() => onBoxClick?.(box.id, box.fieldId)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onBoxClick?.(box.id, box.fieldId);
+                    }
+                  }}
+                  onMouseEnter={() => setHoveredBoxId(box.id)}
+                  onMouseLeave={() => setHoveredBoxId(null)}
                 >
-                  {box.label.length > 24 ? box.label.substring(0, 22) + '...' : box.label}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
+                  <rect
+                    x={box.x}
+                    y={box.y}
+                    width={box.width}
+                    height={box.height}
+                    fill={colors.fill}
+                    stroke={colors.stroke}
+                    strokeWidth={colors.strokeWidth}
+                    rx="0.8"
+                  />
+                </g>
+              );
+            })}
+          </svg>
+        )}
 
-        {/* Floating Specimen Quick Legend */}
-        <div className="absolute bottom-2 left-2 right-2 px-3.5 py-2 rounded-md bg-neutral-950/90 backdrop-blur-md border border-neutral-800 flex items-center justify-between text-2xs text-white shadow-lg">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="flex items-center gap-1.5" title={`${compliantCount} Compliant fields`}>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs ring-1 ring-emerald-300" />
-              <span className="text-neutral-200 font-medium">Compliant ({compliantCount})</span>
-            </span>
-            <span className="flex items-center gap-1.5" title={`${violationCount} Violations detected`}>
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs ring-1 ring-rose-300" />
-              <span className="text-neutral-200 font-medium">Infraction ({violationCount})</span>
-            </span>
-            <span className="flex items-center gap-1.5" title={`${warningCount} Warnings`}>
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs ring-1 ring-amber-300" />
-              <span className="text-neutral-200 font-medium">Caution ({warningCount})</span>
-            </span>
-            <span className="hidden md:flex items-center gap-1.5" title="Active selection">
-              <span className="w-2.5 h-2.5 rounded-full bg-navy-400 ring-1 ring-white" />
-              <span className="text-neutral-300 font-medium">Active Box</span>
-            </span>
+        {/* Quick Legend only if overlay is enabled */}
+        {showOverlay && boxes.length > 0 && (
+          <div className="absolute bottom-2 left-2 right-2 px-3 py-1.5 rounded-md bg-neutral-950/90 backdrop-blur-md border border-neutral-800 flex items-center justify-between text-2xs text-white shadow-lg">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-neutral-200">Compliant ({compliantCount})</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span className="text-neutral-200">Infraction ({violationCount})</span>
+              </span>
+              {warningCount > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-neutral-200">Caution ({warningCount})</span>
+                </span>
+              )}
+            </div>
           </div>
-          <span className="text-neutral-400 hidden sm:inline font-mono">
-            Click any bounding box to inspect clause
-          </span>
-        </div>
+        )}
       </div>
     </div>
   );

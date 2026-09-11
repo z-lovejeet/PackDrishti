@@ -18,7 +18,13 @@ import {
   XCircle,
   CheckCircle,
   Cpu,
-  Database
+  Database,
+  Scales,
+  ShieldCheck,
+  Coins,
+  Package,
+  Ruler,
+  WarningOctagon
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { AnnotatedImage } from "../../components/scanner/AnnotatedImage";
@@ -26,6 +32,7 @@ import { Camera } from "../../components/scanner/Camera";
 import { ReportHeader } from "../../components/reports/ReportHeader";
 import { ComplianceCard } from "../../components/reports/ComplianceCard";
 import { ViolationCard } from "../../components/reports/ViolationCard";
+import { NoticePreviewModal } from "../../components/officer/NoticePreviewModal";
 import { ProductScan, UserRole, BoundingBox, ExtractedDeclaration, StatutoryViolation } from "../../types";
 import { calculateComplianceScore } from "../../utils/complianceEngine";
 import { useScanMachine } from "../../store/scanMachine";
@@ -62,6 +69,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   const [activeBoxId, setActiveBoxId] = useState<string | undefined>(undefined);
   const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
   const [subView, setSubView] = useState<"declarations" | "font_table">("declarations");
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState<boolean>(false);
 
   // Scan Machine State
   const {
@@ -819,272 +827,554 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       </div>
 
       {/* RESULTS WORKSPACE (When Scan is Complete) */}
-      {currentScan && scanStatus === "complete" && (
-        <div className="space-y-6 animate-fadeIn">
-          
-          {/* Executive Summary Header */}
-          <ReportHeader
-            productName={currentScan.productName}
-            brand={currentScan.brand}
-            category={currentScan.category}
-            scanCode={currentScan.scanCode}
-            scannedAt={currentScan.scannedAt}
-            location={currentScan.location}
-            overallStatus={currentScan.overallStatus}
-            complianceScore={complianceResult?.score}
-            barcode={currentScan.barcode}
-            netQuantity={currentScan.netQuantity}
-            declaredMrp={currentScan.mrp}
-            pdpAreaCm2={currentScan.pdpAreaCm2}
-          />
+      {currentScan && scanStatus === "complete" && (() => {
+        const finalFrontImg = frontPreview || imageSrc;
+        const finalBackImg = backPreview || _backImageSrc;
+        const hasDualImage = Boolean(finalFrontImg && finalBackImg);
 
-          {/* Statutory Findings & Consumer Advisory */}
-          {liveResult?.consumer_advisory && (
-            <div className="p-5 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs space-y-2.5">
-              <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-200/80 pb-2.5">
-                <div>
-                  <h3 className="text-xs font-bold font-mono text-slate-900 uppercase tracking-wider">
-                    Statutory Assessment Summary
-                  </h3>
-                  <span className="text-2xs text-slate-500 font-normal">
-                    Automated evaluation against Legal Metrology Rules, 2011
-                  </span>
+        const violationsCount = currentScan.violations.length;
+        const isCompliant = currentScan.overallStatus === "compliant" || violationsCount === 0;
+
+        // Calculate total compounding liability under Section 48
+        const totalCompounding = currentScan.violations.reduce((acc, v) => {
+          const liveV = liveResult?.violations.find(lv => lv.violation_id === v.id || lv.rule_code === v.ruleReference);
+          if (liveV && typeof liveV.compounding_amount === "number") {
+            return acc + liveV.compounding_amount;
+          }
+          return acc + 25000;
+        }, 0);
+
+        // Calculate USP per 100g or 100ml
+        let per100gStr = "N/A";
+        if (liveResult?.net_quantity_value && liveResult?.mrp && liveResult.net_quantity_value > 0) {
+          const unitLower = (liveResult.net_quantity_unit || "g").toLowerCase();
+          if (unitLower === "g" || unitLower === "grams") {
+            const valPer100g = (liveResult.mrp / liveResult.net_quantity_value) * 100;
+            per100gStr = `Rs. ${valPer100g.toFixed(2)} / 100g`;
+          } else if (unitLower === "kg") {
+            const valPer100g = (liveResult.mrp / (liveResult.net_quantity_value * 1000)) * 100;
+            per100gStr = `Rs. ${valPer100g.toFixed(2)} / 100g`;
+          } else if (unitLower === "ml") {
+            const valPer100ml = (liveResult.mrp / liveResult.net_quantity_value) * 100;
+            per100gStr = `Rs. ${valPer100ml.toFixed(2)} / 100ml`;
+          } else if (unitLower === "l" || unitLower === "litre") {
+            const valPer100ml = (liveResult.mrp / (liveResult.net_quantity_value * 1000)) * 100;
+            per100gStr = `Rs. ${valPer100ml.toFixed(2)} / 100ml`;
+          }
+        }
+
+        return (
+          <div className="space-y-6 animate-fadeIn">
+            
+            {/* Executive Summary Header */}
+            <ReportHeader
+              productName={currentScan.productName}
+              brand={currentScan.brand}
+              category={currentScan.category}
+              scanCode={currentScan.scanCode}
+              scannedAt={currentScan.scannedAt}
+              location={currentScan.location}
+              overallStatus={currentScan.overallStatus}
+              complianceScore={complianceResult?.score}
+              barcode={currentScan.barcode}
+              netQuantity={currentScan.netQuantity}
+              declaredMrp={currentScan.mrp}
+              pdpAreaCm2={currentScan.pdpAreaCm2}
+            />
+
+            {/* Brief Statutory Compliance Summary Banner */}
+            <div className={`p-4 sm:p-5 rounded-lg border shadow-xs transition-all ${
+              isCompliant
+                ? "bg-emerald-50/70 border-emerald-200"
+                : "bg-gradient-to-r from-rose-50/80 via-white to-amber-50/60 border-rose-200/90"
+            }`}>
+              <div className="flex items-center justify-between gap-3 flex-wrap border-b border-neutral-200/70 pb-3">
+                <div className="flex items-center gap-2.5">
+                  {isCompliant ? (
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 shrink-0">
+                      <ShieldCheck size={20} weight="fill" />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-700 shrink-0">
+                      <ShieldWarning size={20} weight="fill" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold font-heading text-neutral-900 uppercase tracking-wide">
+                      Statutory Compliance Executive Summary
+                    </h3>
+                    <span className="text-2xs text-neutral-500 font-normal">
+                      Automated audit against Legal Metrology (Packaged Commodities) Rules, 2011
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-2xs font-mono text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-2xs font-bold px-2.5 py-1 rounded-md border font-mono ${
+                    isCompliant
+                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                      : "bg-rose-100 text-rose-800 border-rose-300"
+                  }`}>
+                    {isCompliant ? "VERIFIED COMPLIANT" : `${violationsCount} STATUTORY INFRACTIONS`}
+                  </span>
+                  <span className="text-2xs font-mono text-neutral-600 bg-white px-2 py-1 rounded-md border border-neutral-200">
                     Ref: {currentScan.scanCode}
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-sans">
-                {liveResult.consumer_advisory}
+              {/* Concise 2-sentence executive readout */}
+              <p className="text-xs sm:text-sm text-neutral-800 leading-relaxed font-sans pt-3">
+                Packaging inspection for <strong className="text-neutral-950 font-semibold">{currentScan.brand} {currentScan.productName}</strong> (Net Quantity: <strong className="font-semibold">{currentScan.netQuantity}</strong>, Declared MRP: <strong className="font-semibold">{currentScan.mrp}</strong>). {
+                  isCompliant
+                    ? "All mandatory Rule 6 declarations, Table-I font cap-heights, and Unit Sale Pricing conform to statutory standards."
+                    : `Identified ${violationsCount} statutory infractions under Rule 6 and Rule 7 Table-I. Total estimated compounding liability under Section 48 is Rs. ${totalCompounding.toLocaleString("en-IN")}. Legal notice under FORM LM-INSP-2011 is advised.`
+                }
               </p>
-            </div>
-          )}
 
-          {/* Main Two-Column Interactive Workspace */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* LEFT COLUMN: Sub-View Switcher (Declarations vs Table-I Font Audit) & Violations */}
-            <div className="lg:col-span-7 space-y-5">
-              
-              {/* Sub-view switcher tabs */}
-              <div className="flex items-center justify-between border-b border-neutral-200 pb-3 flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSubView("declarations")}
-                    className={`px-3.5 py-2 rounded-md font-heading text-xs font-bold transition-all flex items-center gap-1.5 ${
-                      subView === "declarations"
-                        ? "bg-navy-800 text-white shadow-xs"
-                        : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-                    }`}
-                  >
-                    <FileText size={14} weight="bold" />
-                    <span>Rule 6 Declarations ({currentScan.declarations.length})</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSubView("font_table")}
-                    className={`px-3.5 py-2 rounded-md font-heading text-xs font-bold transition-all flex items-center gap-1.5 ${
-                      subView === "font_table"
-                        ? "bg-navy-800 text-white shadow-xs"
-                        : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-                    }`}
-                  >
-                    <TextT size={14} weight="bold" />
-                    <span>Rule 7 Table-I Font Audit</span>
-                  </button>
+              {/* 4 Stat Strip Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3.5 mt-1 border-t border-neutral-200/60 text-2xs">
+                <div className="p-2 rounded bg-white/90 border border-neutral-200/80">
+                  <span className="text-neutral-500 block font-medium">Compliance Score</span>
+                  <span className={`font-bold font-mono text-xs ${complianceResult?.score && complianceResult.score >= 80 ? "text-emerald-700" : "text-rose-700"}`}>
+                    {complianceResult?.score || 0} / 100
+                  </span>
                 </div>
-
-                <span className="text-2xs text-neutral-500 font-medium">
-                  Select item to highlight on visual label
-                </span>
+                <div className="p-2 rounded bg-white/90 border border-neutral-200/80">
+                  <span className="text-neutral-500 block font-medium">Unit Sale Price (USP)</span>
+                  <span className="font-bold font-mono text-xs text-neutral-900">
+                    {liveResult?.calculated_usp ? `Rs. ${liveResult.calculated_usp.toFixed(2)} / ${liveResult.calculated_usp_unit || "g"}` : "Missing"}
+                  </span>
+                </div>
+                <div className="p-2 rounded bg-white/90 border border-neutral-200/80">
+                  <span className="text-neutral-500 block font-medium">Compounding Exposure</span>
+                  <span className="font-bold font-mono text-xs text-amber-800">
+                    Rs. {totalCompounding.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="p-2 rounded bg-white/90 border border-neutral-200/80">
+                  <span className="text-neutral-500 block font-medium">Specimen Panels</span>
+                  <span className="font-bold font-mono text-xs text-navy-800">
+                    {hasDualImage ? "Dual Panel (Front + Back)" : "Single Front Specimen"}
+                  </span>
+                </div>
               </div>
+            </div>
 
-              {/* View 1: Rule 6 Mandatory Declarations Cards */}
-              {subView === "declarations" && (
-                <div className="space-y-3" role="region" aria-label="Rule 6 Mandatory Declarations List">
-                  {currentScan.declarations.map((declaration) => (
-                    <ComplianceCard
-                      key={declaration.id}
-                      declaration={declaration}
-                      isSelected={activeFieldId === declaration.id}
-                      onSelect={() => {
-                        setActiveFieldId(declaration.id);
-                        if (declaration.boxId) setActiveBoxId(declaration.boxId);
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* View 2: Table-I Millimeter Font Height Audit */}
-              {subView === "font_table" && (
-                <div className="bg-white p-5 rounded-lg border border-neutral-200 shadow-xs space-y-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <TextT size={18} className="text-navy-800" weight="bold" />
-                      <h4 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
-                        Rule 7 Table-I Font Cap-Height Verification
-                      </h4>
-                    </div>
-                    <p className="text-2xs text-neutral-600 leading-relaxed">
-                      Statutory minimum height of numerals and letters based on Principal Display Panel (PDP) area of <strong>{currentScan.pdpAreaCm2} cm²</strong>.
-                    </p>
-                  </div>
-
-                  <div className="overflow-x-auto border border-neutral-200 rounded-md">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-neutral-100/70 border-b border-neutral-200 text-neutral-700 font-semibold font-heading uppercase text-2xs tracking-wider">
-                          <th className="py-2.5 px-3">Statutory Field</th>
-                          <th className="py-2.5 px-3">Required Minimum</th>
-                          <th className="py-2.5 px-3">Measured Cap-Height</th>
-                          <th className="py-2.5 px-3 text-right">Result</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-200">
-                        {currentScan.declarations
-                          .filter((d) => d.measuredFontHeightMm && d.requiredFontHeightMm)
-                          .map((d) => {
-                            const isPassing = (d.measuredFontHeightMm || 0) >= (d.requiredFontHeightMm || 0);
-                            return (
-                              <tr key={d.id} className="hover:bg-neutral-50/70 transition-colors">
-                                <td className="py-2.5 px-3 font-semibold text-neutral-900">{d.fieldName}</td>
-                                <td className="py-2.5 px-3 font-mono text-neutral-600">{d.requiredFontHeightMm} mm</td>
-                                <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{d.measuredFontHeightMm} mm</td>
-                                <td className="py-2.5 px-3 text-right">
-                                  {isPassing ? (
-                                    <span className="inline-flex items-center gap-1 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-2xs font-bold">
-                                      <CheckCircle size={12} weight="fill" />
-                                      <span>Conforms</span>
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 text-rose-800 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full text-2xs font-bold">
-                                      <XCircle size={12} weight="fill" />
-                                      <span>Deficient</span>
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Statutory Violations Section */}
-              {currentScan.violations.length > 0 && (
-                <div className="space-y-3 pt-3">
-                  <div className="flex items-center justify-between border-b border-rose-200 pb-2.5">
-                    <h3 className="text-xs font-bold text-rose-700 uppercase tracking-wider font-heading flex items-center gap-1.5">
-                      <ShieldWarning size={18} weight="fill" />
-                      <span>Statutory Infractions Requiring Enforcement Action ({currentScan.violations.length})</span>
-                    </h3>
-                    <span className="text-2xs text-neutral-500 font-mono bg-neutral-100 px-2.5 py-0.5 rounded border border-neutral-200">
-                      Section 36(1) Compounding
+            {/* Informative Cards Section (Useful for Consumers as well as Officers) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* Card 1: Consumer Protection & Price Intelligence (For Consumers) */}
+              <div className="p-4 rounded-lg bg-white border border-neutral-200 shadow-2xs space-y-3 flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
+                    <h4 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide flex items-center gap-1.5">
+                      <ShieldCheck size={16} className="text-emerald-600" weight="bold" />
+                      <span>Consumer Price &amp; Rights Intelligence</span>
+                    </h4>
+                    <span className="text-2xs bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-mono font-medium border border-emerald-200">
+                      Consumer Advisory
                     </span>
                   </div>
 
-                  <div className="space-y-3">
-                    {currentScan.violations.map((violation) => (
-                      <ViolationCard
-                        key={violation.id}
-                        violation={violation}
-                        showAction={userRole === "officer"}
-                        onFileNotice={() => {
-                          if (liveResult?.form_lm_insp_2011_notice_draft) {
-                            alert(liveResult.form_lm_insp_2011_notice_draft);
-                          } else {
-                            alert(`Drafting Section 36(1) legal metrology compounding notice for: ${violation.title}`);
-                          }
+                  <div className="grid grid-cols-2 gap-2 text-2xs">
+                    <div className="p-2 bg-neutral-50 rounded border border-neutral-200/70">
+                      <span className="text-neutral-500 block">Declared MRP</span>
+                      <span className="font-bold text-xs text-neutral-900 font-mono">{currentScan.mrp}</span>
+                      <span className="text-neutral-400 block text-[11px]">Incl. all taxes (Rule 6(1)(e))</span>
+                    </div>
+                    <div className="p-2 bg-neutral-50 rounded border border-neutral-200/70">
+                      <span className="text-neutral-500 block">Unit Sale Price (USP)</span>
+                      <span className="font-bold text-xs text-emerald-800 font-mono">
+                        {liveResult?.calculated_usp ? `Rs. ${liveResult.calculated_usp.toFixed(2)} / ${liveResult.calculated_usp_unit || "g"}` : "Not Declared"}
+                      </span>
+                      <span className="text-neutral-500 block text-[11px]">Equiv: {per100gStr}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded bg-navy-50/70 border border-navy-100 text-2xs text-navy-950 space-y-1">
+                    <span className="font-bold text-navy-900 block flex items-center gap-1">
+                      <Coins size={13} className="text-amber-600" weight="bold" />
+                      <span>Price Comparison &amp; Anti-Shrinkflation</span>
+                    </span>
+                    <p className="text-neutral-600 leading-relaxed">
+                      Rule 6(1)(e) Proviso requires Unit Sale Price (USP) so consumers can compare true per-gram prices across different brands and package sizes. Retailers cannot charge above the printed MRP under Rule 18(2).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-2xs text-neutral-500">
+                  <span>Grievance Redressal: Call NCH 1915</span>
+                  <span className="font-mono text-neutral-400">Rule 6(2) Contact Verified</span>
+                </div>
+              </div>
+
+              {/* Card 2: Enforcement Officer Statutory Action (For Officers) */}
+              <div className="p-4 rounded-lg bg-white border border-neutral-200 shadow-2xs space-y-3 flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
+                    <h4 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide flex items-center gap-1.5">
+                      <Scales size={16} className="text-navy-800" weight="bold" />
+                      <span>Statutory Enforcement Action</span>
+                    </h4>
+                    <span className="text-2xs bg-navy-50 text-navy-800 px-2 py-0.5 rounded font-mono font-medium border border-navy-200">
+                      Officer Portal
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-2xs">
+                    <div className="p-2 bg-neutral-50 rounded border border-neutral-200/70">
+                      <span className="text-neutral-500 block">Enforcement Section</span>
+                      <span className="font-bold text-xs text-neutral-900">Section 36(1)</span>
+                      <span className="text-neutral-400 block text-[11px]">LM Act, 2009</span>
+                    </div>
+                    <div className="p-2 bg-neutral-50 rounded border border-neutral-200/70">
+                      <span className="text-neutral-500 block">Section 48 Compounding</span>
+                      <span className="font-bold text-xs text-rose-700 font-mono">Rs. {totalCompounding.toLocaleString("en-IN")}</span>
+                      <span className="text-neutral-400 block text-[11px]">{violationsCount} Infractions Assessed</span>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded bg-amber-50/70 border border-amber-200 text-2xs text-amber-950 space-y-1">
+                    <span className="font-bold text-amber-900 block flex items-center gap-1">
+                      <WarningOctagon size={13} className="text-rose-600" weight="bold" />
+                      <span>Mandatory Inspection Protocol</span>
+                    </span>
+                    <p className="text-neutral-700 leading-relaxed">
+                      First offence compounding is up to Rs. 25,000 per violation; second offence is up to Rs. 50,000. Under Rule 20, serve Form LM-INSP-2011 giving 15 days to show cause or compound before prosecution.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-neutral-100 flex items-center justify-between gap-2">
+                  <span className="text-2xs text-neutral-500 font-mono">15-Day Statutory Window</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsNoticeModalOpen(true)}
+                    className="text-xs font-semibold text-navy-800 border-navy-300 hover:bg-navy-50"
+                    icon={<FileText size={13} weight="bold" />}
+                  >
+                    View / Draft Notice (FORM LM-INSP-2011)
+                  </Button>
+                </div>
+              </div>
+
+              {/* Card 3: Packaging Declarations Matrix (Real Data) */}
+              <div className="p-4 rounded-lg bg-white border border-neutral-200 shadow-2xs space-y-3">
+                <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
+                  <h4 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide flex items-center gap-1.5">
+                    <Package size={16} className="text-navy-800" weight="bold" />
+                    <span>Packaging Declarations Matrix</span>
+                  </h4>
+                  <span className="text-2xs bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded font-mono border border-neutral-200">
+                    Rule 6 Verification
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 text-2xs">
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Brand Identity (Rule 6(1)(a)):</span>
+                    <span className="font-semibold text-neutral-900">{currentScan.brand}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Generic Commodity (Rule 6(1)(b)):</span>
+                    <span className="font-semibold text-neutral-900 truncate max-w-[200px]">{currentScan.productName}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Declared Net Quantity (Rule 6(1)(c)):</span>
+                    <span className="font-semibold text-neutral-900 font-mono">{currentScan.netQuantity}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Maximum Retail Price (Rule 6(1)(e)):</span>
+                    <span className="font-semibold text-neutral-900 font-mono">{currentScan.mrp}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Unit Sale Price (Rule 6(11)):</span>
+                    <span className="font-semibold text-emerald-700 font-mono">
+                      {liveResult?.calculated_usp ? `Rs. ${liveResult.calculated_usp.toFixed(2)} / ${liveResult.calculated_usp_unit || "g"}` : "Not Declared"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Country of Origin (Rule 6(10)):</span>
+                    <span className="font-semibold text-neutral-900">India</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-neutral-500">Metric SI Standard (Rule 13):</span>
+                    <span className="font-semibold text-emerald-700">Verified Metric Units (g/kg)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4: PDP Dimension & Rule 7 Table-I Standards */}
+              <div className="p-4 rounded-lg bg-white border border-neutral-200 shadow-2xs space-y-3">
+                <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
+                  <h4 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide flex items-center gap-1.5">
+                    <Ruler size={16} className="text-navy-800" weight="bold" />
+                    <span>Rule 7 Table-I Font Calibration</span>
+                  </h4>
+                  <span className="text-2xs bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded font-mono border border-neutral-200">
+                    Table-I Metric
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 text-2xs">
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Principal Display Panel Area:</span>
+                    <span className="font-semibold text-neutral-900 font-mono">{currentScan.pdpAreaCm2} cm²</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Table-I Area Category:</span>
+                    <span className="font-semibold text-neutral-900">
+                      {currentScan.pdpAreaCm2 <= 50 ? "<= 50 cm²" : currentScan.pdpAreaCm2 <= 100 ? "50 - 100 cm²" : currentScan.pdpAreaCm2 <= 500 ? "100 - 500 cm²" : "> 500 cm²"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Min. Required Numeral Height:</span>
+                    <span className="font-semibold text-navy-800 font-mono">
+                      {currentScan.pdpAreaCm2 <= 50 ? "1.0 mm" : currentScan.pdpAreaCm2 <= 100 ? "1.5 mm" : currentScan.pdpAreaCm2 <= 500 ? "2.0 mm" : "4.0 mm"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Min. Letter Height (Rule 7(3)):</span>
+                    <span className="font-semibold text-neutral-900 font-mono">&gt;= 1.0 mm</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-neutral-100">
+                    <span className="text-neutral-500">Quiet Zone Margins (Rule 8):</span>
+                    <span className="font-semibold text-emerald-700 font-mono">1x Height (H) / 2x Width (W)</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-neutral-500">Contrast Readability (Rule 9):</span>
+                    <span className="font-semibold text-emerald-700">WCAG Contrast Ratio &gt; 4.5:1</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Main Two-Column Interactive Workspace */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              {/* LEFT COLUMN: Sub-View Switcher (Declarations vs Table-I Font Audit) & Violations */}
+              <div className="lg:col-span-7 space-y-5">
+                
+                {/* Sub-view switcher tabs */}
+                <div className="flex items-center justify-between border-b border-neutral-200 pb-3 flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSubView("declarations")}
+                      className={`px-3.5 py-2 rounded-md font-heading text-xs font-bold transition-all flex items-center gap-1.5 ${
+                        subView === "declarations"
+                          ? "bg-navy-800 text-white shadow-xs"
+                          : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                      }`}
+                    >
+                      <FileText size={14} weight="bold" />
+                      <span>Rule 6 Declarations ({currentScan.declarations.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSubView("font_table")}
+                      className={`px-3.5 py-2 rounded-md font-heading text-xs font-bold transition-all flex items-center gap-1.5 ${
+                        subView === "font_table"
+                          ? "bg-navy-800 text-white shadow-xs"
+                          : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                      }`}
+                    >
+                      <TextT size={14} weight="bold" />
+                      <span>Rule 7 Table-I Font Audit</span>
+                    </button>
+                  </div>
+
+                  <span className="text-2xs text-neutral-500 font-medium">
+                    Verified against PCR 2011 standard
+                  </span>
+                </div>
+
+                {/* View 1: Rule 6 Mandatory Declarations Cards */}
+                {subView === "declarations" && (
+                  <div className="space-y-3" role="region" aria-label="Rule 6 Mandatory Declarations List">
+                    {currentScan.declarations.map((declaration) => (
+                      <ComplianceCard
+                        key={declaration.id}
+                        declaration={declaration}
+                        isSelected={activeFieldId === declaration.id}
+                        onSelect={() => {
+                          setActiveFieldId(declaration.id);
+                          if (declaration.boxId) setActiveBoxId(declaration.boxId);
                         }}
                       />
                     ))}
                   </div>
-                </div>
-              )}
+                )}
 
-            </div>
+                {/* View 2: Table-I Millimeter Font Height Audit */}
+                {subView === "font_table" && (
+                  <div className="bg-white p-5 rounded-lg border border-neutral-200 shadow-xs space-y-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <TextT size={18} className="text-navy-800" weight="bold" />
+                        <h4 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wide">
+                          Rule 7 Table-I Font Cap-Height Verification
+                        </h4>
+                      </div>
+                      <p className="text-2xs text-neutral-600 leading-relaxed">
+                        Statutory minimum height of numerals and letters based on Principal Display Panel (PDP) area of <strong>{currentScan.pdpAreaCm2} cm²</strong>.
+                      </p>
+                    </div>
 
-            {/* RIGHT COLUMN: Sticky Packaging Specimen Image & Legend */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="sticky top-20 space-y-4">
-                <div className="bg-white p-4 rounded-lg border border-neutral-200 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold text-neutral-900 font-heading uppercase tracking-wider flex items-center gap-1.5">
-                      <Scan size={16} className="text-navy-800" weight="bold" />
-                      <span>Packaging Visual Segmentation</span>
-                    </h3>
-                    <span className="text-2xs font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
-                      PDP: {currentScan.pdpAreaCm2} cm²
-                    </span>
+                    <div className="overflow-x-auto border border-neutral-200 rounded-md">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-neutral-100/70 border-b border-neutral-200 text-neutral-700 font-semibold font-heading uppercase text-2xs tracking-wider">
+                            <th className="py-2.5 px-3">Statutory Field</th>
+                            <th className="py-2.5 px-3">Required Minimum</th>
+                            <th className="py-2.5 px-3">Measured Cap-Height</th>
+                            <th className="py-2.5 px-3 text-right">Result</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-200">
+                          {currentScan.declarations
+                            .filter((d) => d.measuredFontHeightMm && d.requiredFontHeightMm)
+                            .map((d) => {
+                              const isPassing = (d.measuredFontHeightMm || 0) >= (d.requiredFontHeightMm || 0);
+                              return (
+                                <tr key={d.id} className="hover:bg-neutral-50/70 transition-colors">
+                                  <td className="py-2.5 px-3 font-semibold text-neutral-900">{d.fieldName}</td>
+                                  <td className="py-2.5 px-3 font-mono text-neutral-600">{d.requiredFontHeightMm} mm</td>
+                                  <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{d.measuredFontHeightMm} mm</td>
+                                  <td className="py-2.5 px-3 text-right">
+                                    {isPassing ? (
+                                      <span className="inline-flex items-center gap-1 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-2xs font-bold">
+                                        <CheckCircle size={12} weight="fill" />
+                                        <span>Conforms</span>
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 text-rose-800 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full text-2xs font-bold">
+                                        <XCircle size={12} weight="fill" />
+                                        <span>Deficient</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
+                )}
 
-                  <AnnotatedImage
-                    imageUrl={currentScan.imageUrl}
-                    boxes={currentScan.boundingBoxes}
-                    activeBoxId={activeBoxId}
-                    pdpAreaCm2={currentScan.pdpAreaCm2}
-                    title={currentScan.productName}
-                    onBoxClick={(boxId, fieldId) => {
-                      setActiveBoxId(boxId);
-                      setActiveFieldId(fieldId);
-                    }}
-                  />
+                {/* Statutory Violations Section */}
+                {currentScan.violations.length > 0 && (
+                  <div className="space-y-3 pt-3">
+                    <div className="flex items-center justify-between border-b border-rose-200 pb-2.5">
+                      <h3 className="text-xs font-bold text-rose-700 uppercase tracking-wider font-heading flex items-center gap-1.5">
+                        <ShieldWarning size={18} weight="fill" />
+                        <span>Statutory Infractions Requiring Enforcement Action ({currentScan.violations.length})</span>
+                      </h3>
+                      <span className="text-2xs text-neutral-500 font-mono bg-neutral-100 px-2.5 py-0.5 rounded border border-neutral-200">
+                        Section 36(1) Compounding
+                      </span>
+                    </div>
 
-                  {/* Redesigned Visual Legend */}
-                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-neutral-100 text-2xs text-neutral-600">
-                    <div className="flex items-center gap-1.5 bg-neutral-50 p-1.5 rounded border border-neutral-200/60 justify-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-1 ring-emerald-300 shrink-0" />
-                      <span className="font-semibold text-neutral-800">Compliant</span>
+                    <div className="space-y-3">
+                      {currentScan.violations.map((violation) => (
+                        <ViolationCard
+                          key={violation.id}
+                          violation={violation}
+                          showAction={true}
+                          onFileNotice={() => setIsNoticeModalOpen(true)}
+                        />
+                      ))}
                     </div>
-                    <div className="flex items-center gap-1.5 bg-neutral-50 p-1.5 rounded border border-neutral-200/60 justify-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-rose-500 ring-1 ring-rose-300 shrink-0" />
-                      <span className="font-semibold text-neutral-800">Infraction</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-neutral-50 p-1.5 rounded border border-neutral-200/60 justify-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-navy-800 ring-1 ring-navy-400 shrink-0" />
-                      <span className="font-semibold text-neutral-800">Active Box</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Consumer Health Cross-Link */}
-                {userRole === "consumer" && onNavigateToHealth && (
-                  <div className="p-4 rounded-lg bg-navy-50/80 border border-navy-200/80 space-y-2 shadow-xs">
-                    <div className="flex items-center gap-2 text-navy-900 font-bold text-xs font-heading">
-                      <Heartbeat size={18} weight="fill" className="text-saffron-600" />
-                      <span>Consumer Health &amp; Nutrition Audit</span>
-                    </div>
-                    <p className="text-xs text-neutral-600 leading-relaxed">
-                      Cross-examine back nutritional facts against ICMR-NIN 2024 daily allowances for sugar, sodium, and saturated fats.
-                    </p>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={onNavigateToHealth}
-                      className="w-full"
-                      icon={<ArrowRight size={14} weight="bold" />}
-                      iconPosition="right"
-                    >
-                      Launch Health &amp; Nutrition Check
-                    </Button>
                   </div>
                 )}
 
               </div>
+
+              {/* RIGHT COLUMN: Sticky Packaging Specimen Image(s) */}
+              <div className="lg:col-span-5 space-y-4">
+                <div className="sticky top-20 space-y-4">
+                  
+                  {hasDualImage ? (
+                    /* Dual Preview Boxes: One for Front, One for Back */
+                    <div className="space-y-4">
+                      <AnnotatedImage
+                        imageUrl={finalFrontImg!}
+                        title="Front Packaging Panel"
+                        badge="Panel 1/2 • Front"
+                        pdpAreaCm2={currentScan.pdpAreaCm2}
+                        showOverlay={false}
+                      />
+
+                      <AnnotatedImage
+                        imageUrl={finalBackImg!}
+                        title="Back Statutory Panel"
+                        badge="Panel 2/2 • Back"
+                        pdpAreaCm2={currentScan.pdpAreaCm2}
+                        showOverlay={false}
+                      />
+                    </div>
+                  ) : (
+                    /* Single Preview Box */
+                    <AnnotatedImage
+                      imageUrl={finalFrontImg || finalBackImg || currentScan.imageUrl}
+                      title="Packaging Specimen"
+                      badge="Panel 1/1 • Front"
+                      pdpAreaCm2={currentScan.pdpAreaCm2}
+                      showOverlay={false}
+                    />
+                  )}
+
+                  {/* Consumer Health Cross-Link */}
+                  {userRole === "consumer" && onNavigateToHealth && (
+                    <div className="p-4 rounded-lg bg-navy-50/80 border border-navy-200/80 space-y-2 shadow-xs">
+                      <div className="flex items-center gap-2 text-navy-900 font-bold text-xs font-heading">
+                        <Heartbeat size={18} weight="fill" className="text-saffron-600" />
+                        <span>Consumer Health &amp; Nutrition Audit</span>
+                      </div>
+                      <p className="text-xs text-neutral-600 leading-relaxed">
+                        Cross-examine back nutritional facts against ICMR-NIN 2024 daily allowances for sugar, sodium, and saturated fats.
+                      </p>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={onNavigateToHealth}
+                        className="w-full"
+                        icon={<ArrowRight size={14} weight="bold" />}
+                        iconPosition="right"
+                      >
+                        Launch Health &amp; Nutrition Check
+                      </Button>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+
             </div>
 
-          </div>
+            {/* Notice Preview Modal for FORM LM-INSP-2011 */}
+            <NoticePreviewModal
+              isOpen={isNoticeModalOpen}
+              onClose={() => setIsNoticeModalOpen(false)}
+              scanId={currentScan.id}
+              docketNumber={currentScan.scanCode}
+              productName={currentScan.productName}
+              brand={currentScan.brand}
+              mrp={currentScan.mrp}
+              netQty={currentScan.netQuantity}
+              violationsCount={currentScan.violations.length}
+              compoundingFee={totalCompounding}
+              assignedOfficer={userRole === "officer" ? "Inspector R. K. Sharma (LMI-DL-2024-884)" : "Legal Metrology Enforcement Division"}
+              inspectionDate={new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+            />
 
-        </div>
-      )}
+          </div>
+        );
+      })()}
 
       {/* Clean initial empty state when no image is loaded */}
       {!imageSrc && scanStatus === "idle" && (
