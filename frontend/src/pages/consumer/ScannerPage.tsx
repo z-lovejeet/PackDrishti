@@ -24,7 +24,8 @@ import {
   Coins,
   Package,
   Ruler,
-  WarningOctagon
+  WarningOctagon,
+  DeviceMobileCamera
 } from "@phosphor-icons/react";
 import { Button } from "../../components/common/Button";
 import { AnnotatedImage } from "../../components/scanner/AnnotatedImage";
@@ -65,6 +66,8 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backFileInputRef = useRef<HTMLInputElement>(null);
   const unifiedFileInputRef = useRef<HTMLInputElement>(null);
+  const frontCamInputRef = useRef<HTMLInputElement>(null);
+  const backCamInputRef = useRef<HTMLInputElement>(null);
 
   const [activeBoxId, setActiveBoxId] = useState<string | undefined>(undefined);
   const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
@@ -498,7 +501,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
           )}
         </div>
 
-        {/* Hidden File Inputs */}
+        {/* Hidden File & Direct Mobile Camera Inputs */}
         <input
           type="file"
           ref={fileInputRef}
@@ -512,8 +515,32 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         />
         <input
           type="file"
+          ref={frontCamInputRef}
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleFrontFileSelected(e.target.files[0]);
+            }
+          }}
+        />
+        <input
+          type="file"
           ref={backFileInputRef}
           accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleBackFileSelected(e.target.files[0]);
+            }
+          }}
+        />
+        <input
+          type="file"
+          ref={backCamInputRef}
+          accept="image/*"
+          capture="environment"
           className="hidden"
           onChange={(e) => {
             if (e.target.files && e.target.files[0]) {
@@ -597,22 +624,35 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2">
+            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2 flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 icon={<UploadSimple size={14} weight="bold" />}
+                className="text-xs"
               >
-                {frontPreview ? "Change Front" : "Browse Front"}
+                {frontPreview ? "Change File" : "Browse File"}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => frontCamInputRef.current?.click()}
+                icon={<DeviceMobileCamera size={15} weight="bold" />}
+                className="text-xs bg-saffron-600 hover:bg-saffron-700 text-slate-950 font-bold shadow-2xs"
+                title="Take photo directly using mobile camera"
+              >
+                Take Photo
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => { setCameraTarget("front"); setIsCameraOpen(true); }}
                 icon={<CameraIcon size={14} weight="bold" />}
+                className="text-xs text-slate-600"
+                title="Open browser live camera stream"
               >
-                Camera
+                Live View
               </Button>
             </div>
           </div>
@@ -668,22 +708,35 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2">
+            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2 flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => backFileInputRef.current?.click()}
                 icon={<UploadSimple size={14} weight="bold" />}
+                className="text-xs"
               >
-                {backPreview ? "Change Back" : "Browse Back"}
+                {backPreview ? "Change File" : "Browse File"}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => backCamInputRef.current?.click()}
+                icon={<DeviceMobileCamera size={15} weight="bold" />}
+                className="text-xs bg-saffron-600 hover:bg-saffron-700 text-slate-950 font-bold shadow-2xs"
+                title="Take photo directly using mobile camera"
+              >
+                Take Photo
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => { setCameraTarget("back"); setIsCameraOpen(true); }}
                 icon={<CameraIcon size={14} weight="bold" />}
+                className="text-xs text-slate-600"
+                title="Open browser live camera stream"
               >
-                Camera
+                Live View
               </Button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { GenerateReportModal } from "./components/reports/GenerateReportModal";
 import { AuthModal } from "./components/common/AuthModal";
 import { useAuthStore } from "./store/authStore";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { PWAInstallPrompt } from "./components/common/PWAInstallPrompt";
 
 // Consumer Pages
 import { LandingPage } from "./pages/consumer/LandingPage";
@@ -192,6 +193,9 @@ export function App() {
           )}
         </ErrorBoundary>
       </main>
+
+      {/* Progressive Web App Install Banner */}
+      <PWAInstallPrompt />
 
       {/* Statutory Government Footer */}
       <Footer />

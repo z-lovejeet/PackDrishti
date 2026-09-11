@@ -20,7 +20,8 @@ import {
   Drop,
   WarningCircle,
   UsersThree,
-  ShieldWarning
+  ShieldWarning,
+  DeviceMobileCamera
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
@@ -28,6 +29,8 @@ import { Camera } from '../../components/scanner/Camera';
 import { HealthBadgeGroup } from '../../components/health/HealthBadgeGroup';
 import { NutrientRow } from '../../components/health/NutrientRow';
 import { DietaryAdvisory } from '../../components/health/DietaryAdvisory';
+import { WhatIsHighCard } from '../../components/health/WhatIsHighCard';
+import { ArtificialColorsAudit } from '../../components/health/ArtificialColorsAudit';
 import { ProductHealthAudit } from '../../types';
 import { UserRole } from '../../types/roles';
 import { apiClient } from '../../utils/apiClient';
@@ -289,6 +292,11 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
                 ? 'good'
                 : 'warning',
             description: b.description || '',
+            whatIsIt: b.whatIsIt || b.what_is_it,
+            whyUsed: b.whyUsed || b.why_used,
+            healthConsequences: b.healthConsequences || b.health_consequences,
+            safeDailyLimit: b.safeDailyLimit || b.safe_daily_limit,
+            whoShouldAvoid: b.whoShouldAvoid || b.who_should_avoid || [],
           })),
           nutrients: cleanedNutrients,
           shouldWeEatIt: apiData.should_we_eat_it || 'Consume in Strict Moderation',
@@ -307,6 +315,8 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
           hasArtificialAdditives: apiData.has_artificial_additives,
           ingredientsList: apiData.ingredients_list || [],
           flaggedIngredients: apiData.flagged_ingredients || apiData.dietary_advisory?.flagged_ingredients || [],
+          artificialColors: apiData.artificial_colors || apiData.artificialColors || apiData.dietary_advisory?.artificial_colors || [],
+          whatIsHigh: apiData.what_is_high || apiData.whatIsHigh || apiData.dietary_advisory?.what_is_high || [],
         };
         setLiveAuditResult(mappedAudit);
       }
@@ -346,6 +356,52 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (Math.min(100, Math.max(0, score)) / 100) * circumference;
   const scoreColor = score >= 70 ? '#059669' : score >= 45 ? '#D97706' : '#DC2626';
+
+  const getCanIEatDecision = () => {
+    if (!currentAudit) return null;
+    if (currentAudit.isExpired || currentAudit.overallRating === 'Critical Hazard - Expired Food' || currentAudit.ratingScore === 0) {
+      return {
+        verdict: 'DO NOT EAT',
+        badgeClass: 'bg-rose-600 text-white border-rose-500',
+        headline: 'Critical Biological Hazard - Unfit for Consumption',
+        explanation: currentAudit.expiryWarning || 'This product has exceeded its manufacturer shelf life date. Acute microbial risk of bacterial toxins and food poisoning. Immediately dispose.',
+        bannerBg: 'bg-gradient-to-r from-rose-950 via-rose-900 to-slate-950 border-rose-600',
+        icon: <XCircle size={28} weight="fill" className="text-rose-400 shrink-0" />,
+        actionRecommendation: 'Discard product immediately. Do not feed to family, children, or elderly.'
+      };
+    }
+    if (currentAudit.overallRating === 'Nutritious Choice' || currentAudit.ratingScore >= 70) {
+      return {
+        verdict: 'SAFE TO EAT',
+        badgeClass: 'bg-emerald-600 text-white border-emerald-500',
+        headline: 'Wholesome Choice - Safe for Regular Family Consumption',
+        explanation: 'Satisfies ICMR-NIN 2024 dietary thresholds. Minimal free sugars, healthy fatty acid profile, and balanced sodium levels.',
+        bannerBg: 'bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-950 border-emerald-600',
+        icon: <CheckCircle size={28} weight="fill" className="text-emerald-400 shrink-0" />,
+        actionRecommendation: 'Recommended as a healthy everyday option within a balanced Indian diet.'
+      };
+    }
+    if (currentAudit.overallRating === 'Consume in Moderation' || currentAudit.ratingScore >= 45) {
+      return {
+        verdict: 'EAT OCCASIONALLY',
+        badgeClass: 'bg-amber-500 text-slate-950 border-amber-400 font-bold',
+        headline: 'Consume in Strict Moderation - Small Portions Only',
+        explanation: 'Acceptable as an occasional treat. Contains elevated levels of refined carbohydrates, added sugar, or saturated fats that will cause metabolic fatigue if eaten daily.',
+        bannerBg: 'bg-gradient-to-r from-amber-950 via-amber-900/80 to-slate-950 border-amber-500',
+        icon: <Warning size={28} weight="fill" className="text-amber-400 shrink-0" />,
+        actionRecommendation: 'Limit consumption to 1-2 times per week. Strictly avoid late at night.'
+      };
+    }
+    return {
+      verdict: 'NOT RECOMMENDED',
+      badgeClass: 'bg-rose-600 text-white border-rose-500 font-bold',
+      headline: 'High Health Risk - Strictly Limit or Avoid Consumption',
+      explanation: 'Exceeds critical ICMR-NIN safe dietary thresholds for added sugar, sodium, ultra-processed industrial additives, or saturated palm fat.',
+      bannerBg: 'bg-gradient-to-r from-rose-950 via-rose-900/90 to-slate-950 border-rose-600',
+      icon: <ShieldWarning size={28} weight="fill" className="text-rose-400 shrink-0" />,
+      actionRecommendation: 'Avoid frequent intake, especially for growing children, diabetics, and cardiac patients.'
+    };
+  };
 
   const getVerdictDisplay = () => {
     if (!currentAudit) return null;
@@ -516,22 +572,35 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2">
+            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2 flex-wrap">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => frontFileRef.current?.click()} 
                 icon={<UploadSimple size={14} weight="bold" />}
+                className="text-xs"
               >
-                {frontImageSrc ? 'Change Front' : 'Browse Front'}
+                {frontImageSrc ? 'Change File' : 'Browse File'}
+              </Button>
+              <Button 
+                variant="primary" 
+                size="sm" 
+                onClick={() => frontCamRef.current?.click()} 
+                icon={<DeviceMobileCamera size={15} weight="bold" />}
+                className="text-xs bg-saffron-600 hover:bg-saffron-700 text-slate-950 font-bold shadow-2xs"
+                title="Take photo directly with mobile camera"
+              >
+                Take Photo
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => { setCameraTarget('front'); setIsCameraOpen(true); }} 
                 icon={<CameraIcon size={14} weight="bold" />}
+                className="text-xs text-slate-600"
+                title="Open browser live camera stream"
               >
-                Camera
+                Live View
               </Button>
             </div>
           </div>
@@ -585,22 +654,35 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2">
+            <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 mt-2 flex-wrap">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => backFileRef.current?.click()} 
                 icon={<UploadSimple size={14} weight="bold" />}
+                className="text-xs"
               >
-                {backImageSrc ? 'Change Back' : 'Browse Back'}
+                {backImageSrc ? 'Change File' : 'Browse File'}
+              </Button>
+              <Button 
+                variant="primary" 
+                size="sm" 
+                onClick={() => backCamRef.current?.click()} 
+                icon={<DeviceMobileCamera size={15} weight="bold" />}
+                className="text-xs bg-saffron-600 hover:bg-saffron-700 text-slate-950 font-bold shadow-2xs"
+                title="Take photo directly with mobile camera"
+              >
+                Take Photo
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => { setCameraTarget('back'); setIsCameraOpen(true); }} 
                 icon={<CameraIcon size={14} weight="bold" />}
+                className="text-xs text-slate-600"
+                title="Open browser live camera stream"
               >
-                Camera
+                Live View
               </Button>
             </div>
           </div>
@@ -686,6 +768,60 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
       {currentAudit ? (
         <div className="space-y-6 animate-fadeIn">
           
+          {/* 0. Can I Eat This Product? Definitive Decision Banner */}
+          {(() => {
+            const decision = getCanIEatDecision();
+            if (!decision) return null;
+            return (
+              <div className={`border-2 rounded-xl p-5 sm:p-6 shadow-md text-white space-y-3.5 relative overflow-hidden ${decision.bannerBg}`}>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center shrink-0 border border-white/20 mt-0.5">
+                      {decision.icon}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-2xs uppercase tracking-wider font-bold text-slate-300 font-mono">
+                          Direct Consumer Decision
+                        </span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold tracking-wider uppercase ${decision.badgeClass}`}>
+                          {decision.verdict}
+                        </span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold font-heading text-white">
+                        {decision.headline}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-3xl">
+                        {decision.explanation}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sm:text-right shrink-0 bg-white/5 sm:bg-transparent p-3 sm:p-0 rounded-lg border border-white/10 sm:border-0">
+                    <span className="text-2xs uppercase tracking-wider text-slate-300 font-mono block">
+                      Nutrition Rating
+                    </span>
+                    <span className="text-lg sm:text-xl font-bold font-heading text-white">
+                      {score}/100
+                    </span>
+                    <span className="text-2xs text-slate-300 block font-mono">
+                      {currentAudit.overallRating}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2 flex-wrap text-2xs">
+                  <span className="text-slate-300">
+                    Action: <strong className="text-white">{decision.actionRecommendation}</strong>
+                  </span>
+                  <span className="text-slate-400 font-mono">
+                    Audited under ICMR-NIN 2024 Guidelines
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Expiry Hazard Danger Banner */}
           {currentAudit.isExpired && (
             <div className="bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 border-2 border-rose-600 rounded-lg p-5 shadow-lg text-white space-y-3">
@@ -888,6 +1024,12 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
               <HealthBadgeGroup badges={currentAudit.badges} />
             </div>
           </div>
+
+          {/* What Is High In This Food & What Does It Cause? */}
+          <WhatIsHighCard items={currentAudit.whatIsHigh} />
+
+          {/* Artificial & Natural Color Additives Quality Grading */}
+          <ArtificialColorsAudit colors={currentAudit.artificialColors} />
 
           {/* 2. DIRECT CONSUMER VERDICT: "Should We Eat It?" & "How Bad Is It?" */}
           {(currentAudit.shouldWeEatIt || currentAudit.howBadIsIt) && (
