@@ -65,7 +65,6 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
   const [actions, setActions] = useState<EnforcementActionItem[]>([]);
   const [violations, setViolations] = useState<ViolationCategoryBreakdown[]>([]);
   const [officer] = useState<OfficerProfile>(DEFAULT_OFFICER_PROFILE);
-  const [hoveredSegment, setHoveredSegment] = useState<"compliant" | "infraction" | null>(null);
 
   const fetchDashboardData = async () => {
     try {
@@ -276,8 +275,8 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
           {/* Left Column: Compliance Distribution & Navigation */}
           <div className="space-y-6">
             
-            {/* Real & Functional Compliance Distribution Card */}
-            <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4 shadow-xs">
+            {/* Real & Functional Compliance Distribution Card (Simple, Minimal, Calm Neutral Tones) */}
+            <div className="p-5 rounded-xl border border-slate-200 bg-white space-y-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-sm font-bold font-heading text-slate-950 flex items-center gap-1.5">
@@ -290,43 +289,40 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
                       : "No active audits in current cycle"}
                   </p>
                 </div>
-                <div className="text-right">
-                  <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-                    totalInspections === 0 
-                      ? "bg-slate-50 text-slate-500 border-slate-200" 
-                      : (metrics?.complianceRate ?? 0) >= 70 
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                      : (metrics?.complianceRate ?? 0) >= 40 
-                      ? "bg-amber-50 text-amber-700 border-amber-200" 
-                      : "bg-rose-50 text-rose-700 border-rose-200"
-                  }`}>
-                    {totalInspections > 0 ? `${metrics?.complianceRate ?? 0}% Adherence` : "0%"}
+                {totalInspections > 0 ? (
+                  <span className="text-xs font-semibold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md">
+                    {metrics?.complianceRate ?? 0}% compliant
                   </span>
-                </div>
+                ) : (
+                  <span className="text-xs text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                    0%
+                  </span>
+                )}
               </div>
 
               {/* Dynamic Progress Bar & Action States */}
               {totalInspections === 0 ? (
                 <div className="space-y-3 pt-1">
-                  {/* Real Empty Progress Bar (0% filled, genuine empty track) */}
-                  <div className="h-2 rounded-full bg-slate-100 overflow-hidden flex" />
+                  {/* Clean Empty Progress Bar */}
+                  <div className="h-2 rounded-full bg-slate-100" />
 
                   <div className="flex items-center justify-between text-xs text-slate-500">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-slate-300" />
                       <span>Compliant (0)</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-slate-300" />
                       <span>Infractions (0)</span>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-400 text-2xs">0 commodities inspected yet.</span>
+                    <span className="text-slate-400 text-2xs">0 commodities inspected</span>
                     <button
+                      type="button"
                       onClick={() => onNavigate("scanner")}
-                      className="font-medium text-slate-900 hover:text-slate-700 inline-flex items-center gap-1 cursor-pointer"
+                      className="font-medium text-slate-800 hover:text-slate-950 inline-flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <span>New Scan</span>
                       <ArrowRight size={11} weight="bold" />
@@ -335,80 +331,80 @@ export const OfficerDashboardPage: React.FC<OfficerDashboardPageProps> = ({
                 </div>
               ) : (
                 <div className="space-y-3 pt-1">
-                  {/* Real Interactive Segmented Progress Bar */}
-                  <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden flex gap-0.5">
+                  {/* Clean Segmented Progress Bar (Slate 900 for Compliant, Slate 300 for Infractions) */}
+                  <div className="h-2 rounded-full bg-slate-100 overflow-hidden flex gap-0.5">
                     {compliantPct > 0 && (
                       <div
                         onClick={() => navigateToWithFilter("Resolved")}
-                        onMouseEnter={() => setHoveredSegment("compliant")}
-                        onMouseLeave={() => setHoveredSegment(null)}
                         style={{ width: `${compliantPct}%` }}
-                        className="bg-slate-900 hover:bg-slate-800 h-full transition-all duration-500 ease-out cursor-pointer"
-                        title={`Click to view ${compliantCount} compliant inspections (${compliantPct}%)`}
+                        className="bg-slate-900 hover:bg-slate-800 h-full transition-all duration-300 cursor-pointer"
+                        title={`Compliant: ${compliantCount} (${compliantPct}%)`}
                       />
                     )}
                     {infractionPct > 0 && (
                       <div
                         onClick={() => navigateToWithFilter("Notice Issued")}
-                        onMouseEnter={() => setHoveredSegment("infraction")}
-                        onMouseLeave={() => setHoveredSegment(null)}
                         style={{ width: `${infractionPct}%` }}
-                        className="bg-slate-400 hover:bg-slate-500 h-full transition-all duration-500 ease-out cursor-pointer"
-                        title={`Click to view ${infractionCount} non-compliant inspections (${infractionPct}%)`}
+                        className="bg-slate-300 hover:bg-slate-400 h-full transition-all duration-300 cursor-pointer"
+                        title={`Infractions: ${infractionCount} (${infractionPct}%)`}
                       />
                     )}
                   </div>
 
-                  {/* Contextual Interactive Hover / Status Readout */}
-                  <div className="text-2xs font-mono text-slate-500 min-h-[20px] flex items-center transition-all">
-                    {hoveredSegment === "compliant" ? (
-                      <span className="text-slate-900 font-semibold">
-                        {compliantCount} compliant ({compliantPct}%) — Click to filter ledger
-                      </span>
-                    ) : hoveredSegment === "infraction" ? (
-                      <span className="text-slate-900 font-semibold">
-                        {infractionCount} non-compliant ({infractionPct}%) with {metrics?.violationCount ?? 0} violations — Click to view notices
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">Click segments or buttons to filter ledger</span>
-                    )}
-                  </div>
-
-                  {/* Real Clickable Legend Filters */}
-                  <div className="flex items-center justify-between text-xs">
+                  {/* Clean Two-Column Metric Row */}
+                  <div className="grid grid-cols-2 gap-2.5 pt-1">
                     <button
+                      type="button"
                       onClick={() => navigateToWithFilter("Resolved")}
-                      onMouseEnter={() => setHoveredSegment("compliant")}
-                      onMouseLeave={() => setHoveredSegment(null)}
-                      className="flex items-center gap-2 hover:opacity-75 transition-opacity cursor-pointer text-left"
+                      className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100/80 transition-colors text-left cursor-pointer border border-slate-100"
                     >
-                      <span className="w-2 h-2 rounded-full bg-slate-900" />
-                      <span className="text-slate-700 font-medium">Compliant ({compliantCount})</span>
-                      <span className="text-2xs font-mono text-slate-400">({compliantPct}%)</span>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                        <span className="w-2 h-2 rounded-full bg-slate-900 shrink-0" />
+                        <span className="font-medium">Compliant</span>
+                      </div>
+                      <div className="mt-1 flex items-baseline justify-between">
+                        <span className="text-base font-bold text-slate-900 font-heading">
+                          {compliantCount}
+                        </span>
+                        <span className="text-xs text-slate-500 font-mono">
+                          {compliantPct}%
+                        </span>
+                      </div>
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => navigateToWithFilter("Notice Issued")}
-                      onMouseEnter={() => setHoveredSegment("infraction")}
-                      onMouseLeave={() => setHoveredSegment(null)}
-                      className="flex items-center gap-2 hover:opacity-75 transition-opacity cursor-pointer text-left"
+                      className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100/80 transition-colors text-left cursor-pointer border border-slate-100"
                     >
-                      <span className="w-2 h-2 rounded-full bg-slate-400" />
-                      <span className="text-slate-700 font-medium">Infractions ({infractionCount})</span>
-                      <span className="text-2xs font-mono text-slate-400">({infractionPct}%)</span>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                        <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
+                        <span className="font-medium">Infractions</span>
+                      </div>
+                      <div className="mt-1 flex items-baseline justify-between">
+                        <span className="text-base font-bold text-slate-900 font-heading">
+                          {infractionCount}
+                        </span>
+                        <span className="text-xs text-slate-500 font-mono">
+                          {infractionPct}%
+                        </span>
+                      </div>
                     </button>
                   </div>
 
-                  {/* Action Toolbar */}
+                  {/* Clean Footer Link */}
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                     <button
+                      type="button"
                       onClick={() => onNavigate("inspections")}
-                      className="font-medium text-slate-900 hover:text-slate-700 inline-flex items-center gap-1 group cursor-pointer"
+                      className="text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1 transition-colors cursor-pointer"
                     >
-                      <span>Field Inspection Ledger</span>
-                      <ArrowRight size={11} weight="bold" className="group-hover:translate-x-0.5 transition-transform" />
+                      <span>Open Inspection Ledger</span>
+                      <ArrowRight size={11} weight="bold" />
                     </button>
-                    <span className="text-2xs font-mono text-slate-400">Total: {totalInspections} audits</span>
+                    <span className="text-2xs text-slate-400 font-mono">
+                      {totalInspections} total
+                    </span>
                   </div>
                 </div>
               )}
