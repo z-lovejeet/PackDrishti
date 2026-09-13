@@ -1,11 +1,22 @@
 <div align="center">
 
-# PackDrashiti
+# PackDrashiti — पैकद्रष्टि
 
-### Automated Compliance Verification of Packaged Commodities under Legal Metrology Rules, 2011
+### AI-Powered Compliance Verification of Packaged Commodities under Legal Metrology Rules, 2011
+
+![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-FF6F00?logo=langchain&logoColor=white)
+![Gemini](https://img.shields.io/badge/Google_Gemini-VLM-4285F4?logo=google&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_16-3FCF8E?logo=supabase&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-47%2F47_Passed-27AE60?logo=pytest&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
 
 **Problem Statement ID**: SIH26034  
 **Ministry**: Ministry of Consumer Affairs, Food & Public Distribution — Legal Metrology Division, Government of India
+
+[Live Demo (Frontend)](https://packdrashiti.vercel.app) · [API Endpoint](https://packdrashiti-backend.onrender.com/health) · [API Docs](https://packdrashiti-backend.onrender.com/api/v1/docs)
 
 ---
 
@@ -52,6 +63,19 @@ In India, **every retail pre-packaged commodity** is governed by the **Legal Met
 | **Nutritional Deception** | Misleading "healthy" branding on products with dangerously high sugar, sodium, or trans fats |
 
 > **Result**: Millions of non-compliant packages reach consumers daily, enabling unfair trade practices, health risks, and regulatory evasion worth an estimated **Rs 10,000+ crore annually**.
+
+### Why PackDrashiti?
+
+| Differentiator | What Makes It Unique |
+|:---|:---|
+| **5-Agent AI Pipeline** | Not a single-model system — a LangGraph multi-agent workflow with specialized agents for perception, rules, RAG, health, and consensus |
+| **Zero Hallucination Rule Engine** | Statutory compliance checks use 100% deterministic Python math — no LLM guesswork for legal verdicts |
+| **Dual-LLM Fault Tolerance** | Two independent LLM chains (Gemini + Groq) run in parallel; if one fails, the other delivers |
+| **Statutory RAG with pgvector** | 878 codified legal rules indexed as vector embeddings — every citation is traceable to a gazette notification |
+| **ICMR-NIN 2024 Health Engine** | First system to combine legal compliance with nutritional safety auditing against India's latest dietary standards |
+| **< 8 Second End-to-End** | From image upload to full compliance report with statutory citations — faster than a human can read the label |
+| **Dual-User Architecture** | Single platform serves both consumers (health focus) and enforcement officers (legal focus) with role-specific features |
+| **PWA + Native Camera** | Works offline, installable as an app, direct hardware camera access — no app store needed |
 
 ---
 
@@ -950,6 +974,9 @@ Government of India
 
 ---
 
-Built with React 19 · FastAPI · LangGraph · Google Gemini · Supabase
+Built with React 19 · FastAPI · LangGraph · Google Gemini · Supabase · pgvector
+
+Copyright 2026 Team PackDrashiti. All rights reserved.
 
 </div>
+
