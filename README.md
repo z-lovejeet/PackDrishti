@@ -1,6 +1,6 @@
 <div align="center">
 
-# PackDrashiti — पैकद्रष्टि
+# PackDrishti (PackDrashiti) — पैकदृष्टि
 
 ### AI-Powered Compliance Verification of Packaged Commodities under Legal Metrology Rules, 2011
 
@@ -725,8 +725,8 @@ PackDrashiti/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<your-org>/PackDrashiti.git
-cd PackDrashiti
+git clone https://github.com/z-lovejeet/PackDrishti.git
+cd PackDrishti
 ```
 
 ### 2. Frontend Setup
@@ -750,21 +750,20 @@ npm run lint
 ### 3. Backend Setup
 
 ```bash
-cd backend
-
-# Create virtual environment
+# From project root directory:
+# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # macOS/Linux
+source venv/bin/activate  # macOS/Linux (or .\venv\Scripts\activate on Windows)
 
 # Install dependencies
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
 # Copy and configure environment variables
-cp .env.example .env
-# Edit .env with your Supabase, Gemini, and Groq API keys
+cp backend/.env.example backend/.env
+# Configure backend/.env with your Supabase, Gemini, and Groq API keys
 
-# Start the development server
-uvicorn backend.src.main:app --reload --port 8000
+# Start the development server from root
+python -m uvicorn backend.src.main:app --reload --port 8000
 ```
 
 The backend API will be accessible at `http://localhost:8000/`.  
@@ -963,7 +962,7 @@ The FastAPI application is deployed on **Render** (Singapore region) with health
 
 <div align="center">
 
-### PackDrashiti — पैकद्रष्टि
+### PackDrishti (PackDrashiti) — पैकदृष्टि
 
 *Empowering consumers and enforcement officers with AI-driven packaging compliance verification.*
 
@@ -976,7 +975,7 @@ Government of India
 
 Built with React 19 · FastAPI · LangGraph · Google Gemini · Supabase · pgvector
 
-Copyright 2026 Team PackDrashiti. All rights reserved.
+Copyright 2026 Team PackDrishti. All rights reserved.
 
 </div>
 
