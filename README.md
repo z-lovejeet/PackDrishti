@@ -13,8 +13,8 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
 
-**Problem Statement ID**: SIH26034  
-**Ministry**: Ministry of Consumer Affairs, Food & Public Distribution — Legal Metrology Division, Government of India
+**Statutory Framework**: Legal Metrology (Packaged Commodities) Rules, 2011  
+**Administering Authority**: Department of Consumer Affairs — Legal Metrology Division, Ministry of Consumer Affairs, Food & Public Distribution, Government of India
 
 [Live Demo (Frontend)](https://packdrashiti.vercel.app) · [API Endpoint](https://packdrashiti-backend.onrender.com/health) · [API Docs](https://packdrashiti-backend.onrender.com/api/v1/docs)
 
@@ -966,10 +966,8 @@ The FastAPI application is deployed on **Render** (Singapore region) with health
 
 *Empowering consumers and enforcement officers with AI-driven packaging compliance verification.*
 
-**SIH 2026 | Problem Statement SIH26034**  
-Ministry of Consumer Affairs, Food & Public Distribution  
 Department of Consumer Affairs — Legal Metrology Division  
-Government of India
+Ministry of Consumer Affairs, Food & Public Distribution, Government of India
 
 ---
 
