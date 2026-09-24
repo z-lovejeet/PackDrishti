@@ -8,7 +8,6 @@ import {
   Image as ImageIcon, 
   CurrencyInr, 
   ArrowRight, 
-  ArrowClockwise,
   Scales,
   Sparkle,
   Plant,

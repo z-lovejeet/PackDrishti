@@ -724,7 +724,22 @@ python -m uvicorn backend.src.main:app --reload --port 8000
 The backend API will be accessible at `http://localhost:8000/`.  
 Interactive API docs at `http://localhost:8000/api/v1/docs`.
 
-### 4. Environment Variables
+### 4. Docker Compose Quickstart (Full Stack)
+
+Spin up PostgreSQL (with pgvector), FastAPI Backend, React Frontend (Nginx), and Adminer with one command:
+
+```bash
+docker compose up --build
+```
+
+| Service | Container | URL |
+|:---|:---|:---|
+| **Frontend (React + Nginx)** | `packdrashiti-frontend` | `http://localhost:3000` |
+| **Backend API (FastAPI)** | `packdrashiti-backend` | `http://localhost:8000` |
+| **Database GUI (Adminer)** | `packdrashiti-adminer` | `http://localhost:8080` |
+| **PostgreSQL 16 + pgvector** | `packdrashiti-postgres` | `localhost:5432` |
+
+### 5. Environment Variables
 
 | Variable | Required | Description |
 |:---|:---|:---|
@@ -834,7 +849,7 @@ python -m pytest tests/ -v
 |:---|:---|:---|
 | Frontend Lint | Oxlint | `cd frontend && npm run lint` |
 | Frontend Build | Vite + tsc | `cd frontend && npm run build` |
-| Backend Syntax | py_compile | `python -m py_compile backend/src/main.py` |
+| Backend Syntax | compileall | `python -m compileall backend/src ai/src` |
 | Zero-Emoji Policy | Custom CI | Enforced in CI — no emojis in source code or docs |
 
 ---
@@ -872,9 +887,9 @@ The FastAPI application is deployed on **Render** (Singapore region) with health
 | Role | Responsibilities |
 |:---|:---|
 | **Frontend Developer** | React 19 SPA, Supabase Auth integration, canvas image processing, bounding box overlays, PWA implementation, responsive mobile UI |
-| **Backend Developer** | FastAPI gateway, SQLAlchemy ORM, PostgreSQL schema design, JWT RBAC, PDF generation (FORM LM-INSP-2011), API contracts |
+| **Backend Developer** | FastAPI gateway, SQLAlchemy ORM, PostgreSQL schema design, JWT auth, statutory rules engine, REST API contracts |
 | **Data Analyst / ML Engineer** | LangGraph workflow, VLM/OCR prompt engineering, deterministic Rule Engine, statutory RAG indexing, ICMR-NIN nutrition engine, dual-LLM consensus |
-| **Tester + DevOps** | Pytest test suite (47 tests), Playwright E2E specs, CI/CD pipeline, benchmark harness, deployment |
+| **Tester + DevOps** | Pytest test suite (33 tests), CI/CD pipeline, Docker containerization, deployment on Render & Vercel |
 
 ---
 

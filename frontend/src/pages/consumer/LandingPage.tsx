@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, ShieldCheck, Heartbeat, Scan, Sparkle } from "@phosphor-icons/react";
+import { ArrowRight, Heartbeat, Scan } from "@phosphor-icons/react";
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;

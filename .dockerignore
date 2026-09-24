@@ -1,0 +1,40 @@
+# Git and CI
+.git
+.github
+.gitignore
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+ENV/
+
+# Node artifacts
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.npm/
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+
+# OS and Editor artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local runtime storage and logs
+storage/uploads/*
+!storage/uploads/.gitkeep
+*.log

@@ -39,25 +39,80 @@ async def test_upload_packaging_scan_image(db_session: AsyncSession):
 async def test_analyze_packaging_compliance(db_session: AsyncSession):
     """
     Test POST /api/v1/scan/analyze with multipart image payload triggering LangGraph.
+    Uses mock pipeline response to verify endpoint orchestration, DB writes, and schemas deterministically.
     """
+    from unittest.mock import patch
+    from ai.src.pipeline.extractor import PackageVisualExtraction, RawDeclarationToken
+    from ai.src.rules.deterministic import RuleEngineEvaluationResult
+    from ai.src.llm.dual_engine import DualLLMConsensusOutput
+
     app.dependency_overrides[get_db_session] = lambda: db_session
 
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        file_content = b"MRP Rs. 120.00 Net Quantity: 500 g"
-        files = {"file": ("biscuit.jpg", io.BytesIO(file_content), "image/jpeg")}
+    mock_extraction = PackageVisualExtraction(
+        brand_name="Britannia",
+        product_name="Good Day Biscuits",
+        category="Bakery",
+        mrp=120.0,
+        net_quantity_value=500.0,
+        net_quantity_unit="g",
+        declared_usp=0.24,
+        declared_usp_unit="g",
+        pdp_area_cm2=150.0,
+        measured_font_height_mm=3.0,
+        mfg_month=1,
+        mfg_year=2026,
+        tokens=[RawDeclarationToken(text="MRP Rs. 120.00", declaration_type="mrp")],
+    )
+    mock_evaluation = RuleEngineEvaluationResult(
+        is_compliant=True,
+        compliance_score=100.0,
+        total_checks_performed=13,
+        passed_checks=13,
+        failed_checks=0,
+        pdp_area_cm2=150.0,
+        min_font_height_required_mm=2.0,
+        calculated_usp=0.24,
+        calculated_usp_unit="g",
+        violations=[],
+    )
+    mock_consensus = DualLLMConsensusOutput(
+        primary_provider="google_gemini",
+        secondary_provider="groq_api",
+        primary_model_used="gemini-3.5-flash",
+        secondary_model_used="qwen/qwen3.8-27b",
+        consensus_confidence=0.95,
+        consumer_advisory_summary="Commodity fully complies with statutory Legal Metrology 2011 declarations.",
+        health_guidance="Standard bakery biscuits; consume in moderation.",
+    )
+    mock_state = {
+        "image_bytes": b"fake",
+        "filename": "biscuit.jpg",
+        "scan_id": None,
+        "extraction": mock_extraction,
+        "evaluation": mock_evaluation,
+        "citations": [],
+        "health_analysis": None,
+        "consensus": mock_consensus,
+        "error": None,
+    }
 
-        response = await client.post("/api/v1/scan/analyze", files=files)
-        assert response.status_code == 200
+    with patch("backend.src.api.v1.endpoints.scan.run_packaging_scan_workflow", return_value=mock_state):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            file_content = b"MRP Rs. 120.00 Net Quantity: 500 g"
+            files = {"file": ("biscuit.jpg", io.BytesIO(file_content), "image/jpeg")}
 
-        data = response.json()
-        assert "scan_id" in data
-        assert "compliance_score" in data
-        assert data["calculated_usp"] is not None
-        assert data["calculated_usp_unit"] == "g"
-        assert "violations" in data
-        assert "tokens" in data
-        assert len(data["consumer_advisory"]) > 10
+            response = await client.post("/api/v1/scan/analyze", files=files)
+            assert response.status_code == 200
+
+            data = response.json()
+            assert "scan_id" in data
+            assert "compliance_score" in data
+            assert data["calculated_usp"] is not None
+            assert data["calculated_usp_unit"] == "g"
+            assert "violations" in data
+            assert "tokens" in data
+            assert len(data["consumer_advisory"]) > 10
 
     app.dependency_overrides.clear()
 

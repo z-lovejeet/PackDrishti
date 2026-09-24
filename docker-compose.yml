@@ -31,7 +31,7 @@ services:
   # ----------------------------------------------------------------------------
   packdrashiti-backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: packdrashiti-backend
     restart: unless-stopped
@@ -47,10 +47,29 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650}
-      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost:80
     depends_on:
       packdrashiti-db:
         condition: service_healthy
+    networks:
+      - packdrashiti-network
+
+  # ----------------------------------------------------------------------------
+  # PackDrashiti React Frontend Application (Nginx SPA)
+  # Accessible via http://localhost:3000
+  # ----------------------------------------------------------------------------
+  packdrashiti-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: packdrashiti-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - packdrashiti-backend
     networks:
       - packdrashiti-network
 

@@ -3,7 +3,6 @@ import {
   DownloadSimple, 
   X, 
   DeviceMobile, 
-  CheckCircle,
   ShareNetwork,
   PlusSquare
 } from '@phosphor-icons/react';

@@ -3,27 +3,16 @@ import {
   CloudArrowUp, 
   Camera as CameraIcon, 
   DownloadSimple, 
-  ArrowClockwise, 
-  ShieldWarning, 
-  FileText, 
   Image as ImageIcon,
-  ArrowRight,
   Sparkle,
   UploadSimple,
   Scan,
-  BookmarkSimple,
   Heartbeat,
-  TextT,
-  HourglassHigh,
   XCircle,
   CheckCircle,
   Cpu,
-  Database,
-  Scales,
-  ShieldCheck,
-  Coins,
-  Package,
-  Ruler,
+  HourglassHigh,
+  FileText,
   WarningOctagon,
   DeviceMobileCamera
 } from "@phosphor-icons/react";
@@ -43,11 +32,10 @@ interface ScannerPageProps {
 }
 
 export const ScannerPage: React.FC<ScannerPageProps> = ({
-  userRole = "consumer",
-  onOpenReportModal,
   onNavigateToHealth,
   onSaveToast,
 }) => {
+  const userRole = "consumer";
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const [cameraTarget, setCameraTarget] = useState<"front" | "back">("front");
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
@@ -66,8 +54,6 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   const frontCamInputRef = useRef<HTMLInputElement>(null);
   const backCamInputRef = useRef<HTMLInputElement>(null);
 
-  const [activeBoxId, setActiveBoxId] = useState<string | undefined>(undefined);
-  const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
   const [subView, setSubView] = useState<"infractions" | "declarations" | "font_table" | "citations">("infractions");
   const [activePanelTab, setActivePanelTab] = useState<"front" | "back">("front");
 
