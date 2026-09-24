@@ -53,8 +53,8 @@ const initialToken = getStoredItem(STORAGE_KEYS.TOKEN);
 const initialRefreshToken = getStoredItem(STORAGE_KEYS.REFRESH_TOKEN);
 const initialRoleString = getStoredItem(STORAGE_KEYS.ROLE);
 const initialRole: UserRole =
-  initialRoleString === 'officer' || initialRoleString === 'admin'
-    ? initialRoleString
+  initialRoleString === 'admin'
+    ? 'admin'
     : 'consumer';
 
 let initialUser: User | null = null;

@@ -6,7 +6,6 @@ from fastapi.security import HTTPAuthorizationCredentials
 from backend.src.core.security import (
     get_current_user,
     require_consumer_role,
-    require_officer_role,
     require_admin_role,
     verify_password,
     get_password_hash,
@@ -24,20 +23,16 @@ async def test_jwt_decode_and_current_user_extraction():
     """
     token = make_test_token(
         user_id="4f8a3c21-9e20-4a89-b8d1-7c9b0e2d1f4a",
-        email="officer.sharma@gov.in",
-        role="officer",
-        badge_number="LMO-DL-2024-089",
-        zone="DL-NORTH",
+        email="citizen.sharma@example.com",
+        role="consumer",
     )
 
     creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
     current_user = await get_current_user(creds)
 
     assert current_user.id == uuid.UUID("4f8a3c21-9e20-4a89-b8d1-7c9b0e2d1f4a")
-    assert current_user.email == "officer.sharma@gov.in"
-    assert current_user.role == UserRole.OFFICER
-    assert current_user.badge_number == "LMO-DL-2024-089"
-    assert current_user.zone == "DL-NORTH"
+    assert current_user.email == "citizen.sharma@example.com"
+    assert current_user.role == UserRole.CONSUMER
 
 
 @pytest.mark.asyncio
@@ -71,36 +66,23 @@ async def test_jwt_missing_credentials():
 async def test_role_based_access_control():
     """
     Verifies RBAC guards:
-    - Consumer can access consumer endpoints, but forbidden from officer/admin endpoints.
-    - Officer can access consumer and officer endpoints, but forbidden from admin.
+    - Consumer can access consumer endpoints, but forbidden from admin endpoints.
     - Admin can access all endpoints.
     """
     consumer_token = make_test_token(role="consumer")
-    officer_token = make_test_token(role="officer")
     admin_token = make_test_token(role="admin")
 
     consumer_user = await get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials=consumer_token))
-    officer_user = await get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials=officer_token))
     admin_user = await get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials=admin_token))
 
     # Consumer checks
     assert require_consumer_role(consumer_user).role == UserRole.CONSUMER
     with pytest.raises(HTTPException) as exc:
-        require_officer_role(consumer_user)
-    assert exc.value.status_code == 403
-
-    with pytest.raises(HTTPException) as exc:
         require_admin_role(consumer_user)
     assert exc.value.status_code == 403
 
-    # Officer checks
-    assert require_officer_role(officer_user).role == UserRole.OFFICER
-    with pytest.raises(HTTPException) as exc:
-        require_admin_role(officer_user)
-    assert exc.value.status_code == 403
-
     # Admin checks
-    assert require_officer_role(admin_user).role == UserRole.ADMIN
+    assert require_consumer_role(admin_user).role == UserRole.ADMIN
     assert require_admin_role(admin_user).role == UserRole.ADMIN
 
 

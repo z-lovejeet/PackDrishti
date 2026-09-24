@@ -54,7 +54,7 @@ export interface ScanAnalysisResult {
   violations: ScanViolation[];
   tokens: VisualToken[];
   consumer_advisory: string;
-  form_lm_insp_2011_notice_draft: string | null;
+  form_lm_insp_2011_notice_draft?: string | null;
   execution_time_ms: number;
 }
 

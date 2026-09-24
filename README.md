@@ -9,7 +9,7 @@
 ![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-FF6F00?logo=langchain&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Google_Gemini-VLM-4285F4?logo=google&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_16-3FCF8E?logo=supabase&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-47%2F47_Passed-27AE60?logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-33%2F33_Passed-27AE60?logo=pytest&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
 
@@ -55,8 +55,8 @@ In India, **every retail pre-packaged commodity** is governed by the **Legal Met
 
 | Challenge | Impact |
 |:---|:---|
-| **Manual Inspections** | A single inspector covers 500+ SKUs per market visit — physically reading every label is infeasible |
-| **Illegal Unit Abbreviations** | Packages print `gms`, `Kgs`, `ltrs` instead of legal `g`, `kg`, `l` — consumers never notice |
+| **Manual Inspections** | Over 500+ SKUs in typical retail stores — physically reading and checking every label is infeasible for everyday citizens |
+| **Illegal Unit Abbreviations** | Packages print `gms`, `Kgs`, `ltrs` instead of legal `g`, `kg`, `l` — consumers rarely notice |
 | **Price Manipulation** | Dual MRP stickers, missing Unit Sale Price, and hidden "inclusive of all taxes" clauses |
 | **Font Size Violations** | Mandatory declarations printed in illegibly small fonts violating Rule 7 Table-I |
 | **No Consumer Tool** | Zero automated tools exist for consumers to verify label compliance or nutritional safety |
@@ -74,7 +74,7 @@ In India, **every retail pre-packaged commodity** is governed by the **Legal Met
 | **Statutory RAG with pgvector** | 878 codified legal rules indexed as vector embeddings — every citation is traceable to a gazette notification |
 | **ICMR-NIN 2024 Health Engine** | First system to combine legal compliance with nutritional safety auditing against India's latest dietary standards |
 | **< 8 Second End-to-End** | From image upload to full compliance report with statutory citations — faster than a human can read the label |
-| **Dual-User Architecture** | Single platform serves both consumers (health focus) and enforcement officers (legal focus) with role-specific features |
+| **Consumer-First Architecture** | Dedicated platform empowering citizens to verify fair pricing, legal declarations, and nutritional safety |
 | **PWA + Native Camera** | Works offline, installable as an app, direct hardware camera access — no app store needed |
 
 ---
@@ -119,37 +119,30 @@ In India, **every retail pre-packaged commodity** is governed by the **Legal Met
      └───────────────────┘   └────────────────────────┘
 ```
 
-### Two Distinct Modes
+### Dedicated to Everyday Consumers & Citizens
 
-| Mode | User | Capabilities |
-|:---|:---|:---|
-| **Consumer Mode** | Everyday shoppers | Scan labels, verify MRP fairness, check Unit Sale Price, get Health Score, dietary advisory, ingredient audit |
-| **Officer Mode** | Legal Metrology Inspectors | All consumer features + Font height verification (Rule 7 Table-I), color contrast analysis (Rule 9 WCAG), violation dockets, FORM LM-INSP-2011 PDF generation, compounding calculator, enforcement dashboard |
+PackDrashiti puts regulatory compliance verification and nutritional safety tools directly into the hands of citizens:
+- **Fair Pricing & Unit Sale Price**: Instantly catch inflated MRPs, missing taxes clauses, and unprinted unit prices.
+- **Mandatory Packaging Declarations**: Verify manufacturer details, consumer care contacts, country of origin, and net quantity in legal SI units.
+- **Expiry & Freshness Intelligence**: Automatic shelf-life calculation and expiry date validation relative to current time.
+- **Nutritional Transparency**: Scientifically grounded ICMR-NIN 2024 health benchmarking with plain-language ingredient breakdowns.
 
 ---
 
 ## Key Features
 
-### For Consumers
+### For Consumers & Citizens
 
-- **Instant Label Scan** — Photograph front + back panels; get complete compliance results in <8 seconds
+- **Instant Label Compliance Scan** — Photograph front + back panels; get complete compliance results in <8 seconds
 - **MRP & Unit Sale Price Verification** — Validates "inclusive of all taxes" clause and computes fair USP per gram/ml
+- **Mandatory Statutory Declarations Audit** — Automatically checks Rule 6 mandatory declarations (Manufacturer details, Country of Origin, Customer Care contacts)
+- **Expiry & Freshness Verification** — Detects manufacture/expiry dates and flags expired commodities or illegal offerings
 - **Health Score (0-100)** — ICMR-NIN 2024 nutritional benchmarking with immediate bodily impact warnings
-- **3-Tier Color Additive Grading** — Grade A (natural), Grade B (permitted synthetic), Grade C (high-concern azo dyes)
-- **"Can I Eat This?" Verdict** — Definitive SAFE / EAT OCCASIONALLY / NOT RECOMMENDED / DO NOT EAT banner
-- **Ingredient Science Guide** — Plain-language explanations of what ingredients do to the human body
-- **Product History** — Searchable archive of all previously scanned products
-- **PWA + Mobile Camera** — Install as native app; direct hardware camera capture with autofocus and flash
-
-### For Enforcement Officers
-
-- **Rule 7 Font Height Calibration** — Automatic PDP area calculation and Table-I minimum height verification
-- **Rule 9 Color Contrast Analysis** — WCAG 2.1 contrast ratio computation (minimum 3.0:1 threshold)
-- **Statutory Violation Flagging** — Auto-detects 13+ violation categories with Section 36(1) penalty citations
-- **FORM LM-INSP-2011 PDF** — One-click generation of official statutory inspection dockets with photographic evidence
-- **Compounding Calculator** — Automatic fine computation under Section 48 with Jan Vishwas 20% reduction
-- **Enforcement Dashboard** — Real-time KPIs, district activity ledger, inspection timeline, compliance trends
-- **Show-Cause Notice Drafting** — AI-generated formal legal notices with RAG-backed statutory citations
+- **3-Tier Color Additive Grading** — Grade A (wholesome natural), Grade B (permitted synthetic), Grade C (high-concern azo dyes)
+- **"Can I Eat This?" Verdict** — Clear, definitive SAFE / EAT OCCASIONALLY / NOT RECOMMENDED / DO NOT EAT banner
+- **Ingredient Science Guide** — Plain-language explanations of what additives, preservatives, and seed oils do to your body
+- **Searchable Scan History** — Persistent archive of all previously scanned packaging for personal reference and comparison
+- **PWA + Mobile Camera** — Install directly as a native web app; direct hardware camera capture with autofocus and flash controls
 
 ---
 
@@ -160,26 +153,22 @@ In India, **every retail pre-packaged commodity** is governed by the **Legal Met
 ```mermaid
 graph TB
     subgraph CLIENT["Client Layer"]
-        direction LR
-        CONSUMER["Consumer Portal<br/>Scanner · Health Check · History"]
-        OFFICER["Officer Portal<br/>Dashboard · Inspections · Reports"]
+        CONSUMER["Citizen & Consumer Portal<br/>Scanner · Health Check · Scan History"]
     end
 
     subgraph FRONTEND["Frontend — React 19 + TypeScript + Vite"]
         direction LR
-        SUPAAUTH["Supabase Auth Client<br/>Session & JWT Injection"]
+        SUPAAUTH["Supabase Auth Client<br/>Session & Citizen Accounts"]
         AXIOS["Axios HTTP Client<br/>API Gateway Layer"]
         ZUSTAND["Zustand State Store<br/>Global State Management"]
     end
 
     subgraph BACKEND["Backend — Python FastAPI"]
         direction LR
-        GATEWAY["API Gateway<br/>CORS · Security Headers · RBAC"]
-        SCAN_EP["/api/v1/scan<br/>Image Upload & Orchestration"]
+        GATEWAY["API Gateway<br/>CORS · Security Headers · Rate Limiting"]
+        SCAN_EP["/api/v1/scan<br/>Image Upload & AI Pipeline Orchestration"]
         HEALTH_EP["/api/v1/health<br/>Diagnostics & Probes"]
-        RULES_EP["/api/v1/rules<br/>Statutory Rules & Notices"]
-        ENFORCE_EP["/api/v1/enforcement<br/>Compounding & Violations"]
-        DASH_EP["/api/v1/dashboard<br/>Analytics & KPIs"]
+        RULES_EP["/api/v1/rules<br/>Statutory Rule Search & Citations"]
     end
 
     subgraph AI["AI & Compliance Engine"]
@@ -382,8 +371,7 @@ graph LR
 
     PARALLEL --> CONSENSUS["Cross-Model Consensus<br/>Confidence Score (0.0 - 1.0)"]
 
-    CONSENSUS --> CONSUMER_OUT["Consumer Advisory<br/>Health Guidance"]
-    CONSENSUS --> OFFICER_OUT["FORM LM-INSP-2011<br/>Show-Cause Notice Draft"]
+    CONSENSUS --> CONSUMER_OUT["Consumer Advisory & Verdict<br/>Health Guidance · Statutory Citations"]
 
     style GEMINI fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
     style GROQ fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
@@ -546,13 +534,13 @@ Penalties applied for:
 
 ## Application Screenshots & User Flows
 
-### Consumer Journey
+### User Journey (Citizen & Consumer Verification)
 
 ```mermaid
 graph LR
-    LAND["Landing Page<br/>Role Selection"] --> SCAN["Scanner Page<br/>Upload Front + Back"]
+    LAND["Landing Page<br/>Overview & Portals"] --> SCAN["Scanner Page<br/>Upload Front + Back"]
     LAND --> HEALTH["Health Check<br/>Nutritional Audit"]
-    LAND --> HISTORY["Product History<br/>Scan Archive"]
+    LAND --> HISTORY["Scan History<br/>Product Archive"]
 
     SCAN --> UPLOAD["Image Upload<br/>Browse · Camera · Live View"]
     UPLOAD --> RESULTS["Compliance Results<br/>Score · Violations · Citations"]
@@ -566,36 +554,14 @@ graph LR
     style VERDICT fill:#FEF9E7,stroke:#F39C12,stroke-width:2px
 ```
 
-### Officer Journey
-
-```mermaid
-graph LR
-    DASH["Officer Dashboard<br/>KPIs · Activity Feed"] --> INSPECT["Inspections Ledger<br/>All Scans & Violations"]
-    DASH --> SCAN["New Inspection<br/>Product Scan"]
-
-    SCAN --> RESULTS["Full Compliance Report<br/>All 13 Rule Checks"]
-    RESULTS --> NOTICE["Show-Cause Notice<br/>AI-Drafted Legal Text"]
-    RESULTS --> PDF["FORM LM-INSP-2011<br/>Statutory PDF Export"]
-    RESULTS --> COMPOUND["Compounding Calculator<br/>Fine with Jan Vishwas Reduction"]
-
-    INSPECT --> REPORT["Report Viewer<br/>Detailed Violation Analysis"]
-
-    style DASH fill:#E8F1F5,stroke:#1B5E7B,stroke-width:2px
-    style NOTICE fill:#FDEDEC,stroke:#C0392B,stroke-width:2px
-    style PDF fill:#FDEDEC,stroke:#C0392B,stroke-width:2px
-```
-
 ### Key Pages
 
 | Page | Route | Description |
 |:---|:---|:---|
-| **Landing Page** | `/` | Role selection (Consumer / Officer), feature highlights, PWA install prompt |
-| **Scanner Page** | `/scan` | Dual-panel image upload (Browse, Camera, Live View), real-time compliance analysis |
-| **Health Check** | `/health` | Back-panel nutrition audit, Health Score, dietary advisory, ingredient science |
-| **Product History** | `/history` | Searchable archive of all past scans with compliance scores |
-| **Officer Dashboard** | `/officer` | Real-time KPIs, compliance trends, recent activity feed, district statistics |
-| **Inspections Ledger** | `/officer/inspections` | Complete inspection history, violation filtering, bulk export |
-| **Report Viewer** | `/officer/report/:id` | Detailed violation analysis, statutory citations, PDF generation |
+| **Landing Page** | `/` | Platform entry, feature overview, dual portal launchers, PWA install prompt |
+| **Label Compliance Scanner** | `/scanner` | Dual-panel image capture (Browse, Camera, Live View), real-time legal metrology compliance analysis |
+| **Nutrition & Health Check** | `/health` | Back-panel nutrition audit, ICMR-NIN 2024 Health Score, dietary advisory, additive & colorant audit |
+| **Scan History** | `/history` | Searchable archive of all past statutory and nutritional scans with filter and export options |
 
 ---
 
@@ -608,24 +574,18 @@ PackDrashiti/
 │   │   ├── App.tsx                    # Root router with role-based navigation
 │   │   ├── main.tsx                   # Entry point + Service Worker registration
 │   │   ├── pages/
-│   │   │   ├── consumer/
-│   │   │   │   ├── LandingPage.tsx    # Home page with role selection
-│   │   │   │   ├── ScannerPage.tsx    # Dual-panel compliance scanner
-│   │   │   │   ├── HealthCheckPage.tsx # Nutritional safety audit
-│   │   │   │   └── ProductHistoryPage.tsx # Scan archive
-│   │   │   └── officer/
-│   │   │       ├── OfficerDashboardPage.tsx # Enforcement KPI dashboard
-│   │   │       ├── InspectionsPage.tsx # Inspections ledger
-│   │   │       └── ReportViewerPage.tsx # Detailed violation report
+│   │   │   └── consumer/
+│   │   │       ├── LandingPage.tsx    # Citizen portal & overview
+│   │   │       ├── ScannerPage.tsx    # Dual-panel compliance scanner
+│   │   │       ├── HealthCheckPage.tsx # Nutritional safety audit
+│   │   │       └── ProductHistoryPage.tsx # Scan archive
 │   │   ├── components/
 │   │   │   ├── common/                # AuthModal, Button, Card, Modal, PWAInstallPrompt
-│   │   │   ├── dashboard/            # StatCard, ComplianceChart, ActivityFeed
-│   │   │   ├── health/               # HealthBadgeGroup, NutrientRow, ArtificialColorsAudit,
-│   │   │   │                         # WhatIsHighCard, DietaryAdvisory
-│   │   │   ├── layout/               # Navbar, Footer
-│   │   │   ├── officer/              # CompoundingCalculator, NoticePreviewModal
-│   │   │   ├── reports/              # ComplianceCard, ViolationCard, ReportHeader
-│   │   │   └── scanner/              # AnnotatedImage, Camera
+│   │   │   ├── health/                # HealthBadgeGroup, NutrientRow, ArtificialColorsAudit,
+│   │   │   │                          # WhatIsHighCard, DietaryAdvisory
+│   │   │   ├── layout/                # Navbar, Footer
+│   │   │   ├── reports/               # ViolationCard
+│   │   │   └── scanner/               # AnnotatedImage, Camera
 │   │   ├── data/                      # Statutory rules, ICMR benchmarks, mock datasets
 │   │   ├── store/                     # Zustand global state stores
 │   │   ├── types/                     # TypeScript domain interfaces
@@ -646,9 +606,7 @@ PackDrashiti/
 │   │   │   └── endpoints/
 │   │   │       ├── health.py          # System diagnostics & probes
 │   │   │       ├── scan.py            # Image upload & AI pipeline orchestration
-│   │   │       ├── rules.py           # Statutory rules & enforcement notices
-│   │   │       ├── enforcement.py     # Compounding & violation management
-│   │   │       └── dashboard.py       # Analytics & KPI endpoints
+│   │   │       └── rules.py           # Statutory rule search & citations
 │   │   ├── core/
 │   │   │   ├── config.py             # Pydantic settings (env vars, LLM chains)
 │   │   │   ├── database.py           # SQLAlchemy async engine + session
@@ -660,17 +618,14 @@ PackDrashiti/
 │   │   │   ├── health.py, report.py  # Health data, inspection reports
 │   │   │   └── knowledge.py          # RAG knowledge base entries
 │   │   └── services/
-│   │       ├── health_engine.py       # ICMR-NIN nutrition scoring
-│   │       ├── compounding_engine.py  # Section 48 fine calculator
-│   │       └── pdf_generator.py       # ReportLab FORM LM-INSP-2011
-│   ├── tests/                         # Pytest automated test suite (47 tests)
-│   │   ├── test_api.py               # REST API integration tests (9 tests)
-│   │   ├── test_enforcement.py       # Violation & compounding tests (9 tests)
+│   │       └── health_engine.py       # ICMR-NIN nutrition scoring
+│   ├── tests/                         # Pytest automated test suite (33 tests)
+│   │   ├── test_api.py               # REST API integration tests (5 tests)
+│   │   ├── test_db.py                # Database model tests (5 tests)
 │   │   ├── test_health.py            # Nutrition engine tests (4 tests)
-│   │   ├── test_scan.py              # Scan pipeline tests (5 tests)
+│   │   ├── test_scan.py              # Scan pipeline tests (4 tests)
 │   │   ├── test_scoring.py           # Compliance scoring tests (8 tests)
-│   │   ├── test_security.py          # Auth & RBAC tests (7 tests)
-│   │   └── test_db.py               # Database model tests (5 tests)
+│   │   └── test_security.py          # Auth & RBAC tests (7 tests)
 │   ├── alembic/                       # Database migrations
 │   ├── requirements.txt
 │   └── Dockerfile
@@ -798,15 +753,13 @@ Interactive API docs at `http://localhost:8000/api/v1/docs`.
 
 | Method | Endpoint | Description | Auth |
 |:---|:---|:---|:---|
-| `GET` | `/health` | System liveness probe | No |
-| `POST` | `/api/v1/scan` | Upload packaging images for compliance analysis | JWT |
-| `GET` | `/api/v1/scan/:id` | Retrieve scan result by ID | JWT |
-| `GET` | `/api/v1/rules` | List all statutory rules | JWT |
-| `POST` | `/api/v1/enforcement/violations` | Create violation record | JWT (Officer) |
-| `GET` | `/api/v1/enforcement/violations` | List violations with filters | JWT (Officer) |
-| `POST` | `/api/v1/enforcement/compounding` | Calculate compounding fine | JWT (Officer) |
-| `GET` | `/api/v1/dashboard/stats` | Enforcement KPI statistics | JWT (Officer) |
-| `GET` | `/api/v1/dashboard/activity` | Recent activity feed | JWT (Officer) |
+| `GET` | `/health` | System liveness & diagnostics probe | No |
+| `POST` | `/api/v1/scan/upload` | Ingest packaging image with SHA-256 tamper-evident hash | Optional |
+| `POST` | `/api/v1/scan/analyze` | Run 5-agent LangGraph workflow (front + back panels) | Optional |
+| `GET` | `/api/v1/scan/:id` | Retrieve detailed statutory & health analysis by ID | Optional |
+| `GET` | `/api/v1/scan/history` | Fetch personal scan and health audit history | Optional |
+| `DELETE` | `/api/v1/scan/history` | Clear personal scan audit records | Optional |
+| `GET` | `/api/v1/rules/search` | Statutory RAG semantic search across 2011 Metrology Rules | Optional |
 
 ### Scan Request Example
 
@@ -835,8 +788,7 @@ curl -X POST https://packdrashiti-backend.onrender.com/api/v1/scan \
       "description": "Non-standard unit 'gms' detected. Legal unit is 'g'.",
       "expected_value": "g or kg",
       "actual_value": "gms",
-      "statutory_reference": "Rule 6(1)(c) read with Rule 13",
-      "compounding_amount": 10000.0
+      "statutory_reference": "Rule 6(1)(c) read with Rule 13"
     }
   ],
   "health_analysis": {
@@ -855,17 +807,16 @@ curl -X POST https://packdrashiti-backend.onrender.com/api/v1/scan \
 
 ### Automated Test Suite
 
-**47 tests** across 7 test modules covering all critical paths:
+**33 tests** across 6 test modules covering all critical paths:
 
 ```
 backend/tests/
-├── test_api.py            9 tests   REST API integration (endpoints, status codes, payloads)
-├── test_enforcement.py    9 tests   Violation creation, compounding, statutory citations
+├── test_api.py            5 tests   REST API integration (endpoints, uploads, routing)
+├── test_db.py             5 tests   ORM models, database CRUD, relationship integrity
 ├── test_health.py         4 tests   Nutrition scoring, ICMR-NIN benchmarks, health verdicts
-├── test_scan.py           5 tests   Scan pipeline, image processing, extraction validation
+├── test_scan.py           4 tests   Scan pipeline, multipart image upload, rule search
 ├── test_scoring.py        8 tests   Compliance score computation, Rule 7 font calibration
-├── test_security.py       7 tests   JWT auth, RBAC enforcement, token rotation
-└── test_db.py             5 tests   ORM models, database CRUD, relationship integrity
+└── test_security.py       7 tests   JWT auth, user roles, security headers
 ```
 
 ### Run Tests
@@ -875,7 +826,7 @@ cd backend
 python -m pytest tests/ -v
 ```
 
-**Latest Results**: 47/47 passed (42.30s)
+**Latest Results**: 33/33 passed (100% passing test suite)
 
 ### Additional Quality Checks
 
@@ -964,7 +915,7 @@ The FastAPI application is deployed on **Render** (Singapore region) with health
 
 ### PackDrishti (PackDrashiti) — पैकदृष्टि
 
-*Empowering consumers and enforcement officers with AI-driven packaging compliance verification.*
+*Empowering consumers and citizens with AI-driven packaging compliance verification.*
 
 Department of Consumer Affairs — Legal Metrology Division  
 Ministry of Consumer Affairs, Food & Public Distribution, Government of India

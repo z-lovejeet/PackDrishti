@@ -422,8 +422,7 @@ async def get_scan_history(
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
-    Retrieves recent scan audit history across statutory compliance and health checks.
-    Supports role-based isolation (consumer vs officer) so audit records are never conflated.
+    Retrieves recent scan audit history across statutory compliance and health checks for citizens and consumers.
     """
     items = []
     effective_role = role.lower().strip() if role and role != "all" else None
@@ -568,7 +567,7 @@ async def clear_scan_history(
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
-    Clears scan audit records with optional role-based separation (consumer vs officer).
+    Clears scan audit records for the user.
     Ensures safe cascading deletion across statutory violations, extracted declarations, and scan history.
     """
     try:

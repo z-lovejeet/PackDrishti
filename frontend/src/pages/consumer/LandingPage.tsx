@@ -1,17 +1,14 @@
 import React from "react";
-import { ArrowRight } from "@phosphor-icons/react";
-import { UserRole } from "../../types";
+import { ArrowRight, ShieldCheck, Heartbeat, Scan, Sparkle } from "@phosphor-icons/react";
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
-  userRole: UserRole;
-  onSetUserRole: (role: UserRole) => void;
+  userRole?: string;
+  onSetUserRole?: (role: any) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onNavigate,
-  userRole: _userRole,
-  onSetUserRole,
 }) => {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-slate-100 selection:text-slate-900">
@@ -25,77 +22,75 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             src="/logo.png"
             alt="PackDrashiti Official Logo"
             className="w-11 h-11 rounded-xl object-contain shadow-xs border border-slate-200 shrink-0"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
           />
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 text-2xs font-mono font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
-            <span>Department of Consumer Affairs • Legal Metrology Division</span>
+            <span>Public Consumer Verification Platform • Department of Consumer Affairs</span>
           </div>
         </div>
 
         {/* Primary Title */}
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 font-heading max-w-3xl leading-[1.12]">
-          Statutory packaging compliance and nutritional verification.
+          Verify packaged goods for fair price, compliance &amp; nutrition.
         </h1>
 
         {/* Subtitle */}
         <p className="mt-6 text-lg text-slate-600 max-w-2xl font-normal leading-relaxed">
-          National regulatory verification platform operating under the Legal Metrology (Packaged Commodities) Rules, 2011 and direct multimodal nutritional intelligence.
+          PackDrashiti puts the power of India's Legal Metrology (Packaged Commodities) Rules, 2011 and ICMR-NIN 2024 nutritional benchmarks directly into consumers' hands. Scan any retail packaging in seconds.
         </p>
 
-        {/* Dual Operational Portals */}
+        {/* Dual Consumer Portals */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           
-          {/* Citizen Consumer Portal */}
-          {/* Citizen Consumer Health & Nutrition Portal */}
+          {/* Consumer Portal 1: Label Compliance Scanner */}
           <div 
-            onClick={() => {
-              onSetUserRole("consumer");
-              onNavigate("health");
-            }}
-            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+            onClick={() => onNavigate("scanner")}
+            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 uppercase tracking-wider">
-                  Citizen Portal
+                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Scan size={14} weight="bold" />
+                  Package Scanner
                 </span>
                 <span className="text-xs font-mono text-slate-400">01</span>
               </div>
-              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Consumer Health &amp; Nutrition</h2>
+              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Label Compliance &amp; Price Check</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Scan packaged food commodities to audit ICMR-NIN 2024 nutritional benchmarks, identify hidden sugars, sodium density, palm oil, and age-specific health advisories.
+                Scan front and back packaging labels to verify Maximum Retail Price (MRP), calculate fair Unit Sale Price (USP), check net quantity units, and detect missing manufacturer declarations.
               </p>
             </div>
             
             <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
-              <span>Check food health &amp; nutrition</span>
+              <span>Scan packaging label</span>
               <ArrowRight size={14} weight="bold" />
             </div>
           </div>
 
-          {/* Officer Enforcement Workstation */}
+          {/* Consumer Portal 2: Health & Nutrition Audit */}
           <div 
-            onClick={() => {
-              onSetUserRole("officer");
-              onNavigate("dashboard");
-            }}
-            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+            onClick={() => onNavigate("health")}
+            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-900 text-white uppercase tracking-wider">
-                  Enforcement Desk
+                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <Heartbeat size={14} weight="bold" />
+                  Health &amp; Nutrition
                 </span>
                 <span className="text-xs font-mono text-slate-400">02</span>
               </div>
-              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Legal Metrology Officer</h2>
+              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Nutrition &amp; Ingredient Audit</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Field workstation for Rule 7 Table-I font calibration, statutory show-cause notices (FORM LM-INSP-2011), and Section 48 compounding fee adjudication.
+                Photograph food nutrition panels to evaluate against ICMR-NIN 2024 safe limits. Identify hidden sugars, excessive sodium, industrial palm oil, harmful azo dyes, and get a clear health score.
               </p>
             </div>
             
             <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
-              <span>Access officer command desk</span>
+              <span>Check nutrition &amp; food health</span>
               <ArrowRight size={14} weight="bold" />
             </div>
           </div>
@@ -104,25 +99,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       </section>
 
-      {/* Statutory Baseline Strip (2011 Rules & Schedules) */}
+      {/* Consumer Statutory Baseline Strip */}
       <section className="border-y border-slate-100 bg-slate-50/50">
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">11</div>
-              <div className="text-xs text-slate-500 mt-1">Rule 6 mandatory declarations</div>
+              <div className="text-3xl font-bold font-heading text-slate-950">11+</div>
+              <div className="text-xs text-slate-500 mt-1">Mandatory Label Declarations</div>
             </div>
             <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">Table-I</div>
-              <div className="text-xs text-slate-500 mt-1">Rule 7 font height standard</div>
+              <div className="text-3xl font-bold font-heading text-slate-950">Per g/ml</div>
+              <div className="text-xs text-slate-500 mt-1">Unit Sale Price Transparency</div>
             </div>
             <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">1.0% - 9%</div>
-              <div className="text-xs text-slate-500 mt-1">First Schedule MPE tolerances</div>
+              <div className="text-3xl font-bold font-heading text-slate-950">&lt; 8 sec</div>
+              <div className="text-xs text-slate-500 mt-1">Instant Label Verification</div>
             </div>
             <div>
               <div className="text-3xl font-bold font-heading text-slate-950">ICMR 2024</div>
-              <div className="text-xs text-slate-500 mt-1">Nutritional threshold guidelines</div>
+              <div className="text-xs text-slate-500 mt-1">National Health Benchmarks</div>
             </div>
           </div>
         </div>
@@ -130,9 +125,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* 4-Tier Pipeline Architecture */}
       <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">Pipeline Architecture</div>
+        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">Consumer Intelligence Pipeline</div>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-950 font-heading mb-12">
-          Multimodal vision, deterministic rule math, and statutory RAG.
+          Multimodal vision, deterministic rule math, and nutrition intelligence.
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -141,17 +136,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 01 / Perception</div>
             <h3 className="text-base font-bold text-slate-950 font-heading">Direct Multimodal Vision (VLM)</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Eliminates brittle manual OCR workflows. Direct multimodal image perception extracts spatial text coordinates, principal display panel dimensions, and complete packaging typography.
+              Snap high-resolution photos of product packaging from your mobile camera or desktop. Multimodal vision perceives label text, expiry dates, batch details, and mandatory legal declarations.
             </p>
             <div className="pt-2">
               <button 
-                onClick={() => {
-                  onSetUserRole("officer");
-                  onNavigate("scanner");
-                }} 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+                onClick={() => onNavigate("scanner")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
               >
-                Launch officer compliance scanner <ArrowRight size={12} weight="bold" />
+                Launch package scanner <ArrowRight size={12} weight="bold" />
               </button>
             </div>
           </div>
@@ -160,52 +152,46 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 02 / Determinism</div>
             <h3 className="text-base font-bold text-slate-950 font-heading">Python Rule Engine</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              100% mathematically auditable logic. Verifies Unit Sale Price arithmetic under Rule 6(1)(e), validates Rule 7 Table-I numeral step functions, and checks SI metric unit symbols under Rule 13.
+              100% mathematically auditable logic. Verifies Unit Sale Price arithmetic under Rule 6(1)(e), validates net quantity metric units under Rule 13, and ensures no dual-pricing manipulations.
             </p>
             <div className="pt-2">
               <button 
-                onClick={() => {
-                  onSetUserRole("officer");
-                  onNavigate("dashboard");
-                }} 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+                onClick={() => onNavigate("scanner")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
               >
-                Open compounding engine <ArrowRight size={12} weight="bold" />
+                Verify pricing &amp; units <ArrowRight size={12} weight="bold" />
               </button>
             </div>
           </div>
 
           <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 03 / Statutory RAG</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Statutory Vector Index</h3>
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 03 / Statutory Knowledge</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Legal Metrology Knowledge Base</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Indexed across all 34 rules, 7 schedules, and recent amendments of the 2011 Regulations. Automatically retrieves exact statutory sections and generates court-admissible FORM LM-INSP-2011 notices.
+              Indexed across the complete 2011 Regulations and statutory amendments. Explains your rights as a consumer regarding mandatory declarations, dual MRP bans, and consumer care coordinates.
             </p>
             <div className="pt-2">
               <button 
-                onClick={() => {
-                  onSetUserRole("officer");
-                  onNavigate("reports");
-                }} 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+                onClick={() => onNavigate("history")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
               >
-                View statutory dockets <ArrowRight size={12} weight="bold" />
+                View scan history <ArrowRight size={12} weight="bold" />
               </button>
             </div>
           </div>
 
           <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 04 / Consumer Health</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Nutrition &amp; Dietary Agent</h3>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Nutrition &amp; Dietary Health Engine</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               Evaluates ingredient lists and nutrition facts against ICMR-NIN 2024 thresholds. Detects industrial palm olein, excessive sodium, ultra-processed formulation (UPF / NOVA 4), and age suitability.
             </p>
             <div className="pt-2">
               <button 
                 onClick={() => onNavigate("health")} 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
               >
-                Run health check <ArrowRight size={12} weight="bold" />
+                Run nutrition health check <ArrowRight size={12} weight="bold" />
               </button>
             </div>
           </div>
@@ -213,18 +199,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* Statutory Rules & Schedules Matrix (Complete 2011 Dataset Breakdown) */}
+      {/* Consumer Rights & Packaging Standards Matrix */}
       <section className="border-t border-slate-100 bg-slate-50/40 py-20">
         <div className="max-w-5xl mx-auto px-6">
           
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-10 gap-2">
             <div>
-              <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Statutory Matrix</div>
+              <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Consumer Knowledge</div>
               <h3 className="text-xl sm:text-2xl font-bold text-slate-950 font-heading mt-1">
-                The Legal Metrology (Packaged Commodities) Rules, 2011
+                Essential Packaging Rules Every Consumer Should Know
               </h3>
             </div>
-            <span className="text-xs text-slate-500 font-mono">G.S.R. 202(E) • 54 Regulatory Clauses</span>
+            <span className="text-xs text-slate-500 font-mono">Legal Metrology (Packaged Commodities) Rules, 2011</span>
           </div>
 
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
@@ -236,7 +222,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <span className="text-2xs font-mono text-slate-500">Mandatory Declarations</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Requires 11 statutory declarations on PDP: Manufacturer/packer identity with factory address and PIN, generic commodity name, net quantity, manufacturing month/year, MRP, and consumer grievance contact.
+                  Every package must clearly declare manufacturer/packer identity with postal PIN, generic commodity name, net quantity, manufacturing date, Maximum Retail Price (MRP), and consumer care grievance coordinates.
                 </p>
               </div>
 
@@ -246,47 +232,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <span className="text-2xs font-mono text-slate-500">Unit Sale Price (USP)</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Mandates Unit Sale Price declaration per gram, millilitre, kilogram, or litre alongside total MRP. Prohibits obscure or missing unit pricing on retail packaging.
+                  Mandatory declaration of Unit Sale Price per gram, millilitre, kilogram, or litre alongside total MRP. This allows consumers to compare actual prices across different pack sizes.
                 </p>
               </div>
 
               <div className="p-6 space-y-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Rule 7 &amp; Table-I</span>
-                  <span className="text-2xs font-mono text-slate-500">Numeral Cap-Heights</span>
+                  <span className="text-xs font-mono font-bold text-slate-950">Rule 13 &amp; Metric Standards</span>
+                  <span className="text-2xs font-mono text-slate-500">Legal SI Units</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Prescribes minimum numeral heights for net quantity: &le; 200g/ml requires 2.0mm; 200g&ndash;500g/ml requires 4.0mm; &gt; 500g/ml requires 6.0mm. Letters must be &ge; 1.0mm normal or &ge; 2.0mm molded.
+                  Standard SI metric units (g, kg, ml, l) must be used. Misleading or prohibited abbreviations such as &quot;gms&quot;, &quot;kgs&quot;, &quot;ltr&quot; are legally non-compliant.
                 </p>
               </div>
 
               <div className="p-6 space-y-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Rule 8 &amp; Rule 9</span>
-                  <span className="text-2xs font-mono text-slate-500">Quiet Zone &amp; Contrast</span>
+                  <span className="text-xs font-mono font-bold text-slate-950">Rule 18(2A)</span>
+                  <span className="text-2xs font-mono text-slate-500">Dual MRP Prohibition</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Enforces quiet margins around net quantity (&ge; 1x numeral height above/below, &ge; 2x left/right). Mandates high conspicuous color contrast for price and quantity declarations.
-                </p>
-              </div>
-
-              <div className="p-6 space-y-2 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Rule 13 &amp; Rule 18(2A)</span>
-                  <span className="text-2xs font-mono text-slate-500">SI Units &amp; Dual MRP</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Enforces standard SI metric unit symbols (kg, g, mg, l, ml, m, cm, mm) and strictly prohibits non-metric abbreviations (gm, gms, ltr, cc). Strictly prohibits Dual MRP on identical goods.
-                </p>
-              </div>
-
-              <div className="p-6 space-y-2 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Schedules I, II &amp; VII</span>
-                  <span className="text-2xs font-mono text-slate-500">MPE &amp; FORM LM-INSP-2011</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Defines Maximum Permissible Error (1.0% to 9.0%), Second Schedule standard pack sizes across 19 commodity classes, and Seventh Schedule statutory inspection datasheets for legal evidence.
+                  Strictly prohibits charging higher prices or printing dual MRP stickers for identical pre-packaged goods across different retail establishments or locations.
                 </p>
               </div>
 

@@ -91,8 +91,8 @@ export interface ComplianceReportModel {
   id: string;
   docketNumber: string;
   scanId: string;
-  officerId: string;
-  officerName: string;
+  userId: string;
+  generatedBy: string;
   jurisdiction: string;
   reportType: string;
   summaryFindings: string;

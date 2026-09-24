@@ -56,10 +56,10 @@ def clean_in_memory_cache():
 
 def make_test_token(
     user_id: str = "4f8a3c21-9e20-4a89-b8d1-7c9b0e2d1f4a",
-    email: str = "officer.sharma@delhi.gov.in",
-    role: str = "officer",
-    badge_number: str = "LMO-DL-2024-089",
-    zone: str = "DL-NORTH-01",
+    email: str = "citizen.sharma@example.com",
+    role: str = "consumer",
+    badge_number: str = None,
+    zone: str = None,
     jti: str = None,
     expired: bool = False,
 ) -> str:

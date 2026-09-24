@@ -1,24 +1,4 @@
-export type UserRole = "consumer" | "officer" | "admin";
-
-export interface OfficerProfile {
-  name: string;
-  badgeNumber: string;
-  designation: string;
-  division: string;
-  zone: string;
-  jurisdiction: string;
-}
-
-export interface DashboardMetrics {
-  totalInspections: number;
-  compliantCount: number;
-  violationCount: number;
-  compoundedCount: number;
-  pendingNoticesCount: number;
-  complianceRate: number;
-  totalFinesLeviedInr: number;
-  monthlyScansDelta: number;
-}
+export type UserRole = "consumer" | "admin";
 
 export interface ScanHistoryItem {
   id: string;

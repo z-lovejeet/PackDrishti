@@ -81,7 +81,6 @@ export interface ViolationRecord {
   severity: 'high' | 'medium' | 'low';
   dateDetected: string;
   status: 'Open' | 'Under Review' | 'Notice Issued' | 'Resolved' | 'Escalated';
-  assignedOfficer: string;
   location: string;
   timeline: {
     date: string;
@@ -217,26 +216,6 @@ export interface EnforcementActionItem {
   targetEstablishment: string;
   fineAmountInr?: number;
   status: "Pending Hearing" | "Issued" | "Settled" | "Closed";
-}
-
-export interface OfficerProfile {
-  name: string;
-  badgeNumber: string;
-  designation: string;
-  division: string;
-  zone: string;
-  jurisdiction: string;
-}
-
-export interface DashboardMetrics {
-  totalInspections: number;
-  compliantCount: number;
-  violationCount: number;
-  compoundedCount: number;
-  pendingNoticesCount?: number;
-  complianceRate?: number;
-  totalFinesLeviedInr: number;
-  monthlyScansDelta: number | string;
 }
 
 export interface ViolationCategoryBreakdown {

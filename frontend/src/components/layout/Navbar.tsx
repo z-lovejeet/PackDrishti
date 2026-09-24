@@ -1,22 +1,19 @@
 import React, { useState } from "react";
 import { List, X } from "@phosphor-icons/react";
 import { Button } from "../common/Button";
-import { UserRole } from "../../types";
 import { useAuthStore } from "../../store/authStore";
 
 interface NavbarProps {
   onNavigate: (page: string) => void;
   activePage: string;
-  userRole: UserRole;
-  onToggleUserRole: () => void;
+  userRole?: string;
+  onToggleUserRole?: () => void;
   onOpenAuthModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   activePage,
-  userRole,
-  onToggleUserRole,
   onOpenAuthModal,
 }) => {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -98,26 +95,33 @@ export const Navbar: React.FC<NavbarProps> = ({
           <img
             src="/logo.png"
             alt="PackDrashiti Official Logo"
-            className="w-9 h-9 rounded-lg object-contain shrink-0 shadow-2xs transition-transform group-hover:scale-105"
+            className="w-9 h-9 object-contain group-hover:opacity-90 transition-opacity"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
           />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-slate-950 tracking-tight font-heading leading-tight">
+
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-lg font-bold font-heading tracking-tight text-slate-950">
                 PackDrashiti
               </span>
+              <span className="text-xs text-slate-500 font-hindi font-medium">
+                पैकद्रष्टि
+              </span>
             </div>
-            <p className="text-2xs text-slate-500 font-normal leading-none mt-0.5">
-              Legal Metrology Division
-            </p>
+            <span className="text-2xs font-mono uppercase tracking-wider text-slate-600 hidden sm:block">
+              Consumer Packaging &amp; Health Verification
+            </span>
           </div>
         </div>
 
-        {/* Desktop Navigation Links (Typography-only, zero icon clutter) */}
+        {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-1 text-xs font-medium">
           <button
             type="button"
             onClick={() => handleNavClick("landing")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
               activePage === "landing"
                 ? "bg-slate-900 text-white font-semibold shadow-2xs"
                 : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
@@ -126,145 +130,61 @@ export const Navbar: React.FC<NavbarProps> = ({
             Overview
           </button>
 
-          {userRole === "officer" && (
-            <button
-              type="button"
-              onClick={() => handleNavClick("dashboard")}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-                activePage === "dashboard"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Officer Desk
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => handleNavClick("scanner")}
+            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+              activePage === "scanner"
+                ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+            }`}
+          >
+            Label Compliance Scanner
+          </button>
 
-          {userRole === "officer" && (
-            <button
-              type="button"
-              onClick={() => handleNavClick("scanner")}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-                activePage === "scanner"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Compliance Scanner
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => handleNavClick("health")}
+            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+              activePage === "health"
+                ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+            }`}
+          >
+            Nutrition &amp; Health Check
+          </button>
 
-          {userRole === "consumer" && (
-            <button
-              type="button"
-              onClick={() => handleNavClick("health")}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-                activePage === "health"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Nutrition &amp; Health Check
-            </button>
-          )}
-
-          {userRole === "consumer" && (
-            <button
-              type="button"
-              onClick={() => handleNavClick("history")}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-                activePage === "history"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Health History
-            </button>
-          )}
-
-          {userRole === "officer" && (
-            <button
-              type="button"
-              onClick={() => handleNavClick("inspections")}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-                activePage === "inspections"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Inspection Ledger
-            </button>
-          )}
-
-          {userRole === "officer" && (
-            <button
-              type="button"
-              onClick={() => handleNavClick("reports")}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-                activePage === "reports"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Reports &amp; Dockets
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => handleNavClick("history")}
+            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+              activePage === "history"
+                ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+            }`}
+          >
+            Scan History
+          </button>
         </nav>
 
-        {/* Right Section: Persona Switcher, Auth Controls, Primary CTA, Mobile Toggle */}
+        {/* Right Section: Auth Controls, Primary CTA, Mobile Toggle */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
-          {/* Persona Segmented Control (Pure text, zero icons) */}
-          <div 
-            role="group" 
-            aria-label="Operating Mode"
-            className="hidden sm:flex items-center p-0.5 rounded-lg bg-slate-100 border border-slate-200 text-xs shadow-2xs"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                if (userRole !== "consumer") onToggleUserRole();
-              }}
-              className={`px-2.5 py-1 rounded-md transition-all text-xs ${
-                userRole === "consumer"
-                  ? "bg-white text-slate-950 font-semibold shadow-2xs border border-slate-200/80"
-                  : "text-slate-500 hover:text-slate-800 font-medium"
-              }`}
-              title="Citizen consumer verification mode"
-            >
-              Consumer
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (userRole !== "officer") onToggleUserRole();
-              }}
-              className={`px-2.5 py-1 rounded-md transition-all text-xs ${
-                userRole === "officer"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-500 hover:text-slate-800 font-medium"
-              }`}
-              title="Statutory enforcement officer mode"
-            >
-              Officer
-            </button>
-          </div>
-
-          {/* Authentication Section (Pure text) */}
+          {/* Authentication Section */}
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <div className="hidden xl:flex items-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-800 px-2.5 py-1 rounded-md text-2xs font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                <span className="font-medium max-w-[120px] truncate">
-                  {user?.badgeNumber || user?.email?.split("@")[0] || "Authorized"}
+                <span className="font-medium max-w-[140px] truncate">
+                  {user?.fullName || user?.email?.split("@")[0] || "Citizen"}
                 </span>
               </div>
+
               <button
                 type="button"
                 onClick={logout}
-                className="px-2.5 py-1 rounded-md text-xs font-medium border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition-colors"
-                title="Sign out of portal"
+                className="text-xs text-slate-500 hover:text-rose-600 font-medium px-2 py-1 rounded transition-colors"
+                title="Sign out"
               >
                 Sign Out
               </button>
@@ -273,25 +193,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onOpenAuthModal}
-              className="px-3 py-1 rounded-md text-xs font-medium border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 transition-colors shadow-2xs"
-              title="Sign in for official access"
+              className="px-3 py-1 rounded-md text-xs font-medium border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 transition-colors shadow-2xs cursor-pointer"
+              title="Sign in to save scan history"
             >
               Sign In
             </button>
           )}
 
-          {/* Primary Action Button (Pure text, sleek and restrained) */}
+          {/* Primary Action Button */}
           <Button
             variant="primary"
             size="sm"
-            onClick={() => handleNavClick(userRole === "officer" ? "scanner" : "health")}
+            onClick={() => handleNavClick("scanner")}
             className={`hidden md:inline-flex text-xs font-semibold px-3 py-1.5 transition-all ${
-              (userRole === "officer" ? activePage === "scanner" : activePage === "health")
+              activePage === "scanner"
                 ? "ring-2 ring-slate-900 ring-offset-2"
                 : ""
             }`}
           >
-            {userRole === "officer" ? "Compliance Scanner" : "Check Food Nutrition"}
+            Scan Product
           </Button>
 
           {/* Mobile Menu Hamburger Button */}
@@ -313,50 +233,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       </div>
 
-      {/* Mobile Menu Drawer (Pure text navigation) */}
+      {/* Mobile Menu Drawer */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-4 shadow-dropdown animate-fadeIn">
-          
-          {/* Mobile Persona Switcher */}
-          <div>
-            <span className="text-2xs uppercase font-mono font-medium text-slate-500 block mb-1.5">
-              Operating Mode
-            </span>
-            <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  if (userRole !== "consumer") onToggleUserRole();
-                }}
-                className={`py-1.5 px-3 rounded-md text-center font-medium transition-all ${
-                  userRole === "consumer"
-                    ? "bg-white text-slate-950 font-semibold shadow-2xs border border-slate-200"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                Consumer
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (userRole !== "officer") onToggleUserRole();
-                }}
-                className={`py-1.5 px-3 rounded-md text-center font-medium transition-all ${
-                  userRole === "officer"
-                    ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                Officer
-              </button>
-            </div>
-          </div>
-
           {/* Mobile Navigation Links */}
           <nav className="space-y-1">
             <span className="text-2xs uppercase font-mono font-medium text-slate-500 block mb-1.5">
-              Navigation
+              Consumer Navigation
             </span>
 
             <button
@@ -374,151 +257,87 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {userRole === "officer" && (
-              <button
-                type="button"
-                onClick={() => handleNavClick("dashboard")}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                  activePage === "dashboard"
-                    ? "bg-slate-900 text-white font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Officer Desk</span>
-                {activePage === "dashboard" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                )}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => handleNavClick("scanner")}
+              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                activePage === "scanner"
+                  ? "bg-slate-900 text-white font-semibold"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <span>Label Compliance Scanner</span>
+              {activePage === "scanner" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              )}
+            </button>
 
-            {userRole === "officer" && (
-              <button
-                type="button"
-                onClick={() => handleNavClick("scanner")}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                  activePage === "scanner"
-                    ? "bg-slate-900 text-white font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Compliance Scanner</span>
-                {activePage === "scanner" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                )}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => handleNavClick("health")}
+              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                activePage === "health"
+                  ? "bg-slate-900 text-white font-semibold"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <span>Nutrition &amp; Health Check</span>
+              {activePage === "health" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              )}
+            </button>
 
-            {userRole === "consumer" && (
-              <button
-                type="button"
-                onClick={() => handleNavClick("health")}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                  activePage === "health"
-                    ? "bg-slate-900 text-white font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Nutrition &amp; Health Check</span>
-                {activePage === "health" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                )}
-              </button>
-            )}
-
-            {userRole === "consumer" && (
-              <button
-                type="button"
-                onClick={() => handleNavClick("history")}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                  activePage === "history"
-                    ? "bg-slate-900 text-white font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Health History</span>
-                {activePage === "history" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                )}
-              </button>
-            )}
-
-            {userRole === "officer" && (
-              <button
-                type="button"
-                onClick={() => handleNavClick("inspections")}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                  activePage === "inspections"
-                    ? "bg-slate-900 text-white font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Inspection Ledger</span>
-                {activePage === "inspections" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                )}
-              </button>
-            )}
-
-            {userRole === "officer" && (
-              <button
-                type="button"
-                onClick={() => handleNavClick("reports")}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                  activePage === "reports"
-                    ? "bg-slate-900 text-white font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Reports &amp; Dockets</span>
-                {activePage === "reports" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                )}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => handleNavClick("history")}
+              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                activePage === "history"
+                  ? "bg-slate-900 text-white font-semibold"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <span>Scan History</span>
+              {activePage === "history" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              )}
+            </button>
           </nav>
 
-          {/* Mobile Quick Scan CTA */}
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => handleNavClick(userRole === "officer" ? "scanner" : "health")}
-            className="w-full text-xs font-semibold"
-          >
-            {userRole === "officer" ? "Scan Packaging Now" : "Check Food Nutrition"}
-          </Button>
+          {/* Mobile Auth and Action */}
+          <div className="pt-3 border-t border-slate-100 space-y-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleNavClick("scanner")}
+              className="w-full text-xs font-semibold justify-center py-2"
+            >
+              Scan Packaging Label
+            </Button>
 
-          {/* Mobile Auth and Status */}
-          <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
-            {isAuthenticated ? (
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-2xs font-mono font-medium text-slate-700 truncate">
-                    {user?.badgeNumber || user?.email || "Authorized"}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="px-2.5 py-1 rounded-md text-xs font-medium border border-slate-200 text-slate-700 hover:bg-slate-100"
-                >
-                  Sign Out
-                </button>
-              </div>
-            ) : (
+            {!isAuthenticated ? (
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   if (onOpenAuthModal) onOpenAuthModal();
                 }}
-                className="w-full py-2 px-3 rounded-md text-xs font-medium border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 text-center"
+                className="w-full text-center py-2 text-xs font-medium text-slate-700 hover:text-slate-950 border border-slate-200 rounded-lg bg-slate-50 transition-colors"
               >
-                Sign In to Portal
+                Sign In to Save History
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-center py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-lg transition-colors"
+              >
+                Sign Out ({user?.fullName || "Citizen"})
               </button>
             )}
           </div>
-
         </div>
       )}
     </header>

@@ -30,17 +30,14 @@ import {
 import { Button } from "../../components/common/Button";
 import { AnnotatedImage } from "../../components/scanner/AnnotatedImage";
 import { Camera } from "../../components/scanner/Camera";
-import { ReportHeader } from "../../components/reports/ReportHeader";
-import { ComplianceCard } from "../../components/reports/ComplianceCard";
 import { ViolationCard } from "../../components/reports/ViolationCard";
-import { NoticePreviewModal } from "../../components/officer/NoticePreviewModal";
 import { ProductScan, UserRole, BoundingBox, ExtractedDeclaration, StatutoryViolation } from "../../types";
 import { calculateComplianceScore } from "../../utils/complianceEngine";
 import { useScanMachine } from "../../store/scanMachine";
 
 interface ScannerPageProps {
   userRole?: UserRole;
-  onOpenReportModal: () => void;
+  onOpenReportModal?: () => void;
   onNavigateToHealth?: () => void;
   onSaveToast?: () => void;
 }
@@ -73,7 +70,6 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
   const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
   const [subView, setSubView] = useState<"infractions" | "declarations" | "font_table" | "citations">("infractions");
   const [activePanelTab, setActivePanelTab] = useState<"front" | "back">("front");
-  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState<boolean>(false);
 
   // Scan Machine State
   const {
@@ -238,10 +234,10 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       isExpired: Boolean((liveResult as any).is_expired),
       expiryStatus: (liveResult as any).expiry_status,
       expiryDetails: (liveResult as any).expiry_details,
-      scannedAt: "Active Field Inspection",
-      scannedBy: userRole === "officer" ? "Inspector of Legal Metrology" : "Consumer Verification",
-      inspectorDesignation: "Inspector of Legal Metrology",
-      location: "Central Consumer Protection Division",
+      scannedAt: "Consumer Verification",
+      scannedBy: "Citizen Consumer Verification",
+      inspectorDesignation: "Consumer Verification",
+      location: "Consumer Portal",
       overallStatus: liveResult.is_compliant ? "compliant" : "violation",
       violationCount: liveViolations.length,
       warningCount: 0,
@@ -419,13 +415,13 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
         <div>
           <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
-            Enforcement Inspection Workstation • LMPC Rules, 2011
+            Citizen Consumer Verification • LMPC Rules, 2011
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1 tracking-tight">
-            Legal Metrology Compliance Scanner
+            Packaging Label &amp; Price Compliance Scanner
           </h1>
           <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
-            Statutory packaging inspection for Legal Metrology Officers. Evaluates mandatory Rule 6 declarations, verifies Rule 7 Table-I numeral cap-heights, checks Unit Sale Price math, and computes Section 48 compounding exposure.
+            Verify retail pre-packaged goods for fair pricing, mandatory manufacturer declarations, Unit Sale Price (USP) accuracy, and standard SI metric units under consumer protection rules.
           </p>
         </div>
 
@@ -434,10 +430,10 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={onOpenReportModal}
+              onClick={() => window.print()}
               className="text-xs font-medium"
             >
-              Export PDF
+              Print Summary
             </Button>
             {onSaveToast && (
               <Button
@@ -905,15 +901,6 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
         const violationsCount = currentScan.violations.length;
         const isCompliant = currentScan.overallStatus === "compliant" || violationsCount === 0;
 
-        // Calculate total compounding liability under Section 48
-        const totalCompounding = currentScan.violations.reduce((acc, v) => {
-          const liveV = liveResult?.violations.find(lv => lv.violation_id === v.id || lv.rule_code === v.ruleReference);
-          if (liveV && typeof liveV.compounding_amount === "number") {
-            return acc + liveV.compounding_amount;
-          }
-          return acc + 25000;
-        }, 0);
-
         // Calculate USP per 100g or 100ml
         let per100gStr = "N/A";
         if (liveResult?.net_quantity_value && liveResult?.mrp && liveResult.net_quantity_value > 0) {
@@ -1028,28 +1015,29 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                     <span>{isCompliant ? "VERIFIED COMPLIANT" : `${violationsCount} STATUTORY INFRACTIONS`}</span>
                   </span>
 
+                  {onNavigateToHealth && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={onNavigateToHealth}
+                      className="text-xs font-medium"
+                      icon={<Heartbeat size={13} weight="bold" />}
+                    >
+                      Check Food Nutrition
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsNoticeModalOpen(true)}
-                    className="text-xs font-medium"
-                    icon={<FileText size={13} weight="bold" />}
-                  >
-                    Draft Notice (LM-INSP-2011)
-                  </Button>
-
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={onOpenReportModal}
+                    onClick={() => window.print()}
                     className="text-xs font-medium"
                   >
-                    Export PDF Docket
+                    Print Summary
                   </Button>
                 </div>
               </div>
 
-              {/* 4 Officer Key Inspection Metrics (Spacious, Clean, Slate) */}
+              {/* 4 Key Consumer Verification Metrics */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
                   <span className="text-2xs font-mono uppercase text-slate-400 block tracking-wider">Compliance Score</span>
@@ -1060,12 +1048,12 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                 </div>
 
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
-                  <span className="text-2xs font-mono uppercase text-slate-400 block tracking-wider">Section 48 Liability</span>
+                  <span className="text-2xs font-mono uppercase text-slate-400 block tracking-wider">Mandatory Declarations</span>
                   <div className="text-2xl font-bold font-heading text-slate-950">
-                    {totalCompounding > 0 ? `₹${totalCompounding.toLocaleString("en-IN")}` : "₹0"}
+                    {currentScan.declarations.filter(d => d.status === 'compliant').length} / {currentScan.declarations.length}
                   </div>
                   <span className="text-2xs text-slate-500 block">
-                    {violationsCount > 0 ? `${violationsCount} actionable infraction counts` : "Zero statutory liability"}
+                    {violationsCount > 0 ? `${violationsCount} non-compliant declarations` : "All statutory declarations verified"}
                   </span>
                 </div>
 
@@ -1091,7 +1079,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               </div>
             </div>
 
-            {/* Main Interactive Officer Workspace */}
+            {/* Main Interactive Consumer Workspace */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
               {/* LEFT COLUMN: Clean Tabbed Working Desk */}
@@ -1181,8 +1169,7 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                           <ViolationCard
                             key={violation.id}
                             violation={violation}
-                            showAction={true}
-                            onFileNotice={() => setIsNoticeModalOpen(true)}
+                            showAction={false}
                           />
                         ))}
                       </div>
@@ -1322,10 +1309,10 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
 
                       <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
                         <span className="font-bold text-slate-900 block font-mono text-2xs">
-                          Section 48 • Compounding of Offences
+                          Consumer Grievance Redressal • Rule 6(1)(n)
                         </span>
                         <p className="text-slate-600 leading-relaxed">
-                          Any offence punishable under Section 36(1) may, either before or after the institution of the prosecution, be compounded by the Director or Controller or such legal metrology officer as may be specially authorized.
+                          Every packaged commodity must declare the name, address, telephone number, and email address of the person or office that can be contacted in case of consumer complaints or grievances.
                         </p>
                       </div>
 
@@ -1402,31 +1389,33 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Officer Action Card */}
+                  {/* Consumer Action Card */}
                   <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
                     <span className="text-xs font-bold font-mono text-slate-900 uppercase tracking-wider block">
-                      Enforcement Toolkit
+                      Consumer Toolkit
                     </span>
 
                     <div className="space-y-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => setIsNoticeModalOpen(true)}
-                        className="w-full text-xs font-semibold justify-center"
-                        icon={<FileText size={14} weight="bold" />}
-                      >
-                        Draft FORM LM-INSP-2011 Notice
-                      </Button>
+                      {onNavigateToHealth && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={onNavigateToHealth}
+                          className="w-full text-xs font-semibold justify-center"
+                          icon={<Heartbeat size={14} weight="bold" />}
+                        >
+                          Check Food Nutrition &amp; Safety
+                        </Button>
+                      )}
 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={onOpenReportModal}
+                        onClick={() => window.print()}
                         className="w-full text-xs font-medium justify-center"
                         icon={<DownloadSimple size={14} />}
                       >
-                        Export Statutory Inspection Certificate
+                        Print Consumer Verification Summary
                       </Button>
                     </div>
                   </div>
@@ -1435,22 +1424,6 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               </div>
 
             </div>
-
-            {/* Notice Preview Modal for FORM LM-INSP-2011 */}
-            <NoticePreviewModal
-              isOpen={isNoticeModalOpen}
-              onClose={() => setIsNoticeModalOpen(false)}
-              scanId={currentScan.id}
-              docketNumber={currentScan.scanCode}
-              productName={currentScan.productName}
-              brand={currentScan.brand}
-              mrp={currentScan.mrp}
-              netQty={currentScan.netQuantity}
-              violationsCount={currentScan.violations.length}
-              compoundingFee={totalCompounding}
-              assignedOfficer="Senior Legal Metrology Inspector"
-              inspectionDate={new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-            />
 
           </div>
         );

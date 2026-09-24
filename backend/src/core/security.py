@@ -133,22 +133,8 @@ def require_consumer_role(
     current_user: CurrentUser = Depends(get_current_user),
 ) -> CurrentUser:
     """
-    Allows all authenticated roles (consumer, officer, admin).
+    Allows authenticated consumer and admin users.
     """
-    return current_user
-
-
-def require_officer_role(
-    current_user: CurrentUser = Depends(get_current_user),
-) -> CurrentUser:
-    """
-    Restricts access strictly to verified enforcement officers and admins.
-    """
-    if current_user.role not in (UserRole.OFFICER, UserRole.ADMIN):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access restricted to Legal Metrology Enforcement Officers.",
-        )
     return current_user
 
 

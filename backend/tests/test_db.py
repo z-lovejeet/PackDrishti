@@ -25,25 +25,21 @@ async def test_user_model_crud(db_session: AsyncSession):
     """
     Verifies User model creation, querying, and role assignment.
     """
-    officer = User(
-        email="officer.patel@delhi.gov.in",
+    consumer = User(
+        email="citizen.patel@example.com",
         password_hash="hashed_secret_123",
-        role=UserRole.OFFICER,
+        role=UserRole.CONSUMER,
         full_name="Rajesh Patel",
-        badge_number="LMO-DL-2024-001",
-        designation="Senior Legal Metrology Inspector",
-        zone="DL-CENTRAL",
-        jurisdiction="Central Delhi Market Division",
     )
-    db_session.add(officer)
+    db_session.add(consumer)
     await db_session.commit()
 
-    result = await db_session.execute(select(User).where(User.email == "officer.patel@delhi.gov.in"))
+    result = await db_session.execute(select(User).where(User.email == "citizen.patel@example.com"))
     fetched = result.scalar_one_or_none()
 
     assert fetched is not None
-    assert fetched.role == UserRole.OFFICER
-    assert fetched.badge_number == "LMO-DL-2024-001"
+    assert fetched.role == UserRole.CONSUMER
+    assert fetched.full_name == "Rajesh Patel"
     assert fetched.is_active is True
     assert fetched.created_at is not None
 
@@ -229,22 +225,20 @@ async def test_compliance_reports_and_health_audits(db_session: AsyncSession):
     """
     Verifies ComplianceReport and HealthAudit models and scan history linking.
     """
-    officer = User(
-        email="inspector.verma@gov.in",
+    citizen = User(
+        email="citizen.verma@example.com",
         password_hash="hash_abc",
-        role=UserRole.OFFICER,
+        role=UserRole.CONSUMER,
         full_name="Anil Verma",
-        badge_number="LMO-MH-2024-112",
-        designation="Inspector",
     )
-    db_session.add(officer)
+    db_session.add(citizen)
     await db_session.flush()
 
     report = ComplianceReport(
         report_number="REP-2026-DL-0012",
-        officer_id=officer.id,
-        report_type="FORM LM-INSP-2011",
-        title="Inspection Certificate for Market Division",
+        officer_id=citizen.id,
+        report_type="Consumer Audit Summary",
+        title="Inspection Summary for Consumer Record",
         district="New Delhi",
         total_products_scanned=5,
         compliant_count=3,
@@ -254,7 +248,7 @@ async def test_compliance_reports_and_health_audits(db_session: AsyncSession):
     db_session.add(report)
 
     health = HealthAudit(
-        user_id=officer.id,
+        user_id=citizen.id,
         product_name="Maggi 2-Minute Noodles",
         brand="Nestle",
         front_image_url="https://example.com/front.jpg",
@@ -268,7 +262,7 @@ async def test_compliance_reports_and_health_audits(db_session: AsyncSession):
     await db_session.flush()
 
     history = ScanHistory(
-        user_id=officer.id,
+        user_id=citizen.id,
         health_audit_id=health.id,
         scan_type="health_check",
     )
