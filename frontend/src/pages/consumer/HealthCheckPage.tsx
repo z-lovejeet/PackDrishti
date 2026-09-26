@@ -273,7 +273,7 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
           priceAnalysis:
             apiData.price_analysis ||
             apiData.dietary_summary ||
-            'Audited against Legal Metrology Rule 6(11) and ICMR-NIN 2024 Dietary Guidelines.',
+            'Evaluated against ICMR-NIN 2024 Dietary Guidelines and consumer value benchmarks.',
           overallRating: apiData.score_band || apiData.overall_rating || 'Consume in Moderation',
           ratingScore: Math.round(apiData.rating_score ?? apiData.health_score ?? 50),
           frontImageUrl:
@@ -1257,7 +1257,7 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
                     MRP &amp; Price Fairness Evaluation
                   </h3>
                   <span className="text-2xs text-neutral-500 font-medium">
-                    Statutory Unit Sale Price (USP) validation under Legal Metrology Rule 6(11) &amp; Rule 6(1)(e)
+                    Unit price per 100g/100ml and consumer value-for-money comparison
                   </span>
                 </div>
               </div>

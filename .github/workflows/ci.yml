@@ -77,7 +77,7 @@ jobs:
           python -c "
           import re, glob
           emoji_pattern = re.compile('[\U00010000-\U0010ffff]|[\u2600-\u27bf]|[\u2300-\u23ff]|[\u2b50-\u2b55]')
-          files = glob.glob('backend/src/**/*.py', recursive=True) + glob.glob('docs/**/*.md', recursive=True)
+          files = glob.glob('backend/src/**/*.py', recursive=True) + glob.glob('ai/src/**/*.py', recursive=True)
           violating_files = [f for f in files if emoji_pattern.findall(open(f, encoding='utf-8', errors='ignore').read())]
           if violating_files:
               print('Zero-Emoji Violation in files:', violating_files)

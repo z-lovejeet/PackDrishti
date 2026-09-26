@@ -92,6 +92,7 @@ class HealthAudit(Base):
     scan_history_entries: Mapped[List["ScanHistory"]] = relationship(
         "ScanHistory",
         back_populates="health_audit",
+        cascade="all, delete-orphan",
         lazy="selectin",
     )
 
@@ -117,20 +118,15 @@ class ScanHistory(Base):
         nullable=True,
         index=True,
     )
-    scan_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        GUID,
-        ForeignKey("product_scans.id", ondelete="SET NULL"),
-        nullable=True,
-        index=True,
-    )
     health_audit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         GUID,
-        ForeignKey("health_audits.id", ondelete="SET NULL"),
+        ForeignKey("health_audits.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
     scan_type: Mapped[str] = mapped_column(
         String(50),
+        default="health_check",
         nullable=False,
     )
     user_role: Mapped[str] = mapped_column(
@@ -145,21 +141,7 @@ class ScanHistory(Base):
     )
 
     # Relationships
-    scan: Mapped[Optional["ProductScan"]] = relationship(
-        "ProductScan",
-    )
     health_audit: Mapped[Optional["HealthAudit"]] = relationship(
         "HealthAudit",
         back_populates="scan_history_entries",
-    )
-
-    __table_args__ = (
-        CheckConstraint(
-            "scan_type IN ('label_compliance', 'health_check')",
-            name="chk_scan_history_type",
-        ),
-        CheckConstraint(
-            "scan_id IS NOT NULL OR health_audit_id IS NOT NULL",
-            name="chk_scan_history_target",
-        ),
     )

@@ -6,8 +6,6 @@ import { useAuthStore } from "../../store/authStore";
 interface NavbarProps {
   onNavigate: (page: string) => void;
   activePage: string;
-  userRole?: string;
-  onToggleUserRole?: () => void;
   onOpenAuthModal?: () => void;
 }
 
@@ -27,20 +25,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
-      {/* Top Government Masthead */}
+      {/* Top Consumer Health Masthead */}
       <div className="bg-slate-950 text-slate-300 text-2xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-slate-900">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
             <span className="font-semibold tracking-wider text-white uppercase">
-              Government of India
+              PackDrashiti
             </span>
             <span className="text-slate-600">•</span>
             <span className="text-slate-300">
-              Ministry of Consumer Affairs, Food &amp; Public Distribution
+              Daily Consumer Food, Ingredient &amp; Nutrition Scanner
             </span>
             <span className="text-slate-600 hidden md:inline">•</span>
             <span className="text-slate-400 hidden md:inline">
-              Department of Consumer Affairs (Legal Metrology Division)
+              ICMR-NIN 2024 &amp; WHO Dietary Benchmarks
             </span>
           </div>
 
@@ -94,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <img
             src="/logo.png"
-            alt="PackDrashiti Official Logo"
+            alt="PackDrashiti Logo"
             className="w-9 h-9 object-contain group-hover:opacity-90 transition-opacity"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = "none";
@@ -111,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
             <span className="text-2xs font-mono uppercase tracking-wider text-slate-600 hidden sm:block">
-              Consumer Packaging &amp; Health Verification
+              Smart Food &amp; Nutrition Scanner
             </span>
           </div>
         </div>
@@ -132,18 +130,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
-            onClick={() => handleNavClick("scanner")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "scanner"
-                ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            Label Compliance Scanner
-          </button>
-
-          <button
-            type="button"
             onClick={() => handleNavClick("health")}
             className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
               activePage === "health"
@@ -151,7 +137,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
             }`}
           >
-            Nutrition &amp; Health Check
+            Nutrition &amp; Health Scanner
           </button>
 
           <button
@@ -176,7 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="hidden xl:flex items-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-800 px-2.5 py-1 rounded-md text-2xs font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                 <span className="font-medium max-w-[140px] truncate">
-                  {user?.fullName || user?.email?.split("@")[0] || "Citizen"}
+                  {user?.fullName || user?.email?.split("@")[0] || "Consumer"}
                 </span>
               </div>
 
@@ -204,14 +190,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Button
             variant="primary"
             size="sm"
-            onClick={() => handleNavClick("scanner")}
+            onClick={() => handleNavClick("health")}
             className={`hidden md:inline-flex text-xs font-semibold px-3 py-1.5 transition-all ${
-              activePage === "scanner"
+              activePage === "health"
                 ? "ring-2 ring-slate-900 ring-offset-2"
                 : ""
             }`}
           >
-            Scan Product
+            Scan Food Label
           </Button>
 
           {/* Mobile Menu Hamburger Button */}
@@ -259,21 +245,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               type="button"
-              onClick={() => handleNavClick("scanner")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "scanner"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>Label Compliance Scanner</span>
-              {activePage === "scanner" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-white" />
-              )}
-            </button>
-
-            <button
-              type="button"
               onClick={() => handleNavClick("health")}
               className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
                 activePage === "health"
@@ -281,7 +252,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : "text-slate-700 hover:bg-slate-100"
               }`}
             >
-              <span>Nutrition &amp; Health Check</span>
+              <span>Nutrition &amp; Health Scanner</span>
               {activePage === "health" && (
                 <span className="w-1.5 h-1.5 rounded-full bg-white" />
               )}
@@ -308,10 +279,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Button
               variant="primary"
               size="sm"
-              onClick={() => handleNavClick("scanner")}
+              onClick={() => handleNavClick("health")}
               className="w-full text-xs font-semibold justify-center py-2"
             >
-              Scan Packaging Label
+              Scan Food Label
             </Button>
 
             {!isAuthenticated ? (
@@ -334,7 +305,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }}
                 className="w-full text-center py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-lg transition-colors"
               >
-                Sign Out ({user?.fullName || "Citizen"})
+                Sign Out ({user?.fullName || "Consumer"})
               </button>
             )}
           </div>

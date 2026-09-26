@@ -28,10 +28,8 @@ def test_api_v1_health_endpoint():
     assert data["app_name"] == "PackDrashiti"
     assert "subsystems" in data
     assert data["subsystems"]["database"] == "supabase_postgresql"
-    assert data["subsystems"]["vectordb"] == "supabase_pgvector"
     assert data["subsystems"]["auth"] == "supabase_auth"
     assert data["subsystems"]["cache"] == "in_memory_async_lru"
-    assert data["subsystems"]["rag_framework"] == "langgraph"
     assert "gemini" in data["subsystems"]["llm_primary_chain"]
     assert "qwen" in data["subsystems"]["llm_secondary_chain"]
 

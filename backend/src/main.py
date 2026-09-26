@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="PackDrashiti: Automated Compliance Verification Platform under Legal Metrology (Packaged Commodities) Rules, 2011.",
+    description="PackDrashiti: AI-Powered Consumer Food Nutrition, Ingredient Safety & Daily Product Scanner.",
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
     docs_url=f"{settings.API_V1_STR}/docs" if settings.DEBUG else None,
     redoc_url=f"{settings.API_V1_STR}/redoc" if settings.DEBUG else None,

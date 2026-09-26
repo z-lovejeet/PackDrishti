@@ -239,8 +239,8 @@ BADGE_EDUCATIONAL_DATABASE = {
         "whoShouldAvoid": "Pregnant women, young children, and individuals suffering from digestive dysbiosis or phenylketonuria (for aspartame).",
     },
     "expired": {
-        "whatIsIt": "A packaged commodity that has exceeded its statutory shelf-life, best-before, or expiry date.",
-        "whyUsed": "Illegal retail offering of unsold inventory in violation of Legal Metrology Rule 18(1) and FSSAI Section 59.",
+        "whatIsIt": "A packaged food product that has exceeded its printed shelf-life, best-before, or expiry date.",
+        "whyUsed": "Unsold inventory kept past its safe consumption date.",
         "healthConsequences": "Severe microbiological contamination from bacterial pathogens (Salmonella, Clostridium, Staphylococcus), enterotoxins, and toxic oxidized rancid fats.",
         "safeDailyLimit": "ZERO. Strictly banned from human consumption.",
         "whoShouldAvoid": "ALL CONSUMERS WITHOUT EXCEPTION. Immediate disposal is mandatory.",
@@ -1038,7 +1038,7 @@ class MultimodalHealthAgent:
             "6. 'mrp': The declared Maximum Retail Price printed on the package with currency (e.g., 'Rs. 30.00' or 'Rs. 20.00').\n"
             "7. 'pricePer100g': Calculate the Unit Sale Price per 100g = (MRP / Net Quantity in grams) * 100 (e.g., 'Rs. 42.86 / 100g').\n"
             "8. 'priceRating': 'Budget' if USP < Rs. 25/100g, 'Fair Market Rate' if between Rs. 25-55/100g, 'Premium' if > Rs. 55/100g.\n"
-            "9. 'priceAnalysis': Plain-language analysis of pricing fairness and statutory compliance under Rule 6(1)(e).\n\n"
+            "9. 'priceAnalysis': Plain-language analysis of pricing fairness and value for money per 100g.\n\n"
             "CRITICAL INSTRUCTIONS FOR DATE & EXPIRY DETECTION (Current Reference Date: September 2026):\n"
             "10. 'mfgDate': Exact date of manufacture printed on the package (e.g., '08/2024', '15/04/2024', 'AUG 2024').\n"
             "11. 'expiryDate': Exact expiry date or calculated best before date (e.g., '12/2024', '15/10/2024'). If packaging states 'Best before 4 months from manufacture' and mfg is 08/2024, expiryDate is '12/2024'.\n"

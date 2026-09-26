@@ -1,10 +1,8 @@
 import React from "react";
-import { ArrowRight, Heartbeat, Scan } from "@phosphor-icons/react";
+import { ArrowRight, Heartbeat, Archive, ShieldCheck, Plant, Sparkle } from "@phosphor-icons/react";
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
-  userRole?: string;
-  onSetUserRole?: (role: any) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -16,61 +14,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Hero Section */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-20">
         
-        {/* Government Authority Masthead Tag with Official Emblem */}
+        {/* Consumer Health Masthead Tag */}
         <div className="flex items-center gap-3.5 mb-8">
           <img
             src="/logo.png"
-            alt="PackDrashiti Official Logo"
+            alt="PackDrashiti Logo"
             className="w-11 h-11 rounded-xl object-contain shadow-xs border border-slate-200 shrink-0"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = "none";
             }}
           />
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 text-2xs font-mono font-medium tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
-            <span>Public Consumer Verification Platform • Department of Consumer Affairs</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+            <span>Daily Consumer Food, Ingredient &amp; Nutrition Intelligence</span>
           </div>
         </div>
 
         {/* Primary Title */}
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 font-heading max-w-3xl leading-[1.12]">
-          Verify packaged goods for fair price, compliance &amp; nutrition.
+          Know what’s really inside your everyday packaged food.
         </h1>
 
         {/* Subtitle */}
         <p className="mt-6 text-lg text-slate-600 max-w-2xl font-normal leading-relaxed">
-          PackDrashiti puts the power of India's Legal Metrology (Packaged Commodities) Rules, 2011 and ICMR-NIN 2024 nutritional benchmarks directly into consumers' hands. Scan any retail packaging in seconds.
+          PackDrashiti helps you make smarter grocery choices in seconds. Snap the front and back of any food packet to uncover hidden sugars, industrial palm oil, synthetic dyes, expiry hazards, and get healthier whole-food alternatives.
         </p>
 
-        {/* Dual Consumer Portals */}
+        {/* Consumer Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           
-          {/* Consumer Portal 1: Label Compliance Scanner */}
-          <div 
-            onClick={() => onNavigate("scanner")}
-            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Scan size={14} weight="bold" />
-                  Package Scanner
-                </span>
-                <span className="text-xs font-mono text-slate-400">01</span>
-              </div>
-              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Label Compliance &amp; Price Check</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Scan front and back packaging labels to verify Maximum Retail Price (MRP), calculate fair Unit Sale Price (USP), check net quantity units, and detect missing manufacturer declarations.
-              </p>
-            </div>
-            
-            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
-              <span>Scan packaging label</span>
-              <ArrowRight size={14} weight="bold" />
-            </div>
-          </div>
-
-          {/* Consumer Portal 2: Health & Nutrition Audit */}
+          {/* Portal 1: Nutrition & Ingredient Scanner */}
           <div 
             onClick={() => onNavigate("health")}
             className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
@@ -79,18 +52,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider flex items-center gap-1.5">
                   <Heartbeat size={14} weight="bold" />
-                  Health &amp; Nutrition
+                  Food &amp; Nutrition Scanner
                 </span>
-                <span className="text-xs font-mono text-slate-400">02</span>
+                <span className="text-xs font-mono text-slate-400">01</span>
               </div>
-              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Nutrition &amp; Ingredient Audit</h2>
+              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Scan Food &amp; Ingredients</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Photograph food nutrition panels to evaluate against ICMR-NIN 2024 safe limits. Identify hidden sugars, excessive sodium, industrial palm oil, harmful azo dyes, and get a clear health score.
+                Photograph front and back packaging panels to evaluate nutrients against ICMR-NIN 2024 safe limits, flag palm oil and synthetic colors, check shelf-life expiry, and calculate real price per 100g.
               </p>
             </div>
             
             <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
-              <span>Check nutrition &amp; food health</span>
+              <span>Launch nutrition scanner</span>
+              <ArrowRight size={14} weight="bold" />
+            </div>
+          </div>
+
+          {/* Portal 2: Consumer Scan History */}
+          <div 
+            onClick={() => onNavigate("history")}
+            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Archive size={14} weight="bold" />
+                  Personal Food Log
+                </span>
+                <span className="text-xs font-mono text-slate-400">02</span>
+              </div>
+              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Past Scans &amp; Comparisons</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Review your previously scanned snacks, beverages, and groceries. Compare 0–100 health scores, track flagged additives, and revisit recommended whole-food swaps anytime.
+              </p>
+            </div>
+            
+            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
+              <span>View scan history</span>
               <ArrowRight size={14} weight="bold" />
             </div>
           </div>
@@ -99,99 +97,99 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       </section>
 
-      {/* Consumer Statutory Baseline Strip */}
+      {/* Consumer Health Highlights Strip */}
       <section className="border-y border-slate-100 bg-slate-50/50">
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">11+</div>
-              <div className="text-xs text-slate-500 mt-1">Mandatory Label Declarations</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">Per g/ml</div>
-              <div className="text-xs text-slate-500 mt-1">Unit Sale Price Transparency</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold font-heading text-slate-950">&lt; 8 sec</div>
-              <div className="text-xs text-slate-500 mt-1">Instant Label Verification</div>
+              <div className="text-3xl font-bold font-heading text-slate-950">0–100</div>
+              <div className="text-xs text-slate-500 mt-1">Nutrition Health Score</div>
             </div>
             <div>
               <div className="text-3xl font-bold font-heading text-slate-950">ICMR 2024</div>
-              <div className="text-xs text-slate-500 mt-1">National Health Benchmarks</div>
+              <div className="text-xs text-slate-500 mt-1">Daily Dietary Benchmarks</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold font-heading text-slate-950">Per 100g</div>
+              <div className="text-xs text-slate-500 mt-1">Nutrient &amp; Price Normalization</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold font-heading text-slate-950">&lt; 8 sec</div>
+              <div className="text-xs text-slate-500 mt-1">Instant Label Decoding</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4-Tier Pipeline Architecture */}
+      {/* 4-Pillar Consumer Nutrition Architecture */}
       <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">Consumer Intelligence Pipeline</div>
+        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">How PackDrashiti Works</div>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-950 font-heading mb-12">
-          Multimodal vision, deterministic rule math, and nutrition intelligence.
+          From tiny back-of-pack print to clear daily health answers.
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 01 / Perception</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Direct Multimodal Vision (VLM)</h3>
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Step 01 / Visual Reading</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Direct Multimodal Label Perception</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Snap high-resolution photos of product packaging from your mobile camera or desktop. Multimodal vision perceives label text, expiry dates, batch details, and mandatory legal declarations.
-            </p>
-            <div className="pt-2">
-              <button 
-                onClick={() => onNavigate("scanner")} 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
-              >
-                Launch package scanner <ArrowRight size={12} weight="bold" />
-              </button>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 02 / Determinism</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Python Rule Engine</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              100% mathematically auditable logic. Verifies Unit Sale Price arithmetic under Rule 6(1)(e), validates net quantity metric units under Rule 13, and ensures no dual-pricing manipulations.
-            </p>
-            <div className="pt-2">
-              <button 
-                onClick={() => onNavigate("scanner")} 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
-              >
-                Verify pricing &amp; units <ArrowRight size={12} weight="bold" />
-              </button>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 03 / Statutory Knowledge</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Legal Metrology Knowledge Base</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Indexed across the complete 2011 Regulations and statutory amendments. Explains your rights as a consumer regarding mandatory declarations, dual MRP bans, and consumer care coordinates.
-            </p>
-            <div className="pt-2">
-              <button 
-                onClick={() => onNavigate("history")} 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
-              >
-                View scan history <ArrowRight size={12} weight="bold" />
-              </button>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Tier 04 / Consumer Health</div>
-            <h3 className="text-base font-bold text-slate-950 font-heading">Nutrition &amp; Dietary Health Engine</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Evaluates ingredient lists and nutrition facts against ICMR-NIN 2024 thresholds. Detects industrial palm olein, excessive sodium, ultra-processed formulation (UPF / NOVA 4), and age suitability.
+              Snap photos of any food packet using your phone camera or upload images from your gallery. Multimodal AI reads the brand, nutrition table, fine-print ingredients, expiry date, and price directly.
             </p>
             <div className="pt-2">
               <button 
                 onClick={() => onNavigate("health")} 
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
               >
-                Run nutrition health check <ArrowRight size={12} weight="bold" />
+                Scan a food packet <ArrowRight size={12} weight="bold" />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Step 02 / Nutrient Normalization</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Per-100g &amp; Per-Serving Math</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Brands often hide high sugar or fat behind tiny 15g or 20g serving sizes. PackDrashiti automatically normalizes every nutrient to a strict 100g/100ml baseline so you see the true concentration.
+            </p>
+            <div className="pt-2">
+              <button 
+                onClick={() => onNavigate("health")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
+              >
+                Check nutrient levels <ArrowRight size={12} weight="bold" />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Step 03 / Ingredient &amp; Dye Audit</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Palm Oil, Hidden Sugar &amp; Additive Detection</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Spots disguised sugars (maltodextrin, liquid glucose), industrial palmolein, MSG/flavour enhancers (INS 621/627/631), and synthetic azo food dyes (Tartrazine, Sunset Yellow, Allura Red).
+            </p>
+            <div className="pt-2">
+              <button 
+                onClick={() => onNavigate("health")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
+              >
+                Audit ingredients <ArrowRight size={12} weight="bold" />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-3">
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Step 04 / Personalized Guidance</div>
+            <h3 className="text-base font-bold text-slate-950 font-heading">Age Suitability &amp; Healthier Swaps</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Highlights who should avoid a product (toddlers, diabetics, hypertensive individuals) and recommends practical, culturally familiar Indian whole-food alternatives.
+            </p>
+            <div className="pt-2">
+              <button 
+                onClick={() => onNavigate("history")} 
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-slate-600 cursor-pointer"
+              >
+                Browse past scans <ArrowRight size={12} weight="bold" />
               </button>
             </div>
           </div>
@@ -199,18 +197,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* Consumer Rights & Packaging Standards Matrix */}
+      {/* Everyday Label Guide Matrix */}
       <section className="border-t border-slate-100 bg-slate-50/40 py-20">
         <div className="max-w-5xl mx-auto px-6">
           
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-10 gap-2">
             <div>
-              <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Consumer Knowledge</div>
+              <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Daily Shopping Guide</div>
               <h3 className="text-xl sm:text-2xl font-bold text-slate-950 font-heading mt-1">
-                Essential Packaging Rules Every Consumer Should Know
+                4 Things to Check on Every Food Packet
               </h3>
             </div>
-            <span className="text-xs text-slate-500 font-mono">Legal Metrology (Packaged Commodities) Rules, 2011</span>
+            <span className="text-xs text-slate-500 font-mono">ICMR-NIN 2024 &amp; WHO Guidelines</span>
           </div>
 
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
@@ -218,41 +216,53 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               
               <div className="p-6 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Rule 6(1) &amp; Rule 10</span>
-                  <span className="text-2xs font-mono text-slate-500">Mandatory Declarations</span>
+                  <span className="text-xs font-mono font-bold text-slate-950 flex items-center gap-1.5">
+                    <Heartbeat size={14} className="text-rose-600" />
+                    Added Sugars &amp; Sweeteners
+                  </span>
+                  <span className="text-2xs font-mono text-slate-500">Max 25g / day</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Every package must clearly declare manufacturer/packer identity with postal PIN, generic commodity name, net quantity, manufacturing date, Maximum Retail Price (MRP), and consumer care grievance coordinates.
+                  Products with more than 10g of added sugar per 100g (or 5g per 100ml for drinks) can spike blood glucose rapidly. Watch out for sucrose, liquid glucose, invert syrup, and maltodextrin.
                 </p>
               </div>
 
               <div className="p-6 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Rule 6(1)(e) Proviso</span>
-                  <span className="text-2xs font-mono text-slate-500">Unit Sale Price (USP)</span>
+                  <span className="text-xs font-mono font-bold text-slate-950 flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-amber-600" />
+                    Edible Vegetable Oil (Palmolein)
+                  </span>
+                  <span className="text-2xs font-mono text-slate-500">Saturated Fat Alert</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Mandatory declaration of Unit Sale Price per gram, millilitre, kilogram, or litre alongside total MRP. This allows consumers to compare actual prices across different pack sizes.
+                  Many chips, biscuits, and instant noodles list &quot;Edible Vegetable Oil (Palmolein)&quot; as a primary ingredient—a cheap, highly saturated fat linked to elevated LDL cholesterol.
                 </p>
               </div>
 
               <div className="p-6 space-y-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Rule 13 &amp; Metric Standards</span>
-                  <span className="text-2xs font-mono text-slate-500">Legal SI Units</span>
+                  <span className="text-xs font-mono font-bold text-slate-950 flex items-center gap-1.5">
+                    <Sparkle size={14} className="text-indigo-600" />
+                    Sodium &amp; Synthetic Azo Dyes
+                  </span>
+                  <span className="text-2xs font-mono text-slate-500">Max 2000mg Sodium</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Standard SI metric units (g, kg, ml, l) must be used. Misleading or prohibited abbreviations such as &quot;gms&quot;, &quot;kgs&quot;, &quot;ltr&quot; are legally non-compliant.
+                  Savoury snacks often exceed 600mg sodium per 100g and use synthetic colors (INS 102, 110, 129) that can trigger hyperactivity in young children and raise blood pressure.
                 </p>
               </div>
 
               <div className="p-6 space-y-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-950">Rule 18(2A)</span>
-                  <span className="text-2xs font-mono text-slate-500">Dual MRP Prohibition</span>
+                  <span className="text-xs font-mono font-bold text-slate-950 flex items-center gap-1.5">
+                    <Plant size={14} className="text-emerald-600" />
+                    Expiry &amp; Real Price per 100g
+                  </span>
+                  <span className="text-2xs font-mono text-slate-500">Freshness &amp; Value</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Strictly prohibits charging higher prices or printing dual MRP stickers for identical pre-packaged goods across different retail establishments or locations.
+                  Always check the manufacturing and expiry dates before consuming, and compare the price per 100g across pack sizes to avoid paying extra for air-filled or shrinkflated packs.
                 </p>
               </div>
 

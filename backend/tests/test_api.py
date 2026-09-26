@@ -4,9 +4,6 @@ Verifies all public & secured API routes, security headers middleware,
 sliding-window rate limiting (HTTP 429), and input sanitization.
 """
 
-import io
-import uuid
-from decimal import Decimal
 import pytest
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +12,6 @@ from backend.src.main import app
 from backend.src.core.database import get_db_session
 from backend.src.core.cache import cache_manager
 from backend.src.core.security import RateLimiter, sanitize_text_input
-from backend.src.models.scan import ProductScan, ComplianceStatus
 
 
 @pytest.mark.asyncio
@@ -48,7 +44,7 @@ async def test_root_and_security_headers():
 @pytest.mark.asyncio
 async def test_health_api_endpoints(db_session: AsyncSession):
     """
-    Test GET /api/v1/health probe and 404 handling on missing audit.
+    Test GET /api/v1/health probe, GET /api/v1/health/history, and 404 handling on missing audit.
     """
     app.dependency_overrides[get_db_session] = lambda: db_session
     transport = ASGITransport(app=app)
@@ -59,32 +55,16 @@ async def test_health_api_endpoints(db_session: AsyncSession):
         assert data["status"] in ("ok", "healthy")
         assert "database" in data["subsystems"]
 
+        # Consumer scan history endpoint
+        res_history = await client.get("/api/v1/health/history")
+        assert res_history.status_code == 200
+        hist_data = res_history.json()
+        assert isinstance(hist_data, list)
+
         # Non-existent audit returns 404
         res_404 = await client.get("/api/v1/health/00000000-0000-0000-0000-000000000099")
         assert res_404.status_code == 404
     app.dependency_overrides.clear()
-
-
-@pytest.mark.asyncio
-async def test_rules_search_endpoint(db_session: AsyncSession):
-    """
-    Test GET /api/v1/rules/search with semantic query and input sanitization.
-    """
-    app.dependency_overrides[get_db_session] = lambda: db_session
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        res = await client.get("/api/v1/rules/search?q=unit+sale+price")
-        assert res.status_code == 200
-        data = res.json()
-        assert "citations" in data
-        assert data["query"] == "unit sale price"
-
-        # Test with malicious script tag in query (must be sanitized)
-        res_xss = await client.get("/api/v1/rules/search?q=<script>alert('xss')</script>dual+mrp")
-        assert res_xss.status_code == 200
-        assert "<script>" not in res_xss.json()["query"]
-    app.dependency_overrides.clear()
-
 
 
 @pytest.mark.asyncio

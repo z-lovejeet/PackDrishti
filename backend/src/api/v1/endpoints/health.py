@@ -1,21 +1,15 @@
-import io
-import json
 import logging
 import uuid
 from decimal import Decimal
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from PIL import Image
+from sqlalchemy import select, delete
 
 from backend.src.core.config import settings
 from backend.src.core.database import get_db_session
 from backend.src.core.security import get_optional_current_user, CurrentUser
 from backend.src.models.health import HealthAudit, ScanHistory
-from backend.src.models.scan import ProductScan
-from backend.src.services.health_engine import ICMRNutritionProfilingEngine, HealthAuditPayload
-from ai.src.rules.nutrition_parser import NutritionFactsParser, NutrientValues
 
 logger = logging.getLogger("packdrashiti.health")
 
@@ -25,8 +19,7 @@ router = APIRouter()
 @router.get("", summary="Subsystem Health Check")
 async def health_check():
     """
-    Returns detailed health and operational readiness status of the PackDrashiti API service,
-    verifying Supabase Database, pgvector, Supabase Auth, in-memory cache, and Parallel Dual-LLM chains.
+    Returns detailed health and operational readiness status of the PackDrashiti API service.
     """
     return {
         "status": "ok",
@@ -35,22 +28,19 @@ async def health_check():
         "environment": settings.APP_ENV,
         "subsystems": {
             "database": "supabase_postgresql",
-            "vectordb": "supabase_pgvector",
             "auth": "supabase_auth",
             "cache": "in_memory_async_lru",
-            "ocr_engine": settings.OCR_ENGINE,
             "llm_primary_chain": " -> ".join(settings.GEMINI_FALLBACK_CHAIN),
             "llm_secondary_chain": " -> ".join(settings.GROQ_FALLBACK_CHAIN),
-            "rag_framework": settings.RAG_FRAMEWORK,
             "storage": settings.STORAGE_PROVIDER,
         },
     }
 
 
-@router.post("/analyze", summary="Analyze Dual-Panel Package for Health & Nutrition Audit")
+@router.post("/analyze", summary="Analyze Packaged Food for Nutrition, Ingredients & Health")
 async def analyze_health_packaging(
     front_image: UploadFile = File(..., description="Front packaging panel image"),
-    back_image: UploadFile = File(..., description="Back packaging panel image with nutrition table"),
+    back_image: UploadFile = File(..., description="Back packaging panel image with nutrition & ingredients"),
     product_name: Optional[str] = Form(None),
     brand: Optional[str] = Form(None),
     serving_size_g: Optional[float] = Form(None),
@@ -61,11 +51,10 @@ async def analyze_health_packaging(
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
-    Ingests front and back panel images of a packaged food commodity, extracts nutrition facts,
-    benchmarks values against ICMR-NIN 2024 and WHO thresholds, determines NOVA processing class,
-    and returns consumer health warnings and healthier substitutes.
+    Ingests front and back panel images of a packaged food product, extracts nutrition facts & ingredients,
+    benchmarks values against ICMR-NIN 2024 and WHO thresholds, audits additives and artificial colors,
+    and returns consumer health scores, warnings, and healthier alternatives.
     """
-    # 1. Validate file formats
     allowed_types = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
     for img, label in [(front_image, "Front image"), (back_image, "Back image")]:
         if img.content_type not in allowed_types:
@@ -83,11 +72,9 @@ async def analyze_health_packaging(
             detail="Uploaded image payload is empty."
         )
 
-    # 2. Direct Multimodal Health Agent Analysis (Direct vision image ingestion)
     from ai.src.pipeline.health_agent import MultimodalHealthAgent
     agent = MultimodalHealthAgent()
 
-    # Sanitize incoming client hints: ignore filenames and generic placeholder strings
     sanitized_product_hint = None
     if product_name and product_name.strip():
         pn = product_name.strip()
@@ -112,9 +99,7 @@ async def analyze_health_packaging(
 
     resolved_product = analysis.commodityName
     resolved_brand = analysis.brandName
-    resolved_serving = 30.0
 
-    # 3. Format badges and dietary advisory for database persistence
     db_badges = [b.model_dump() for b in analysis.badges]
     db_nutrients = [
         {
@@ -149,7 +134,6 @@ async def analyze_health_packaging(
         "expiry_warning": analysis.expiryWarning,
     }
 
-    # 4. Persist to Supabase / Database with graceful fallback
     audit_uuid = uuid.uuid4()
     try:
         effective_role = (user_role or "consumer").lower().strip()
@@ -171,11 +155,9 @@ async def analyze_health_packaging(
         )
         db.add(audit_record)
 
-        # Log into ScanHistory
         history_record = ScanHistory(
             id=uuid.uuid4(),
             user_id=current_user.id if current_user else None,
-            scan_id=None,
             health_audit_id=audit_uuid,
             scan_type="health_check",
             user_role=effective_role,
@@ -192,7 +174,7 @@ async def analyze_health_packaging(
     return {
         "status": "success",
         "data": {
-            "audit_id": str(audit_record.id),
+            "audit_id": str(audit_uuid),
             "product_name": resolved_product,
             "brand": resolved_brand,
             "commodity_name": resolved_product,
@@ -238,6 +220,74 @@ async def analyze_health_packaging(
     }
 
 
+@router.get("/history", summary="Retrieve Consumer Health Scan History")
+async def get_health_scan_history(
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
+):
+    """
+    Retrieves recent consumer product health audits.
+    """
+    items = []
+    try:
+        stmt = select(HealthAudit).order_by(HealthAudit.created_at.desc()).limit(limit)
+        result = await db.execute(stmt)
+        audits = result.scalars().all()
+
+        for a in audits:
+            score_val = float(a.health_score) if a.health_score is not None else 50.0
+            is_exp = bool(getattr(a, "is_expired", False))
+            status_val = "expired" if is_exp else ("healthy" if score_val >= 70 else ("caution" if score_val >= 40 else "unhealthy"))
+
+            items.append({
+                "id": str(a.id),
+                "scan_id": str(a.id),
+                "scan_code": f"HLTH-{str(a.id)[:8].upper()}",
+                "scan_type": "consumer_health",
+                "brand_name": a.brand,
+                "product_name": a.product_name,
+                "category": "Packaged Food",
+                "mrp": 0.0,
+                "mfg_date": getattr(a, "mfg_date", None),
+                "expiry_date": getattr(a, "expiry_date", None),
+                "is_expired": is_exp,
+                "expiry_status": "expired" if is_exp else "valid",
+                "status": status_val,
+                "overall_score": score_val,
+                "created_at": a.created_at.isoformat() if a.created_at else None,
+                "image_url": a.front_image_url,
+                "badges": a.badges_json or [],
+                "nutrients": a.nutrients_json or [],
+                "dietary_advisory": a.dietary_advisory_json or {},
+            })
+    except Exception as db_err:
+        logger.warning("Database query notice in health history: %s", db_err)
+
+    return items
+
+
+@router.delete("/history", summary="Clear All Consumer Health History")
+async def clear_all_health_history(
+    db: AsyncSession = Depends(get_db_session),
+    current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
+):
+    """
+    Clears all consumer health audit and scan history records.
+    """
+    try:
+        await db.execute(delete(ScanHistory))
+        await db.execute(delete(HealthAudit))
+        await db.commit()
+    except Exception as e:
+        logger.warning("Error clearing health history: %s", e)
+        try:
+            await db.rollback()
+        except Exception:
+            pass
+    return {"status": "cleared", "message": "All scan history records have been removed."}
+
+
 @router.get("/{audit_id}", summary="Retrieve Health Audit Record by ID")
 async def get_health_audit_by_id(
     audit_id: str,
@@ -281,42 +331,32 @@ async def get_health_audit_by_id(
     }
 
 
-@router.get("/score/{scan_id}", summary="Retrieve or Compute Health Score for a Scan")
-async def get_health_score_by_scan_id(
-    scan_id: str,
+@router.delete("/{audit_id}", summary="Delete Health Audit Record by ID")
+async def delete_health_audit_by_id(
+    audit_id: str,
     db: AsyncSession = Depends(get_db_session),
     current_user: Optional[CurrentUser] = Depends(get_optional_current_user),
 ):
     """
-    Retrieves health score and nutritional summary for a given scan record.
+    Deletes a specific health audit record and its associated history entry.
     """
     try:
-        scan_uuid = uuid.UUID(scan_id)
+        audit_uuid = uuid.UUID(audit_id)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid scan UUID format."
+            detail="Invalid health audit UUID format."
         )
 
-    result = await db.execute(select(ProductScan).where(ProductScan.id == scan_uuid))
-    scan = result.scalar_one_or_none()
+    try:
+        await db.execute(delete(ScanHistory).where(ScanHistory.health_audit_id == audit_uuid))
+        await db.execute(delete(HealthAudit).where(HealthAudit.id == audit_uuid))
+        await db.commit()
+    except Exception as e:
+        logger.warning("Error deleting health audit %s: %s", audit_id, e)
+        try:
+            await db.rollback()
+        except Exception:
+            pass
 
-    if not scan:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Specified scan record not found."
-        )
-
-    # Return summary score based on product scan compliance score and basic baseline
-    score = float(scan.compliance_score) if scan.compliance_score else 85.0
-    return {
-        "status": "success",
-        "data": {
-            "scan_id": str(scan.id),
-            "product_name": scan.product_name,
-            "brand": scan.brand,
-            "health_score": score,
-            "score_band": "Nutritious Choice" if score >= 80 else ("Consume in Moderation" if score >= 60 else "High Health Concern"),
-            "verified_at": scan.scanned_at.isoformat() if scan.scanned_at else None,
-        }
-    }
+    return {"status": "deleted", "audit_id": audit_id}

@@ -9,13 +9,11 @@ import { PWAInstallPrompt } from "./components/common/PWAInstallPrompt";
 
 // Consumer Pages
 import { LandingPage } from "./pages/consumer/LandingPage";
-import { ScannerPage } from "./pages/consumer/ScannerPage";
 import { HealthCheckPage } from "./pages/consumer/HealthCheckPage";
 import { ProductHistoryPage } from "./pages/consumer/ProductHistoryPage";
 
 const VALID_PAGES = [
   "landing",
-  "scanner",
   "health",
   "history",
 ] as const;
@@ -81,14 +79,14 @@ export function App() {
       {/* Toast Notification Queue */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* Citizen Authentication Modal */}
+      {/* Consumer Authentication Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={(msg) => addToast("success", "Authentication", msg)}
       />
 
-      {/* Persistent Government Shell Navbar */}
+      {/* Persistent Consumer Navbar */}
       <Navbar
         onNavigate={navigateTo}
         activePage={activePage}
@@ -104,21 +102,12 @@ export function App() {
             />
           )}
 
-          {activePage === "scanner" && (
-            <ScannerPage 
-              userRole={userRole}
-              onNavigateToHealth={() => navigateTo("health")}
-              onSaveToast={() => addToast("success", "Saved to Repository", "Product scan record archived in compliance history.")}
-            />
-          )}
-
           {activePage === "health" && (
             <HealthCheckPage userRole={userRole} />
           )}
 
           {activePage === "history" && (
             <ProductHistoryPage
-              onNavigateToScanner={() => navigateTo("scanner")}
               onNavigateToHealth={() => navigateTo("health")}
             />
           )}
@@ -128,7 +117,7 @@ export function App() {
       {/* Progressive Web App Install Banner */}
       <PWAInstallPrompt />
 
-      {/* Statutory Government Footer */}
+      {/* Consumer Platform Footer */}
       <Footer />
     </div>
   );
