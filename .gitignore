@@ -68,3 +68,7 @@ backend/uploads/
 # Local SQLite databases
 *.db
 *.sqlite3
+
+# Documentation specifications
+docs/
+
