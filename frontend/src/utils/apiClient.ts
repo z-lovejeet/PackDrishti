@@ -67,7 +67,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(new Error(errorMessage));
     } else if (error.request) {
       return Promise.reject(
-        new Error('Network error: No response received from PackDrashiti backend.')
+        new Error('Network error: No response received from BiteIQ backend.')
       );
     } else {
       return Promise.reject(error);

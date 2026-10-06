@@ -1,5 +1,5 @@
 /**
- * PackDrashiti Domain Models and Database Schemas.
+ * BiteIQ Domain Models and Database Schemas.
  * Consumer Food Nutrition, Ingredient Safety & Daily Product Scanner.
  */
 
