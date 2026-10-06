@@ -1,4 +1,4 @@
-# PackDrashiti Backend Dependencies (SIH26034)
+# BiteIQ Backend Dependencies
 # Python 3.11+
 
 # Web Framework & ASGI Server

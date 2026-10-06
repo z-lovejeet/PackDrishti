@@ -1,4 +1,4 @@
-# Multi-stage production container for PackDrashiti Backend
+# Multi-stage production container for BiteIQ Backend
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
