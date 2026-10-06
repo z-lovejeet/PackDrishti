@@ -1,5 +1,5 @@
-// PackDrashiti Service Worker - Progressive Web App
-const CACHE_NAME = 'packdrashiti-v1.0.0';
+// BiteIQ Service Worker - Progressive Web App
+const CACHE_NAME = 'biteiq-v1.0.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

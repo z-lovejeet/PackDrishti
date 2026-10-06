@@ -1,10 +1,9 @@
 /*
-PackDrashiti - Service Worker Offline Contingency (SIH26034)
-Provides offline caching for PWA shell assets, fonts, icons, and API fallback records
-to guarantee continuous operation during live jury demonstrations.
+BiteIQ - Service Worker Offline Contingency
+Provides offline caching for PWA shell assets, fonts, icons, and API fallback records.
 */
 
-const CACHE_NAME = 'packdrashiti-v1.0.0';
+const CACHE_NAME = 'biteiq-v1.0.0';
 
 const STATIC_ASSETS = [
   '/',
@@ -64,7 +63,7 @@ self.addEventListener('fetch', (event: any) => {
             return new Response(
               JSON.stringify({
                 status: 'offline_fallback',
-                message: 'PackDrashiti is operating in offline contingency mode.',
+                message: 'BiteIQ is operating in offline contingency mode.',
               }),
               {
                 headers: { 'Content-Type': 'application/json' },
