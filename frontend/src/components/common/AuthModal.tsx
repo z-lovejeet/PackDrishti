@@ -160,7 +160,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                 {mode === 'signin' ? 'Citizen Sign In' : 'Citizen Account Registration'}
               </h3>
               <p className="text-2xs text-neutral-500 font-sans">
-                PackDrashiti Consumer Portal
+                BiteIQ Consumer Portal
               </p>
             </div>
           </div>

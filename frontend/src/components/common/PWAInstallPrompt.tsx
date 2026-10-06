@@ -38,7 +38,7 @@ export const PWAInstallPrompt: React.FC = () => {
     setIsIOS(isIosDevice);
 
     // Check if dismissed recently in localStorage
-    const dismissedUntil = localStorage.getItem('packdrashiti_pwa_dismissed');
+    const dismissedUntil = localStorage.getItem('biteiq_pwa_dismissed');
     if (dismissedUntil && Number(dismissedUntil) > Date.now()) {
       return;
     }
@@ -80,7 +80,7 @@ export const PWAInstallPrompt: React.FC = () => {
   const handleDismiss = () => {
     setIsVisible(false);
     // Suppress prompt for 7 days
-    localStorage.setItem('packdrashiti_pwa_dismissed', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
+    localStorage.setItem('biteiq_pwa_dismissed', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
   };
 
   if (isStandalone || !isVisible) {
@@ -101,7 +101,7 @@ export const PWAInstallPrompt: React.FC = () => {
             </div>
             <div>
               <h4 className="text-sm font-bold font-heading text-white">
-                Install PackDrashiti App
+                Install BiteIQ App
               </h4>
               <p className="text-2xs text-slate-300">
                 Fast mobile scanning, camera access, and offline health checks
