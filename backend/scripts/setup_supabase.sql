@@ -1,5 +1,5 @@
 -- ============================================================================
--- PACKDRISHTI - SUPABASE POSTGRESQL 16 SETUP SCRIPT
+-- BITEIQ - SUPABASE POSTGRESQL 16 SETUP SCRIPT
 -- Consumer Food Nutrition, Ingredient Safety & Daily Product Scanner
 -- ============================================================================
 
