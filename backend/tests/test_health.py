@@ -25,7 +25,7 @@ def test_api_v1_health_endpoint():
     data = response.json()
     assert data["status"] == "ok"
     assert data["version"] == "0.1.0"
-    assert data["app_name"] == "PackDrashiti"
+    assert data["app_name"] == "BiteIQ"
     assert "subsystems" in data
     assert data["subsystems"]["database"] == "supabase_postgresql"
     assert data["subsystems"]["auth"] == "supabase_auth"
@@ -42,7 +42,7 @@ def test_root_index_endpoint():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "PackDrashiti"
+    assert data["name"] == "BiteIQ"
     assert data["version"] == "0.1.0"
     assert data["status"] == "operational"
 

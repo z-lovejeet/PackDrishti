@@ -1,5 +1,5 @@
 """
-PackDrashiti - Comprehensive REST Endpoint & Security Hardening Test Suite
+BiteIQ - Comprehensive REST Endpoint & Security Hardening Test Suite
 Verifies all public & secured API routes, security headers middleware,
 sliding-window rate limiting (HTTP 429), and input sanitization.
 """
@@ -38,7 +38,7 @@ async def test_root_and_security_headers():
         # Root index
         res_root = await client.get("/")
         assert res_root.status_code == 200
-        assert res_root.json()["name"] == "PackDrashiti"
+        assert res_root.json()["name"] == "BiteIQ"
 
 
 @pytest.mark.asyncio
