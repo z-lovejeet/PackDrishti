@@ -1,11 +1,11 @@
 /**
  * End-to-End Test Suite: Consumer Food & Nutrition Scanner Flow
- * System: PackDrashiti Consumer Health & Ingredient Intelligence
+ * System: BiteIQ Consumer Health & Nutrition Intelligence
  */
 
 import { test, expect } from '@playwright/test';
 
-test.describe('PackDrashiti Consumer Nutrition Scanner Flow', () => {
+test.describe('BiteIQ Consumer Nutrition Scanner Flow', () => {
   const BASE_URL = 'http://localhost:5173/';
 
   test('should render consumer landing page and navigate to nutrition scanner', async ({ page }) => {
