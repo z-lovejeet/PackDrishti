@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """
-    PackDrashiti Application Configuration Settings.
+    BiteIQ Application Configuration Settings.
     Type-safe environment parsing backed by Pydantic v2 Settings.
     """
 
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     )
 
     # Application Runtime Settings
-    APP_NAME: str = "PackDrashiti"
+    APP_NAME: str = "BiteIQ"
     APP_ENV: str = "development"
     DEBUG: bool = True
     PORT: int = 8000
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     SUPABASE_SERVICE_ROLE_KEY: str = ""
     SUPABASE_JWT_SECRET: str = "4a2e8c1f9b3d7a6e508192c73e4b5a6f80192837465019283746501928374650"
 
-    DATABASE_URL: str = "sqlite+aiosqlite:///./packdrashiti.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./biteiq.db"
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
     DATABASE_POOL_TIMEOUT: int = 30

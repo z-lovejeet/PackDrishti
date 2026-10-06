@@ -5,7 +5,7 @@ from backend.src.core.config import settings
 from backend.src.api.v1.router import api_router
 import logging
 
-logger = logging.getLogger("packdrashiti")
+logger = logging.getLogger("biteiq")
 
 
 @asynccontextmanager
@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="PackDrashiti: AI-Powered Consumer Food Nutrition, Ingredient Safety & Daily Product Scanner.",
+    description="BiteIQ: AI-Powered Nutrition Engine, Macro Tracking, Plate Vision & Food Scanner.",
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
     docs_url=f"{settings.API_V1_STR}/docs" if settings.DEBUG else None,
     redoc_url=f"{settings.API_V1_STR}/redoc" if settings.DEBUG else None,
