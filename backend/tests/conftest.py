@@ -11,6 +11,8 @@ from backend.src.models.base import Base
 from backend.src.core.config import settings
 from backend.src.core.cache import cache_manager
 
+from sqlalchemy import event
+
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 test_engine = create_async_engine(
@@ -18,6 +20,13 @@ test_engine = create_async_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
+
+
+@event.listens_for(test_engine.sync_engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 TestingSessionLocal = async_sessionmaker(
     bind=test_engine,
