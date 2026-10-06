@@ -1,7 +1,7 @@
 {
-  "name": "PackDrashiti - Food & Nutrition Scanner",
-  "short_name": "PackDrashiti",
-  "description": "AI-Powered Daily Consumer Food Nutrition, Ingredient Safety & Product Scanner",
+  "name": "BiteIQ - Smart AI Nutrition & Macro Tracker",
+  "short_name": "BiteIQ",
+  "description": "AI-Powered Nutrition Engine, Macro Tracker, Plate Vision & Food Scanner",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
