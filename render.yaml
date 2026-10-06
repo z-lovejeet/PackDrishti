@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: packdrashiti-backend
+    name: biteiq-backend
     env: python
     region: singapore
     plan: free
@@ -17,7 +17,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: CORS_ORIGINS
-        value: http://localhost:5173,https://packdrashiti.vercel.app
+        value: http://localhost:5173,https://biteiq.vercel.app
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
