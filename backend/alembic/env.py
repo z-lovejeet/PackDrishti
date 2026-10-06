@@ -22,14 +22,20 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# Use DATABASE_URL from settings
-db_url = settings.DATABASE_URL
-if db_url.startswith("postgresql://"):
-    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-elif db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
-
-config.set_main_option("sqlalchemy.url", db_url)
+# Use DATABASE_URL from settings unless overridden in config
+custom_url = config.get_main_option("sqlalchemy.url")
+if not custom_url or "driver://user:pass" in custom_url:
+    db_url = settings.DATABASE_URL
+    if db_url.startswith("postgresql://"):
+        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    elif db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    config.set_main_option("sqlalchemy.url", db_url)
+else:
+    db_url = custom_url
+    if db_url.startswith("sqlite:///") and not db_url.startswith("sqlite+aiosqlite:///"):
+        db_url = db_url.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
+    config.set_main_option("sqlalchemy.url", db_url)
 
 
 def run_migrations_offline() -> None:
