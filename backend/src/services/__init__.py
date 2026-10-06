@@ -1,1 +1,1 @@
-"""PackDrashiti Domain Services Package."""
+"""BiteIQ Domain Services Package."""

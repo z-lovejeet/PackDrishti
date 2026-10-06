@@ -147,7 +147,7 @@ INDIAN_HEALTHIER_ALTERNATIVES_MAP = {
 class ICMRNutritionProfilingEngine:
     """
     ICMR-NIN 2024 and WHO SEAR Nutritional Profiling & Health Scoring Engine.
-    Implements SPEC-PACKDRASHITI-NUTRI-2024.
+    Implements SPEC-BITEIQ-NUTRI-2024.
     """
 
     ICMR_THRESHOLDS = {
