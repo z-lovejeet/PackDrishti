@@ -1,5 +1,5 @@
 /**
- * PackDrashiti (SIH26034) Image Processing Utilities
+ * BiteIQ Image Processing Utilities
  * Enforces client-side downsampling to keep packaging scans < 2MB while preserving OCR clarity.
  */
 
