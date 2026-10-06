@@ -11,7 +11,7 @@ from backend.src.core.database import get_db_session
 from backend.src.core.security import get_optional_current_user, CurrentUser
 from backend.src.models.health import HealthAudit, ScanHistory
 
-logger = logging.getLogger("packdrashiti.health")
+logger = logging.getLogger("biteiq.health")
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ router = APIRouter()
 @router.get("", summary="Subsystem Health Check")
 async def health_check():
     """
-    Returns detailed health and operational readiness status of the PackDrashiti API service.
+    Returns detailed health and operational readiness status of the BiteIQ API service.
     """
     return {
         "status": "ok",

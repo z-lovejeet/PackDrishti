@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from backend.src.core.config import settings
 
-logger = logging.getLogger("packdrashiti.database")
+logger = logging.getLogger("biteiq.database")
 
 
 import socket
@@ -18,7 +18,7 @@ def get_async_database_url(url: str) -> str:
     if not url or url.startswith("sqlite"):
         if url and url.startswith("sqlite:///") and not url.startswith("sqlite+aiosqlite:///"):
             return url.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
-        return url or "sqlite+aiosqlite:///./packdrashiti.db"
+        return url or "sqlite+aiosqlite:///./biteiq.db"
 
     # Validate remote host DNS resolution
     try:
@@ -31,11 +31,11 @@ def get_async_database_url(url: str) -> str:
     except Exception as dns_err:
         logger.warning(
             "Configured database host '%s' failed DNS validation (%s). "
-            "Falling back automatically to local SQLite database: sqlite+aiosqlite:///./packdrashiti.db",
+            "Falling back automatically to local SQLite database: sqlite+aiosqlite:///./biteiq.db",
             host if 'host' in locals() else 'unknown',
             dns_err,
         )
-        return "sqlite+aiosqlite:///./packdrashiti.db"
+        return "sqlite+aiosqlite:///./biteiq.db"
 
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
