@@ -14,13 +14,13 @@ export const Footer: React.FC = () => {
             <div className="flex items-start gap-3.5">
               <img
                 src="/logo.png"
-                alt="PackDrashiti Logo"
+                alt="BiteIQ Logo"
                 className="w-10 h-10 rounded-lg object-contain shrink-0 shadow-2xs border border-slate-800"
               />
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-heading font-bold text-white text-base tracking-tight">
-                    PackDrashiti
+                    BiteIQ
                   </span>
                   <span className="text-2xs uppercase font-mono font-semibold tracking-wider px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
                     Consumer Health AI
@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-4 lg:pl-6 lg:border-l lg:border-slate-900">
             <div>
               <span className="text-2xs uppercase font-semibold tracking-wider text-slate-400 block mb-1">
-                What PackDrashiti Checks For You
+                What BiteIQ Checks For You
               </span>
               <h4 className="text-sm font-bold text-white">
                 Transparent Food &amp; Ingredient Intelligence
@@ -99,7 +99,7 @@ export const Footer: React.FC = () => {
             Built to empower everyday consumers with instant, science-backed nutrition and ingredient clarity.
           </p>
           <p className="text-slate-400 sm:text-right shrink-0">
-            PackDrashiti • Consumer Nutrition &amp; Ingredient Intelligence
+            BiteIQ • Consumer Nutrition &amp; Ingredient Intelligence
           </p>
         </div>
 

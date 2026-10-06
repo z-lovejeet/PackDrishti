@@ -30,11 +30,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
             <span className="font-semibold tracking-wider text-white uppercase">
-              PackDrashiti
+              BiteIQ
             </span>
             <span className="text-slate-600">•</span>
             <span className="text-slate-300">
-              Daily Consumer Food, Ingredient &amp; Nutrition Scanner
+              AI Nutrition, Macro Tracker &amp; Food Scanner
             </span>
             <span className="text-slate-600 hidden md:inline">•</span>
             <span className="text-slate-400 hidden md:inline">
@@ -88,11 +88,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               handleNavClick("landing");
             }
           }}
-          aria-label="PackDrashiti Home"
+          aria-label="BiteIQ Home"
         >
           <img
             src="/logo.png"
-            alt="PackDrashiti Logo"
+            alt="BiteIQ Logo"
             className="w-9 h-9 object-contain group-hover:opacity-90 transition-opacity"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = "none";
@@ -102,14 +102,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex flex-col">
             <div className="flex items-baseline gap-1.5">
               <span className="text-lg font-bold font-heading tracking-tight text-slate-950">
-                PackDrashiti
+                BiteIQ
               </span>
               <span className="text-xs text-slate-500 font-hindi font-medium">
-                पैकद्रष्टि
+                बाइट IQ
               </span>
             </div>
             <span className="text-2xs font-mono uppercase tracking-wider text-slate-600 hidden sm:block">
-              Smart Food &amp; Nutrition Scanner
+              AI Nutrition &amp; Macro Intelligence
             </span>
           </div>
         </div>
