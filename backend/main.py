@@ -1,5 +1,5 @@
 """
-PackDrashiti Backend Entrypoint.
+BiteIQ Backend Entrypoint.
 Delegates to backend.src.main:app.
 """
 from backend.src.main import app

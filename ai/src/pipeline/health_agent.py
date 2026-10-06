@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field, model_validator
 from backend.src.core.config import settings
 
-logger = logging.getLogger("packdrashiti.health_agent")
+logger = logging.getLogger("biteiq.health_agent")
 
 
 class HealthBadge(BaseModel):
