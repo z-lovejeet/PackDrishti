@@ -1,9 +1,11 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import DateTime
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy import DateTime, JSON
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.types import TypeDecorator, CHAR
+
+JSON_TYPE = JSON().with_variant(JSONB(), "postgresql")
 
 
 class GUID(TypeDecorator):
