@@ -1,4 +1,4 @@
-name: PackDrashiti CI
+name: BiteIQ CI
 
 on:
   push:
@@ -106,7 +106,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false
-          tags: packdrashiti-backend:test
+          tags: biteiq-backend:test
 
       - name: Build Frontend Docker Image
         uses: docker/build-push-action@v5
@@ -114,4 +114,4 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: false
-          tags: packdrashiti-frontend:test
+          tags: biteiq-frontend:test
