@@ -18,7 +18,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="flex items-center gap-3.5 mb-8">
           <img
             src="/logo.png"
-            alt="PackDrashiti Logo"
+            alt="BiteIQ Logo"
             className="w-11 h-11 rounded-xl object-contain shadow-xs border border-slate-200 shrink-0"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = "none";
@@ -37,7 +37,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* Subtitle */}
         <p className="mt-6 text-lg text-slate-600 max-w-2xl font-normal leading-relaxed">
-          PackDrashiti helps you make smarter grocery choices in seconds. Snap the front and back of any food packet to uncover hidden sugars, industrial palm oil, synthetic dyes, expiry hazards, and get healthier whole-food alternatives.
+          BiteIQ helps you make smarter grocery choices in seconds. Snap the front and back of any food packet to uncover hidden sugars, industrial palm oil, synthetic dyes, expiry hazards, and get healthier whole-food alternatives.
         </p>
 
         {/* Consumer Action Cards */}
@@ -123,7 +123,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* 4-Pillar Consumer Nutrition Architecture */}
       <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">How PackDrashiti Works</div>
+        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">How BiteIQ Works</div>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-950 font-heading mb-12">
           From tiny back-of-pack print to clear daily health answers.
         </h2>
@@ -150,7 +150,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">Step 02 / Nutrient Normalization</div>
             <h3 className="text-base font-bold text-slate-950 font-heading">Per-100g &amp; Per-Serving Math</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Brands often hide high sugar or fat behind tiny 15g or 20g serving sizes. PackDrashiti automatically normalizes every nutrient to a strict 100g/100ml baseline so you see the true concentration.
+              Brands often hide high sugar or fat behind tiny 15g or 20g serving sizes. BiteIQ automatically normalizes every nutrient to a strict 100g/100ml baseline so you see the true concentration.
             </p>
             <div className="pt-2">
               <button 

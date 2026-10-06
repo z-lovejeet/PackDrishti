@@ -19,10 +19,10 @@ interface AuthState {
 }
 
 const STORAGE_KEYS = {
-  TOKEN: 'packdrashiti_access_token',
-  REFRESH_TOKEN: 'packdrashiti_refresh_token',
-  USER: 'packdrashiti_user_session',
-  ROLE: 'packdrashiti_active_role',
+  TOKEN: 'biteiq_access_token',
+  REFRESH_TOKEN: 'biteiq_refresh_token',
+  USER: 'biteiq_user_session',
+  ROLE: 'biteiq_active_role',
 };
 
 const getStoredItem = (key: string): string | null => {
