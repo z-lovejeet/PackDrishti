@@ -1,6 +1,6 @@
 <div align="center">
 
-# PackDrishti (PackDrashiti) — पैकदृष्टि
+# BiteIQ
 
 ### AI-Powered Consumer Food Nutrition, Ingredient Safety & Daily Product Scanner
 
@@ -8,13 +8,13 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Google_Gemini-Multimodal_VLM-4285F4?logo=google&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_16-3FCF8E?logo=supabase&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-26%2F26_Passed-27AE60?logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-38%2F38_Passed-27AE60?logo=pytest&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
 
 **Dietary Benchmarks**: ICMR-NIN 2024 Dietary Guidelines for Indians · WHO Safe Intake Thresholds
 
-[Live Demo (Frontend)](https://packdrashiti.vercel.app) · [API Endpoint](https://packdrashiti-backend.onrender.com/health) · [API Docs](https://packdrashiti-backend.onrender.com/api/v1/docs)
+[Live Demo (Frontend)](https://biteiq.vercel.app) · [API Endpoint](https://biteiq-backend.onrender.com/health) · [API Docs](https://biteiq-backend.onrender.com/api/v1/docs)
 
 ---
 
@@ -58,7 +58,7 @@ Everyday shoppers face confusing, fine-print food labels when buying packaged sn
 
 ## Our Solution
 
-**PackDrishti** is a daily-life consumer application that turns any smartphone or browser into an instant food scientist and nutritionist. Simply **photograph the front and back of any packaged food product** to receive an objective **0–100 Health Score**, per-100g nutrient normalization, ingredient & additive hazard alerts, expiry verification, unit price per 100g, and culturally familiar whole-food swaps.
+**BiteIQ** is a daily-life consumer application that turns any smartphone or browser into an instant food scientist and nutritionist. Simply **photograph the front and back of any packaged food product** to receive an objective **0–100 Health Score**, per-100g nutrient normalization, ingredient & additive hazard alerts, expiry verification, unit price per 100g, and culturally familiar whole-food swaps.
 
 ```
                     ┌─────────────────────────┐
@@ -236,7 +236,7 @@ Positive Credits (applied when not ultra-processed):
 
 | Page | Route | Description |
 |:---|:---|:---|
-| **Overview** | `/#landing` | Consumer home page highlighting what PackDrishti checks on every food packet |
+| **Overview** | `/#landing` | Consumer home page highlighting what BiteIQ checks on every food packet |
 | **Nutrition & Health Scanner** | `/#health` | Dual-panel image uploader & camera scanner delivering 0–100 health scores, nutrient bars, additive/color audits, expiry alerts, price per 100g, and healthier swaps |
 | **Scan History** | `/#history` | Personal food log to search, filter (`Nutritious 70+` vs `Caution / Concern`), and manage past scans |
 
@@ -245,7 +245,7 @@ Positive Credits (applied when not ultra-processed):
 ## Repository Structure
 
 ```text
-PackDrishti/
+BiteIQ/
 ├── frontend/                          # React 19 Consumer Web App (Vercel)
 │   ├── src/
 │   │   ├── App.tsx                    # Consumer router (landing, health, history)
@@ -300,8 +300,8 @@ PackDrishti/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/z-lovejeet/PackDrishti.git
-cd PackDrishti
+git clone https://github.com/z-lovejeet/PackDrishti.git biteiq
+cd biteiq
 ```
 
 ### 2. Run the Frontend
