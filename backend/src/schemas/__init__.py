@@ -28,6 +28,14 @@ from backend.src.schemas.insight import (
     InsightResponse,
     WholeFoodSwapItem,
 )
+from backend.src.schemas.meals import (
+    DetectedFoodItem,
+    PlateSummary,
+    PlateAnalysisResult,
+    ConfirmedPlateItem,
+    ConfirmPlateLogRequest,
+    ConfirmPlateLogResponse,
+)
 
 __all__ = [
     "ConditionItem",
@@ -48,4 +56,10 @@ __all__ = [
     "FoodSearchResponse",
     "InsightResponse",
     "WholeFoodSwapItem",
+    "DetectedFoodItem",
+    "PlateSummary",
+    "PlateAnalysisResult",
+    "ConfirmedPlateItem",
+    "ConfirmPlateLogRequest",
+    "ConfirmPlateLogResponse",
 ]
