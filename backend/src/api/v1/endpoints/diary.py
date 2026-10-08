@@ -575,3 +575,9 @@ async def log_water_consumption(
         "diary_date": str(diary.diary_date),
         "total_water_ml": float(diary.total_water_ml),
     }
+
+
+# Public utility exports for related endpoints (e.g., meals.py, packaged.py)
+recalculate_diary_totals = _recalculate_diary_totals
+resolve_daily_budget = _resolve_daily_budget
+
