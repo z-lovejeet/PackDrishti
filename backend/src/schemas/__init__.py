@@ -36,6 +36,20 @@ from backend.src.schemas.meals import (
     ConfirmPlateLogRequest,
     ConfirmPlateLogResponse,
 )
+from backend.src.schemas.packaged import (
+    NutrientItemSchema,
+    BadgeItemSchema,
+    AdditiveAuditItemSchema,
+    NutrientsPer100gSchema,
+    ContraindicationAlertSchema,
+    ClinicalAdvisorySchema,
+    PackagedAuditData,
+    PackagedAuditResponse,
+    LogPackagedToDiaryRequest,
+    LogPackagedToDiaryResponse,
+    PackagedAuditSummaryResponse,
+    PackagedHistoryListResponse,
+)
 
 __all__ = [
     "ConditionItem",
@@ -62,4 +76,16 @@ __all__ = [
     "ConfirmedPlateItem",
     "ConfirmPlateLogRequest",
     "ConfirmPlateLogResponse",
+    "NutrientItemSchema",
+    "BadgeItemSchema",
+    "AdditiveAuditItemSchema",
+    "NutrientsPer100gSchema",
+    "ContraindicationAlertSchema",
+    "ClinicalAdvisorySchema",
+    "PackagedAuditData",
+    "PackagedAuditResponse",
+    "LogPackagedToDiaryRequest",
+    "LogPackagedToDiaryResponse",
+    "PackagedAuditSummaryResponse",
+    "PackagedHistoryListResponse",
 ]
