@@ -958,6 +958,68 @@ class MultimodalHealthAnalysis(BaseModel):
 
         return data
 
+    def to_nutrients_per_100g_dict(self) -> Dict[str, float]:
+        """
+        Extracts normalized per-100g macronutrients and micronutrients into a flat dictionary
+        matching NutrientsPer100gSchema (energy_kcal, protein_g, total_carbs_g, total_sugars_g,
+        added_sugars_g, total_fat_g, saturated_fat_g, trans_fat_g, sodium_mg, dietary_fiber_g).
+        """
+        result = {
+            "energy_kcal": 0.0,
+            "protein_g": 0.0,
+            "total_carbs_g": 0.0,
+            "total_sugars_g": 0.0,
+            "added_sugars_g": 0.0,
+            "total_fat_g": 0.0,
+            "saturated_fat_g": 0.0,
+            "trans_fat_g": 0.0,
+            "sodium_mg": 0.0,
+            "dietary_fiber_g": 0.0,
+        }
+
+        for n in self.nutrients:
+            name_lower = (n.name or "").lower().strip()
+            val = float(n.valuePer100g or 0.0)
+
+            if "energy" in name_lower or "calorie" in name_lower or "kcal" in name_lower:
+                if result["energy_kcal"] == 0.0:
+                    result["energy_kcal"] = round(val, 1)
+            elif "protein" in name_lower:
+                if result["protein_g"] == 0.0:
+                    result["protein_g"] = round(val, 2)
+            elif "added sugar" in name_lower:
+                result["added_sugars_g"] = round(val, 2)
+            elif "total sugar" in name_lower or ("sugar" in name_lower and "added" not in name_lower):
+                if result["total_sugars_g"] == 0.0:
+                    result["total_sugars_g"] = round(val, 2)
+            elif "carbohydrate" in name_lower or "carb" in name_lower:
+                if result["total_carbs_g"] == 0.0:
+                    result["total_carbs_g"] = round(val, 2)
+            elif "saturated" in name_lower:
+                result["saturated_fat_g"] = round(val, 2)
+            elif "trans" in name_lower:
+                result["trans_fat_g"] = round(val, 2)
+            elif "total fat" in name_lower or (name_lower == "fat" or "edible fat" in name_lower):
+                if result["total_fat_g"] == 0.0:
+                    result["total_fat_g"] = round(val, 2)
+            elif "sodium" in name_lower:
+                if (n.unit or "").lower() == "g" and val < 50.0:
+                    val = val * 1000.0
+                result["sodium_mg"] = round(val, 1)
+            elif "fiber" in name_lower or "fibre" in name_lower:
+                result["dietary_fiber_g"] = round(val, 2)
+
+        if result["total_sugars_g"] == 0.0 and result["added_sugars_g"] > 0.0:
+            result["total_sugars_g"] = result["added_sugars_g"]
+
+        if result["energy_kcal"] == 0.0 and (
+            result["protein_g"] > 0 or result["total_carbs_g"] > 0 or result["total_fat_g"] > 0
+        ):
+            calc_energy = (4.0 * result["protein_g"]) + (4.0 * result["total_carbs_g"]) + (9.0 * result["total_fat_g"])
+            result["energy_kcal"] = round(calc_energy, 1)
+
+        return result
+
 
 class MultimodalHealthAgent:
     """
