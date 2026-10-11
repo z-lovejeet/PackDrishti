@@ -32,6 +32,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 COPY backend /app/backend
 COPY ai /app/ai
 
+RUN groupadd -g 10001 biteiq && \
+    useradd -u 10001 -g biteiq -s /bin/sh -d /app biteiq && \
+    chown -R biteiq:biteiq /app /root/.local
+
+USER biteiq
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
