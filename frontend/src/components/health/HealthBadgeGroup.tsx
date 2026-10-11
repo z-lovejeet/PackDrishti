@@ -11,7 +11,6 @@ import {
   Plant,
   X,
   BookOpen,
-  UsersThree,
   Heartbeat
 } from '@phosphor-icons/react';
 import { HealthBadge } from '../../types';
@@ -239,6 +238,18 @@ export const HealthBadgeGroup: React.FC<HealthBadgeGroupProps> = ({ badges, clas
                     {whatIsIt}
                   </p>
                 </div>
+
+                {/* Educational Block: Why Manufacturers Add It */}
+                {whyUsed && (
+                  <div className="space-y-1">
+                    <span className="text-2xs font-bold uppercase tracking-wider text-slate-500 font-mono block">
+                      Why It Is Used
+                    </span>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      {whyUsed}
+                    </p>
+                  </div>
+                )}
 
                 {/* Educational Block 2: Clinical / Body Impact */}
                 <div className="space-y-1 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
