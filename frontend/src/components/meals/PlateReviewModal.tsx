@@ -244,11 +244,6 @@ export const PlateReviewModal: React.FC<PlateReviewModalProps> = ({
                     <span className="font-heading font-bold text-sm text-slate-900">
                       {item.name}
                     </span>
-                    {item.hindiName && (
-                      <span className="text-2xs text-slate-500 font-hindi">
-                        {item.hindiName}
-                      </span>
-                    )}
                     <span className="text-2xs font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600">
                       {item.category}
                     </span>

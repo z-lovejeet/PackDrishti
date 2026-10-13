@@ -42,7 +42,6 @@ interface FoodSearchResult {
 const COMMON_INDIAN_STAPLES: FoodSearchResult[] = [
   {
     foodName: "Toor Dal Tadka",
-    regionalName: "तूर दाल तड़का",
     category: "Lentil/Dal",
     servingUnit: "katori",
     servingWeightG: 150,
@@ -56,7 +55,6 @@ const COMMON_INDIAN_STAPLES: FoodSearchResult[] = [
   },
   {
     foodName: "Whole Wheat Roti",
-    regionalName: "रोटी / चपाती",
     category: "Bread",
     servingUnit: "roti",
     servingWeightG: 40,
@@ -70,7 +68,6 @@ const COMMON_INDIAN_STAPLES: FoodSearchResult[] = [
   },
   {
     foodName: "Paneer Bhurji",
-    regionalName: "पनीर भुर्जी",
     category: "Dairy/Curry",
     servingUnit: "serving",
     servingWeightG: 120,
@@ -84,7 +81,6 @@ const COMMON_INDIAN_STAPLES: FoodSearchResult[] = [
   },
   {
     foodName: "Steamed Basmati Rice",
-    regionalName: "सादे चावल",
     category: "Grain",
     servingUnit: "katori",
     servingWeightG: 150,
@@ -98,7 +94,6 @@ const COMMON_INDIAN_STAPLES: FoodSearchResult[] = [
   },
   {
     foodName: "Mixed Vegetable Sabzi",
-    regionalName: "मिक्स वेज",
     category: "Curry",
     servingUnit: "katori",
     servingWeightG: 150,
@@ -112,7 +107,6 @@ const COMMON_INDIAN_STAPLES: FoodSearchResult[] = [
   },
   {
     foodName: "Boiled Whole Egg",
-    regionalName: "उबला अंडा",
     category: "Egg/Protein",
     servingUnit: "piece",
     servingWeightG: 50,
@@ -313,7 +307,6 @@ export const FoodLoggerModal: React.FC<FoodLoggerModalProps> = ({
         detectedItems: (data.items || []).map((it: any) => ({
           id: it.id || `item-${Math.random()}`,
           name: it.name || it.food_name,
-          hindiName: it.hindi_name,
           category: it.category || "Meal",
           estimatedGrams: Number(it.estimated_grams) || 100,
           confidenceScore: Number(it.confidence_score) || 0.85,

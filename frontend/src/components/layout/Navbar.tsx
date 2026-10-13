@@ -22,7 +22,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { diary } = useDiaryStore();
   const { budget } = useProfileStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const [language, setLanguage] = useState<"en" | "hi">("en");
 
   const handleNavClick = (page: string) => {
     onNavigate(page);
@@ -52,33 +51,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 text-2xs">
-            <span className="text-slate-500 hidden sm:inline">Language:</span>
-            <div className="flex items-center gap-1 font-medium">
-              <button
-                type="button"
-                onClick={() => setLanguage("en")}
-                className={`transition-colors cursor-pointer px-1.5 py-0.5 rounded text-2xs ${
-                  language === "en"
-                    ? "text-white font-semibold bg-slate-800"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                English
-              </button>
-              <span className="text-slate-700">|</span>
-              <button
-                type="button"
-                onClick={() => setLanguage("hi")}
-                className={`transition-colors cursor-pointer px-1.5 py-0.5 rounded text-2xs ${
-                  language === "hi"
-                    ? "text-white font-semibold bg-slate-800"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                हिन्दी
-              </button>
-            </div>
+          <div className="flex items-center gap-2 shrink-0 text-2xs text-slate-400">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="font-mono text-slate-300">Clinical Nutrition Engine</span>
           </div>
         </div>
       </div>
@@ -109,14 +84,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           />
 
           <div className="flex flex-col">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-bold font-heading tracking-tight text-slate-950">
-                BiteIQ
-              </span>
-              <span className="text-xs text-slate-500 font-hindi font-medium">
-                बाइट IQ
-              </span>
-            </div>
+            <span className="text-lg font-bold font-heading tracking-tight text-slate-950">
+              BiteIQ
+            </span>
             <span className="text-2xs font-mono uppercase tracking-wider text-slate-600 hidden sm:block">
               AI Nutrition &amp; Macro Intelligence
             </span>
