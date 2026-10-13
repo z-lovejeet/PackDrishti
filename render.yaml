@@ -1,11 +1,10 @@
 services:
   - type: web
     name: biteiq-backend
-    env: python
+    env: docker
+    dockerfilePath: ./Dockerfile
     region: singapore
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.src.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: APP_ENV
@@ -13,9 +12,7 @@ services:
       - key: DEBUG
         value: 'false'
       - key: PYTHONPATH
-        value: .
-      - key: PYTHON_VERSION
-        value: 3.11.9
+        value: /app
       - key: CORS_ORIGINS
         value: http://localhost:5173,https://biteiq.vercel.app
       - key: SUPABASE_URL
