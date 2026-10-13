@@ -72,3 +72,6 @@ backend/uploads/
 # Documentation specifications
 docs/
 
+# Local Agent Workspace Tooling & Skills
+.agents/
+skills-lock.json
