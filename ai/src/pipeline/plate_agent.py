@@ -256,7 +256,7 @@ class PlateVisionAgent:
             DetectedFoodItem(
                 id=str(uuid.uuid4()),
                 name="Toor Dal Tadka",
-                hindi_name="तूर दाल तड़का",
+                hindi_name=None,
                 category="Lentil/Dal",
                 estimated_grams=150.0,
                 confidence_score=0.95,
@@ -273,7 +273,7 @@ class PlateVisionAgent:
             DetectedFoodItem(
                 id=str(uuid.uuid4()),
                 name="Whole Wheat Roti / Phulka",
-                hindi_name="रोटी / फुल्का",
+                hindi_name=None,
                 category="Bread",
                 estimated_grams=75.0,
                 confidence_score=0.98,
@@ -290,7 +290,7 @@ class PlateVisionAgent:
             DetectedFoodItem(
                 id=str(uuid.uuid4()),
                 name="Cucumber & Tomato Salad",
-                hindi_name="ककड़ी टमाटर सलाद",
+                hindi_name=None,
                 category="Salad",
                 estimated_grams=80.0,
                 confidence_score=0.92,
@@ -349,7 +349,6 @@ class PlateVisionAgent:
             "  \"items\": [\n"
             "    {\n"
             "      \"name\": \"Toor Dal Tadka\",\n"
-            "      \"hindi_name\": \"तूर दाल तड़का\",\n"
             "      \"category\": \"Lentil/Dal\",\n"
             "      \"estimated_grams\": 150.0,\n"
             "      \"confidence_score\": 0.95,\n"

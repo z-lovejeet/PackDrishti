@@ -21,7 +21,7 @@ class DetectedFoodItem(BaseModel):
     )
     hindi_name: Optional[str] = Field(
         None,
-        description="Localized Hindi or regional culinary name (e.g., 'तूर दाल तड़का')",
+        description="Optional regional culinary name",
     )
     category: str = Field(
         ...,
