@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="100%" height="auto">
+  <defs>
+    <linearGradient id="cardGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#022C22" />
+    </linearGradient>
+    <linearGradient id="cardGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#0C1E3C" />
+    </linearGradient>
+    <linearGradient id="cardGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#2D1500" />
+    </linearGradient>
+  </defs>
+
+  <!-- Card 1: Clinical Metabolic Engine -->
+  <g transform="translate(10, 10)">
+    <rect width="380" height="280" rx="16" fill="url(#cardGrad1)" stroke="#10B981" stroke-width="1.5" />
+    <circle cx="50" cy="50" r="22" fill="#064E3B" />
+    <path d="M40 50 L47 57 L60 43" stroke="#34D399" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="85" y="46" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="19" font-weight="800" fill="#FFFFFF">Clinical Engine</text>
+    <text x="85" y="66" font-family="monospace" font-size="11.5" font-weight="600" fill="#34D399">METABOLIC &amp; COMORBID</text>
+
+    <text x="30" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Precision Formulas</text>
+    <text x="30" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Mifflin-St Jeor &amp; Katch-McArdle math</text>
+
+    <text x="30" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">8 Disease Rulebooks</text>
+    <text x="30" y="190" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Diabetes, HTN, CKD Stage 3+, Gout, PCOS</text>
+
+    <text x="30" y="225" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Physiological Safety Floors</text>
+    <text x="30" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Male 1500 kcal / Female 1200 kcal</text>
+  </g>
+
+  <!-- Card 2: AI Meal Plate Vision -->
+  <g transform="translate(410, 10)">
+    <rect width="380" height="280" rx="16" fill="url(#cardGrad2)" stroke="#38BDF8" stroke-width="1.5" />
+    <circle cx="50" cy="50" r="22" fill="#0C4A6E" />
+    <rect x="40" y="40" width="20" height="20" rx="4" stroke="#38BDF8" stroke-width="2.5" fill="none" />
+    <text x="85" y="46" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="19" font-weight="800" fill="#FFFFFF">Plate Vision Agent</text>
+    <text x="85" y="66" font-family="monospace" font-size="11.5" font-weight="600" fill="#38BDF8">SPATIAL SEGMENTATION</text>
+
+    <text x="30" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Item Detection &amp; Boxes</text>
+    <text x="30" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Spatial grid [0, 1000] bounding coords</text>
+
+    <text x="30" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Portion Review Stepper</text>
+    <text x="30" y="190" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Interactive scaling before diary commit</text>
+
+    <text x="30" y="225" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Atwater Reconciliation</text>
+    <text x="30" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Thermodynamic balance |4P+4C+9F-Cal| &lt; 20%</text>
+  </g>
+
+  <!-- Card 3: Packaged Food Scanner -->
+  <g transform="translate(810, 10)">
+    <rect width="380" height="280" rx="16" fill="url(#cardGrad3)" stroke="#F59E0B" stroke-width="1.5" />
+    <circle cx="50" cy="50" r="22" fill="#78350F" />
+    <path d="M42 42 L58 58 M58 42 L42 58" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" />
+    <text x="85" y="46" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="19" font-weight="800" fill="#FFFFFF">Packaged Scanner</text>
+    <text x="85" y="66" font-family="monospace" font-size="11.5" font-weight="600" fill="#FBBF24">ICMR-NIN 2024 AUDIT</text>
+
+    <text x="30" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">0-100 Health Profiler</text>
+    <text x="30" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Per-100g math, sugar, salt &amp; fat penalties</text>
+
+    <text x="30" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Palm Oil &amp; Dye Grading</text>
+    <text x="30" y="190" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Flags palmolein, Grade A/B/C colorants</text>
+
+    <text x="30" y="225" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">One-Tap Diary Bridge</text>
+    <text x="30" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Instant proportion scaling into meal slots</text>
+  </g>
+</svg>

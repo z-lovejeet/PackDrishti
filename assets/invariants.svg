@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" width="100%" height="auto">
+  <defs>
+    <linearGradient id="invBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090D16" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+  </defs>
+
+  <!-- Card 1: Lipid Law -->
+  <g transform="translate(10, 10)">
+    <rect width="280" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
+    <circle cx="35" cy="35" r="16" fill="#0F2D25" stroke="#10B981" stroke-width="1.5" />
+    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#34D399" text-anchor="middle">01</text>
+    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Lipid Invariant</text>
+    <rect x="20" y="70" width="240" height="38" rx="8" fill="#1E293B" />
+    <text x="140" y="94" font-family="monospace" font-size="12" font-weight="700" fill="#34D399" text-anchor="middle">SatFat + TransFat &lt;= TotalFat</text>
+    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Constituent sub-lipids cannot</text>
+    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">exceed total lipid mass.</text>
+    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">TOLERANCE: 0.2g analytical</text>
+  </g>
+
+  <!-- Card 2: Carbohydrate Law -->
+  <g transform="translate(305, 10)">
+    <rect width="280" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
+    <circle cx="35" cy="35" r="16" fill="#0C2D48" stroke="#38BDF8" stroke-width="1.5" />
+    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#38BDF8" text-anchor="middle">02</text>
+    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Carbohydrate Law</text>
+    <rect x="20" y="70" width="240" height="38" rx="8" fill="#1E293B" />
+    <text x="140" y="94" font-family="monospace" font-size="12" font-weight="700" fill="#38BDF8" text-anchor="middle">AddedSugar &lt;= Sugars &lt;= Carbs</text>
+    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Added sugars strictly bounded</text>
+    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">by total carbohydrate matrix.</text>
+    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">TOLERANCE: 0.2g analytical</text>
+  </g>
+
+  <!-- Card 3: Mass Summation Ceiling -->
+  <g transform="translate(600, 10)">
+    <rect width="280" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
+    <circle cx="35" cy="35" r="16" fill="#381E48" stroke="#C084FC" stroke-width="1.5" />
+    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#C084FC" text-anchor="middle">03</text>
+    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Mass Ceiling</text>
+    <rect x="20" y="70" width="240" height="38" rx="8" fill="#1E293B" />
+    <text x="140" y="94" font-family="monospace" font-size="12" font-weight="700" fill="#C084FC" text-anchor="middle">Sum(Macros) &lt;= SampleMass</text>
+    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Sum of Protein + Carbs + Fat</text>
+    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">cannot exceed serving weight.</text>
+    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">CONSERVATION: Physical Law</text>
+  </g>
+
+  <!-- Card 4: Atwater Energy Invariant -->
+  <g transform="translate(895, 10)">
+    <rect width="295" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
+    <circle cx="35" cy="35" r="16" fill="#3E2006" stroke="#F59E0B" stroke-width="1.5" />
+    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#F59E0B" text-anchor="middle">04</text>
+    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Atwater Balance</text>
+    <rect x="15" y="70" width="265" height="38" rx="8" fill="#1E293B" />
+    <text x="147" y="94" font-family="monospace" font-size="11.5" font-weight="700" fill="#FBBF24" text-anchor="middle">|Declared - (4P+4C+9F)| &lt;= 20%</text>
+    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Thermodynamic energy balance</text>
+    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">detects falsified nutrition labels.</text>
+    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">AUTO-CORRECTION: Reconciled</text>
+  </g>
+</svg>

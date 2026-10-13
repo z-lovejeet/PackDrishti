@@ -1,99 +1,9 @@
 <div align="center">
 
-<!-- BiteIQ Premium Hero Header SVG -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="100%" height="auto">
-  <defs>
-    <linearGradient id="heroBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#090D16" />
-      <stop offset="50%" stop-color="#0F172A" />
-      <stop offset="100%" stop-color="#022C22" />
-    </linearGradient>
-    <linearGradient id="brandEmerald" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#10B981" />
-      <stop offset="100%" stop-color="#34D399" />
-    </linearGradient>
-    <linearGradient id="badgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E293B" />
-      <stop offset="100%" stop-color="#0F172A" />
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="16" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-  </defs>
-
-  <!-- Background Base -->
-  <rect width="1200" height="340" rx="20" fill="url(#heroBg)" stroke="#1E293B" stroke-width="2"/>
-
-  <!-- Subtle Hexagonal Decorative Grid -->
-  <g opacity="0.08" stroke="#34D399" stroke-width="1" fill="none">
-    <polygon points="100,50 130,35 160,50 160,80 130,95 100,80" />
-    <polygon points="160,50 190,35 220,50 220,80 190,95 160,80" />
-    <polygon points="130,95 160,80 190,95 190,125 160,140 130,125" />
-    <polygon points="1020,200 1050,185 1080,200 1080,230 1050,245 1020,230" />
-    <polygon points="1080,200 1110,185 1140,200 1140,230 1110,245 1080,230" />
-    <polygon points="1050,245 1080,230 1110,245 1110,275 1080,290 1050,275" />
-  </g>
-
-  <!-- Brand Symbol Mark (Hexagonal Shield + Molecule Aperture) -->
-  <g transform="translate(100, 75)">
-    <circle cx="50" cy="50" r="48" fill="#10B981" opacity="0.15" filter="url(#glow)" />
-    <rect x="10" y="10" width="80" height="80" rx="22" fill="#0F172A" stroke="#10B981" stroke-width="3" />
-    <!-- Dynamic Aperture Nodes -->
-    <circle cx="50" cy="32" r="7" fill="#34D399" />
-    <circle cx="34" cy="62" r="7" fill="#10B981" />
-    <circle cx="66" cy="62" r="7" fill="#059669" />
-    <path d="M50 32 L34 62 L66 62 Z" fill="none" stroke="#34D399" stroke-width="2.5" stroke-dasharray="3,3" />
-    <circle cx="50" cy="52" r="4" fill="#FFFFFF" />
-  </g>
-
-  <!-- Main Wordmark & Typography -->
-  <text x="225" y="112" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', Inter, sans-serif" font-size="46" font-weight="900" fill="#FFFFFF" letter-spacing="-1">Bite<tspan fill="url(#brandEmerald)">IQ</tspan></text>
-  <text x="225" y="142" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', Inter, sans-serif" font-size="16" font-weight="600" fill="#94A3B8" letter-spacing="0.5">Clinical Nutrition Intelligence · AI Plate Vision · Packaged Scanner</text>
-
-  <!-- Key Specification Tags -->
-  <g transform="translate(225, 170)">
-    <!-- Pill 1: ICMR-NIN 2024 -->
-    <rect x="0" y="0" width="165" height="30" rx="8" fill="url(#badgeGradient)" stroke="#334155" stroke-width="1.2" />
-    <circle cx="15" cy="15" r="4" fill="#10B981" />
-    <text x="27" y="19" font-family="monospace" font-size="11.5" font-weight="700" fill="#E2E8F0">ICMR-NIN 2024</text>
-
-    <!-- Pill 2: 104 Tests 100% Pass -->
-    <rect x="180" y="0" width="175" height="30" rx="8" fill="url(#badgeGradient)" stroke="#334155" stroke-width="1.2" />
-    <circle cx="195" cy="15" r="4" fill="#34D399" />
-    <text x="207" y="19" font-family="monospace" font-size="11.5" font-weight="700" fill="#E2E8F0">104 / 104 Tests Pass</text>
-
-    <!-- Pill 3: Dual-LLM Pipeline -->
-    <rect x="370" y="0" width="190" height="30" rx="8" fill="url(#badgeGradient)" stroke="#334155" stroke-width="1.2" />
-    <circle cx="385" cy="15" r="4" fill="#38BDF8" />
-    <text x="397" y="19" font-family="monospace" font-size="11.5" font-weight="700" fill="#E2E8F0">Gemini + Groq VLM</text>
-
-    <!-- Pill 4: Mass Invariants -->
-    <rect x="575" y="0" width="195" height="30" rx="8" fill="url(#badgeGradient)" stroke="#334155" stroke-width="1.2" />
-    <circle cx="590" cy="15" r="4" fill="#F59E0B" />
-    <text x="602" y="19" font-family="monospace" font-size="11.5" font-weight="700" fill="#E2E8F0">Mass Invariants Verifier</text>
-  </g>
-
-  <!-- Metric Quick-Read Stats (Right Block) -->
-  <g transform="translate(850, 70)">
-    <rect x="0" y="0" width="250" height="150" rx="14" fill="#090D16" stroke="#1E293B" stroke-width="1.5" />
-    <text x="25" y="38" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" fill="#64748B" letter-spacing="1">SYSTEM LATENCY BENCHMARKS</text>
-
-    <text x="25" y="72" font-family="monospace" font-size="13" font-weight="700" fill="#34D399">Health Probes</text>
-    <text x="180" y="72" font-family="monospace" font-size="13" font-weight="700" fill="#FFFFFF">&lt; 15 ms</text>
-
-    <text x="25" y="102" font-family="monospace" font-size="13" font-weight="700" fill="#38BDF8">Diary CRUD</text>
-    <text x="180" y="102" font-family="monospace" font-size="13" font-weight="700" fill="#FFFFFF">&lt; 120 ms</text>
-
-    <text x="25" y="132" font-family="monospace" font-size="13" font-weight="700" fill="#F59E0B">Plate Vision</text>
-    <text x="180" y="132" font-family="monospace" font-size="13" font-weight="700" fill="#FFFFFF">&lt; 2.5 s</text>
-  </g>
-
-  <!-- Bottom Accent Strip -->
-  <rect x="0" y="334" width="1200" height="6" fill="url(#brandEmerald)" />
-</svg>
-
-<br />
+<!-- BiteIQ Premium Hero Header -->
+<p align="center">
+  <img src="assets/hero-banner.svg" alt="BiteIQ Hero Banner" width="100%" />
+</p>
 
 # BiteIQ
 ### Precision Clinical Nutrition Engine · AI Plate Vision · Intelligent Food Scanner
@@ -217,76 +127,7 @@ graph TB
 ## 3. Core Technical Pillars
 
 <div align="center">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="100%" height="auto">
-  <defs>
-    <linearGradient id="cardGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A" />
-      <stop offset="100%" stop-color="#022C22" />
-    </linearGradient>
-    <linearGradient id="cardGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A" />
-      <stop offset="100%" stop-color="#0C1E3C" />
-    </linearGradient>
-    <linearGradient id="cardGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A" />
-      <stop offset="100%" stop-color="#2D1500" />
-    </linearGradient>
-  </defs>
-
-  <!-- Card 1: Clinical Metabolic Engine -->
-  <g transform="translate(10, 10)">
-    <rect width="380" height="280" rx="16" fill="url(#cardGrad1)" stroke="#10B981" stroke-width="1.5" />
-    <circle cx="50" cy="50" r="22" fill="#064E3B" />
-    <path d="M40 50 L47 57 L60 43" stroke="#34D399" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-    <text x="85" y="46" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="19" font-weight="800" fill="#FFFFFF">Clinical Engine</text>
-    <text x="85" y="66" font-family="monospace" font-size="11.5" font-weight="600" fill="#34D399">METABOLIC &amp; COMORBID</text>
-
-    <text x="30" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Precision Formulas</text>
-    <text x="30" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Mifflin-St Jeor &amp; Katch-McArdle math</text>
-
-    <text x="30" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">8 Disease Rulebooks</text>
-    <text x="30" y="190" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Diabetes, HTN, CKD Stage 3+, Gout, PCOS</text>
-
-    <text x="30" y="225" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Physiological Safety Floors</text>
-    <text x="30" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Male 1500 kcal / Female 1200 kcal</text>
-  </g>
-
-  <!-- Card 2: AI Meal Plate Vision -->
-  <g transform="translate(410, 10)">
-    <rect width="380" height="280" rx="16" fill="url(#cardGrad2)" stroke="#38BDF8" stroke-width="1.5" />
-    <circle cx="50" cy="50" r="22" fill="#0C4A6E" />
-    <rect x="40" y="40" width="20" height="20" rx="4" stroke="#38BDF8" stroke-width="2.5" fill="none" />
-    <text x="85" y="46" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="19" font-weight="800" fill="#FFFFFF">Plate Vision Agent</text>
-    <text x="85" y="66" font-family="monospace" font-size="11.5" font-weight="600" fill="#38BDF8">SPATIAL SEGMENTATION</text>
-
-    <text x="30" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Item Detection &amp; Boxes</text>
-    <text x="30" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Spatial grid [0, 1000] bounding coords</text>
-
-    <text x="30" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Portion Review Stepper</text>
-    <text x="30" y="190" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Interactive scaling before diary commit</text>
-
-    <text x="30" y="225" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Atwater Reconciliation</text>
-    <text x="30" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Thermodynamic balance |4P+4C+9F-Cal| &lt; 20%</text>
-  </g>
-
-  <!-- Card 3: Packaged Food Scanner -->
-  <g transform="translate(810, 10)">
-    <rect width="380" height="280" rx="16" fill="url(#cardGrad3)" stroke="#F59E0B" stroke-width="1.5" />
-    <circle cx="50" cy="50" r="22" fill="#78350F" />
-    <path d="M42 42 L58 58 M58 42 L42 58" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" />
-    <text x="85" y="46" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="19" font-weight="800" fill="#FFFFFF">Packaged Scanner</text>
-    <text x="85" y="66" font-family="monospace" font-size="11.5" font-weight="600" fill="#FBBF24">ICMR-NIN 2024 AUDIT</text>
-
-    <text x="30" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">0-100 Health Profiler</text>
-    <text x="30" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Per-100g math, sugar, salt &amp; fat penalties</text>
-
-    <text x="30" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">Palm Oil &amp; Dye Grading</text>
-    <text x="30" y="190" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Flags palmolein, Grade A/B/C colorants</text>
-
-    <text x="30" y="225" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#E2E8F0">One-Tap Diary Bridge</text>
-    <text x="30" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#94A3B8">Instant proportion scaling into meal slots</text>
-  </g>
-</svg>
+  <img src="assets/pillars.svg" alt="BiteIQ Core Technical Pillars" width="100%" />
 </div>
 
 <br />
@@ -380,46 +221,7 @@ The packaged scanner (`POST /api/v1/packaged/analyze`) performs forensic audits 
 #### 3-Tier Artificial Color Additive Grading
 
 <div align="center">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 230" width="100%" height="auto">
-  <!-- Grade A Card -->
-  <g transform="translate(10, 10)">
-    <rect width="380" height="210" rx="14" fill="#06281E" stroke="#10B981" stroke-width="1.5" />
-    <rect x="25" y="25" width="90" height="26" rx="6" fill="#10B981" />
-    <text x="70" y="42" font-family="monospace" font-size="12" font-weight="800" fill="#090D16" text-anchor="middle">GRADE A</text>
-    <text x="130" y="43" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="700" fill="#34D399">Wholesome Natural</text>
-    <text x="25" y="85" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" font-weight="600" fill="#E2E8F0">Examples:</text>
-    <text x="25" y="107" font-family="monospace" font-size="11.5" fill="#94A3B8">Curcumin (INS 100), Annatto (INS 160b)</text>
-    <text x="25" y="127" font-family="monospace" font-size="11.5" fill="#94A3B8">Beetroot (INS 162), Chlorophyll (INS 140)</text>
-    <rect x="25" y="152" width="330" height="36" rx="8" fill="#022C22" stroke="#059669" stroke-width="1" />
-    <text x="190" y="174" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" font-weight="600" fill="#6EE7B7" text-anchor="middle">Consumer Advisory: Safe for all age groups</text>
-  </g>
-
-  <!-- Grade B Card -->
-  <g transform="translate(410, 10)">
-    <rect width="380" height="210" rx="14" fill="#0C2340" stroke="#38BDF8" stroke-width="1.5" />
-    <rect x="25" y="25" width="90" height="26" rx="6" fill="#38BDF8" />
-    <text x="70" y="42" font-family="monospace" font-size="12" font-weight="800" fill="#090D16" text-anchor="middle">GRADE B</text>
-    <text x="130" y="43" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="700" fill="#7DD3FC">Permitted Synthetic</text>
-    <text x="25" y="85" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" font-weight="600" fill="#E2E8F0">Examples:</text>
-    <text x="25" y="107" font-family="monospace" font-size="11.5" fill="#94A3B8">Caramel (INS 150d), Brilliant Blue (INS 133)</text>
-    <text x="25" y="127" font-family="monospace" font-size="11.5" fill="#94A3B8">Fast Green FCF (INS 143), Erythrosine</text>
-    <rect x="25" y="152" width="330" height="36" rx="8" fill="#082F49" stroke="#0284C7" stroke-width="1" />
-    <text x="190" y="174" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" font-weight="600" fill="#BAE6FD" text-anchor="middle">Consumer Advisory: Consume in moderation</text>
-  </g>
-
-  <!-- Grade C Card -->
-  <g transform="translate(810, 10)">
-    <rect width="380" height="210" rx="14" fill="#2E0815" stroke="#F43F5E" stroke-width="1.5" />
-    <rect x="25" y="25" width="90" height="26" rx="6" fill="#F43F5E" />
-    <text x="70" y="42" font-family="monospace" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">GRADE C</text>
-    <text x="130" y="43" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="700" fill="#FDA4AF">High-Concern Azo</text>
-    <text x="25" y="85" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" font-weight="600" fill="#E2E8F0">Examples:</text>
-    <text x="25" y="107" font-family="monospace" font-size="11.5" fill="#94A3B8">Tartrazine (INS 102), Sunset Yellow (INS 110)</text>
-    <text x="25" y="127" font-family="monospace" font-size="11.5" fill="#94A3B8">Carmoisine (INS 122), Allura Red (INS 129)</text>
-    <rect x="25" y="152" width="330" height="36" rx="8" fill="#4C0519" stroke="#E11D48" stroke-width="1" />
-    <text x="190" y="174" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" font-weight="600" fill="#FECDD3" text-anchor="middle">Pediatric Alert: Linked to hyperactivity</text>
-  </g>
-</svg>
+  <img src="assets/colors.svg" alt="BiteIQ 3-Tier Food Color Additive Grading" width="100%" />
 </div>
 
 <br />
@@ -513,66 +315,7 @@ sequenceDiagram
 ## 5. Mathematical & Physical Conservation Invariants
 
 <div align="center">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" width="100%" height="auto">
-  <defs>
-    <linearGradient id="invBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#090D16" />
-      <stop offset="100%" stop-color="#0F172A" />
-    </linearGradient>
-  </defs>
-
-  <!-- Card 1: Lipid Law -->
-  <g transform="translate(10, 10)">
-    <rect width="280" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
-    <circle cx="35" cy="35" r="16" fill="#0F2D25" stroke="#10B981" stroke-width="1.5" />
-    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#34D399" text-anchor="middle">01</text>
-    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Lipid Invariant</text>
-    <rect x="20" y="70" width="240" height="38" rx="8" fill="#1E293B" />
-    <text x="140" y="94" font-family="monospace" font-size="12" font-weight="700" fill="#34D399" text-anchor="middle">SatFat + TransFat &lt;= TotalFat</text>
-    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Constituent sub-lipids cannot</text>
-    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">exceed total lipid mass.</text>
-    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">TOLERANCE: 0.2g analytical</text>
-  </g>
-
-  <!-- Card 2: Carbohydrate Law -->
-  <g transform="translate(305, 10)">
-    <rect width="280" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
-    <circle cx="35" cy="35" r="16" fill="#0C2D48" stroke="#38BDF8" stroke-width="1.5" />
-    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#38BDF8" text-anchor="middle">02</text>
-    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Carbohydrate Law</text>
-    <rect x="20" y="70" width="240" height="38" rx="8" fill="#1E293B" />
-    <text x="140" y="94" font-family="monospace" font-size="12" font-weight="700" fill="#38BDF8" text-anchor="middle">AddedSugar &lt;= Sugars &lt;= Carbs</text>
-    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Added sugars strictly bounded</text>
-    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">by total carbohydrate matrix.</text>
-    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">TOLERANCE: 0.2g analytical</text>
-  </g>
-
-  <!-- Card 3: Mass Summation Ceiling -->
-  <g transform="translate(600, 10)">
-    <rect width="280" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
-    <circle cx="35" cy="35" r="16" fill="#381E48" stroke="#C084FC" stroke-width="1.5" />
-    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#C084FC" text-anchor="middle">03</text>
-    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Mass Ceiling</text>
-    <rect x="20" y="70" width="240" height="38" rx="8" fill="#1E293B" />
-    <text x="140" y="94" font-family="monospace" font-size="12" font-weight="700" fill="#C084FC" text-anchor="middle">Sum(Macros) &lt;= SampleMass</text>
-    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Sum of Protein + Carbs + Fat</text>
-    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">cannot exceed serving weight.</text>
-    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">CONSERVATION: Physical Law</text>
-  </g>
-
-  <!-- Card 4: Atwater Energy Invariant -->
-  <g transform="translate(895, 10)">
-    <rect width="295" height="220" rx="14" fill="url(#invBg)" stroke="#334155" stroke-width="1.5" />
-    <circle cx="35" cy="35" r="16" fill="#3E2006" stroke="#F59E0B" stroke-width="1.5" />
-    <text x="35" y="40" font-family="monospace" font-size="12" font-weight="800" fill="#F59E0B" text-anchor="middle">04</text>
-    <text x="65" y="39" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">Atwater Balance</text>
-    <rect x="15" y="70" width="265" height="38" rx="8" fill="#1E293B" />
-    <text x="147" y="94" font-family="monospace" font-size="11.5" font-weight="700" fill="#FBBF24" text-anchor="middle">|Declared - (4P+4C+9F)| &lt;= 20%</text>
-    <text x="20" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">Thermodynamic energy balance</text>
-    <text x="20" y="153" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#94A3B8">detects falsified nutrition labels.</text>
-    <text x="20" y="185" font-family="monospace" font-size="10.5" font-weight="600" fill="#64748B">AUTO-CORRECTION: Reconciled</text>
-  </g>
-</svg>
+  <img src="assets/invariants.svg" alt="BiteIQ Mathematical and Physical Conservation Invariants" width="100%" />
 </div>
 
 <br />
