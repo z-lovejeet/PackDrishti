@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, Heartbeat, Archive, ShieldCheck, Plant, Sparkle } from "@phosphor-icons/react";
+import { ArrowRight, Heartbeat, ShieldCheck, Plant, Sparkle, BowlFood, Barcode } from "@phosphor-icons/react";
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
@@ -32,63 +32,63 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* Primary Title */}
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 font-heading max-w-3xl leading-[1.12]">
-          Know what’s really inside your everyday packaged food.
+          Know what’s really inside your food and meals.
         </h1>
 
         {/* Subtitle */}
         <p className="mt-6 text-lg text-slate-600 max-w-2xl font-normal leading-relaxed">
-          BiteIQ helps you make smarter grocery choices in seconds. Snap the front and back of any food packet to uncover hidden sugars, industrial palm oil, synthetic dyes, expiry hazards, and get healthier whole-food alternatives.
+          BiteIQ brings clinical AI nutrition intelligence to your plate. Log fresh home-cooked dishes with AI plate vision, or audit commercial packaged food labels to detect hidden sugars, industrial palm oil, and synthetic additives.
         </p>
 
-        {/* Consumer Action Cards */}
+        {/* Consumer Action Cards: Dedicated Food vs Packaged Food */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           
-          {/* Portal 1: Nutrition & Ingredient Scanner */}
+          {/* Portal 1: Fresh Food & Meal Plate Scanner */}
           <div 
-            onClick={() => onNavigate("health")}
-            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
+            onClick={() => onNavigate("food")}
+            className="group relative p-8 rounded-xl border border-slate-200 hover:border-emerald-500 bg-white hover:bg-emerald-50/20 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
           >
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider flex items-center gap-1.5">
-                  <Heartbeat size={14} weight="bold" />
-                  Food &amp; Nutrition Scanner
+                  <BowlFood size={14} weight="bold" />
+                  Fresh Meals &amp; Plate Vision
                 </span>
                 <span className="text-xs font-mono text-slate-400">01</span>
               </div>
-              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Scan Food &amp; Ingredients</h2>
+              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Food &amp; Meal Scanner</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Photograph front and back packaging panels to evaluate nutrients against ICMR-NIN 2024 safe limits, flag palm oil and synthetic colors, check shelf-life expiry, and calculate real price per 100g.
+                Snap photos of your thali, cooked dishes, and fresh food. Volumetric AI segments items, estimates portion weights, calculates exact macros, and balances your plate against ICMR-NIN 2024 benchmarks.
               </p>
             </div>
             
-            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
-              <span>Launch nutrition scanner</span>
+            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-emerald-800 group-hover:translate-x-1 transition-transform duration-200">
+              <span>Launch Food &amp; Meal Scanner</span>
               <ArrowRight size={14} weight="bold" />
             </div>
           </div>
 
-          {/* Portal 2: Consumer Scan History */}
+          {/* Portal 2: Packaged Food & Label Audit */}
           <div 
-            onClick={() => onNavigate("history")}
-            className="group relative p-8 rounded-xl border border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50/40 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
+            onClick={() => onNavigate("packaged")}
+            className="group relative p-8 rounded-xl border border-slate-200 hover:border-amber-500 bg-white hover:bg-amber-50/20 transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs"
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Archive size={14} weight="bold" />
-                  Personal Food Log
+                <span className="text-2xs font-mono font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <Barcode size={14} weight="bold" />
+                  Packaged Food &amp; Labels
                 </span>
                 <span className="text-xs font-mono text-slate-400">02</span>
               </div>
-              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Past Scans &amp; Comparisons</h2>
+              <h2 className="text-xl font-bold text-slate-950 font-heading mb-2">Packaged Food Audit</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Review your previously scanned snacks, beverages, and groceries. Compare 0–100 health scores, track flagged additives, and revisit recommended whole-food swaps anytime.
+                Photograph front and back packaging panels to audit palm oil, synthetic dyes, hidden added sugars, sodium density, and check manufacturer shelf-life expiry dates.
               </p>
             </div>
             
-            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-slate-900 group-hover:translate-x-1 transition-transform duration-200">
-              <span>View scan history</span>
+            <div className="mt-8 flex items-center gap-2 text-xs font-semibold text-amber-900 group-hover:translate-x-1 transition-transform duration-200">
+              <span>Launch Packaged Food Audit</span>
               <ArrowRight size={14} weight="bold" />
             </div>
           </div>

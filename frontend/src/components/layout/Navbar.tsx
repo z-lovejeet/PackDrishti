@@ -109,14 +109,26 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
-            onClick={() => handleNavClick("dashboard")}
+            onClick={() => handleNavClick("food")}
             className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "dashboard"
+              activePage === "food"
                 ? "bg-slate-900 text-white font-semibold shadow-xs"
                 : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
             }`}
           >
-            Dashboard
+            Food
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleNavClick("packaged")}
+            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+              activePage === "packaged" || activePage === "health"
+                ? "bg-slate-900 text-white font-semibold shadow-xs"
+                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+            }`}
+          >
+            Packaged Food
           </button>
 
           <button
@@ -133,14 +145,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
-            onClick={() => handleNavClick("packaged")}
+            onClick={() => handleNavClick("dashboard")}
             className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "packaged" || activePage === "health"
+              activePage === "dashboard"
                 ? "bg-slate-900 text-white font-semibold shadow-xs"
                 : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
             }`}
           >
-            Food Scanner
+            Dashboard
           </button>
 
           <button
@@ -264,15 +276,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               type="button"
-              onClick={() => handleNavClick("diary")}
+              onClick={() => handleNavClick("food")}
               className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "diary"
+                activePage === "food"
                   ? "bg-slate-900 text-white font-semibold"
                   : "text-slate-700 hover:bg-slate-100"
               }`}
             >
-              <span>Food Diary</span>
-              {activePage === "diary" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+              <span>Food (Meals &amp; Fresh)</span>
+              {activePage === "food" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
             </button>
 
             <button
@@ -284,10 +296,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : "text-slate-700 hover:bg-slate-100"
               }`}
             >
-              <span>Food Scanner</span>
+              <span>Packaged Food Audit</span>
               {(activePage === "packaged" || activePage === "health") && (
                 <span className="w-1.5 h-1.5 rounded-full bg-white" />
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleNavClick("diary")}
+              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                activePage === "diary"
+                  ? "bg-slate-900 text-white font-semibold"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <span>Food Diary</span>
+              {activePage === "diary" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
             </button>
 
             <button

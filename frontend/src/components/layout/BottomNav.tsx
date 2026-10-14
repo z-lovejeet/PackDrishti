@@ -1,5 +1,5 @@
 import React from "react";
-import { House, Calendar, Plus, Barcode, User } from "@phosphor-icons/react";
+import { House, Calendar, Plus, Barcode, BowlFood } from "@phosphor-icons/react";
 
 interface BottomNavProps {
   activePage: string;
@@ -33,19 +33,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <span className="text-[11px] leading-tight mt-0.5 tracking-tight">Dashboard</span>
         </button>
 
-        {/* Food Diary */}
+        {/* Fresh Food & Meal Scanner */}
         <button
           type="button"
-          onClick={() => onNavigate("diary")}
+          onClick={() => onNavigate("food")}
           className={`flex flex-col items-center justify-center h-full transition-colors ${
-            activePage === "diary"
+            activePage === "food"
               ? "text-slate-950 font-semibold"
               : "text-slate-500 hover:text-slate-800"
           }`}
-          aria-label="Food Diary"
+          aria-label="Food & Meal Intelligence"
         >
-          <Calendar size={22} weight={activePage === "diary" ? "fill" : "regular"} />
-          <span className="text-[11px] leading-tight mt-0.5 tracking-tight">Diary</span>
+          <BowlFood size={22} weight={activePage === "food" ? "fill" : "regular"} />
+          <span className="text-[11px] leading-tight mt-0.5 tracking-tight">Food</span>
         </button>
 
         {/* Quick Log Action (Raised Button) */}
@@ -53,7 +53,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <button
             type="button"
             onClick={onOpenLogger}
-            className="w-12 h-12 -mt-5 rounded-full bg-slate-950 text-white flex items-center justify-center shadow-md border-4 border-white active:scale-95 transition-all hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="w-12 h-12 -mt-5 rounded-full bg-slate-950 text-white flex items-center justify-center shadow-md border-4 border-white active:scale-95 transition-all hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
             aria-label="Quick Log Food"
           >
             <Plus size={22} weight="bold" />
@@ -61,7 +61,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <span className="text-[11px] leading-tight mt-0.5 font-medium text-slate-700">Log</span>
         </div>
 
-        {/* Scanner */}
+        {/* Packaged Food Scanner */}
         <button
           type="button"
           onClick={() => onNavigate("packaged")}
@@ -76,22 +76,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             size={22}
             weight={activePage === "packaged" || activePage === "health" ? "fill" : "regular"}
           />
-          <span className="text-[11px] leading-tight mt-0.5 tracking-tight">Scanner</span>
+          <span className="text-[11px] leading-tight mt-0.5 tracking-tight">Packaged</span>
         </button>
 
-        {/* Profile */}
+        {/* Food Diary */}
         <button
           type="button"
-          onClick={() => onNavigate("profile")}
+          onClick={() => onNavigate("diary")}
           className={`flex flex-col items-center justify-center h-full transition-colors ${
-            activePage === "profile"
+            activePage === "diary"
               ? "text-slate-950 font-semibold"
               : "text-slate-500 hover:text-slate-800"
           }`}
-          aria-label="Health Profile"
+          aria-label="Food Diary"
         >
-          <User size={22} weight={activePage === "profile" ? "fill" : "regular"} />
-          <span className="text-[11px] leading-tight mt-0.5 tracking-tight">Profile</span>
+          <Calendar size={22} weight={activePage === "diary" ? "fill" : "regular"} />
+          <span className="text-[11px] leading-tight mt-0.5 tracking-tight">Diary</span>
         </button>
       </div>
     </nav>

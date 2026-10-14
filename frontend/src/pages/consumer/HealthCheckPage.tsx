@@ -20,7 +20,8 @@ import {
   WarningCircle,
   UsersThree,
   ShieldWarning,
-  DeviceMobileCamera
+  DeviceMobileCamera,
+  BowlFood
 } from '@phosphor-icons/react';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
@@ -37,9 +38,10 @@ import { downsampleImage, blobToFile } from '../../utils/imageProc';
 
 interface HealthCheckPageProps {
   userRole?: UserRole;
+  onNavigate?: (page: string) => void;
 }
 
-export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'consumer' }) => {
+export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'consumer', onNavigate }) => {
   // Dual Image Upload States
   const [frontImageSrc, setFrontImageSrc] = useState<string | null>(null);
   const [frontFileName, setFrontFileName] = useState<string>('');
@@ -452,13 +454,13 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
         <div>
           <p className="text-2xs font-mono font-medium tracking-wider text-slate-500 uppercase">
-            Nutritional Safety &amp; Ingredients • ICMR-NIN 2024
+            Packaged Foods &amp; Additives • ICMR-NIN 2024
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold font-heading text-slate-950 mt-1 tracking-tight">
-            Nutrition &amp; Ingredient Analysis
+            Packaged Food &amp; Label Audit
           </h1>
           <p className="text-xs text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
-            Evaluate nutritional profiles, palm oil content, added sugars, sodium density, and age-specific dietary suitability against national health standards.
+            Audit commercial packaged foods, instant goods, and groceries. Photograph front &amp; back panels to detect hidden palm oil, artificial food dyes, excessive sodium, and dangerous shelf-life expiry hazards.
           </p>
         </div>
 
@@ -481,6 +483,33 @@ export const HealthCheckPage: React.FC<HealthCheckPageProps> = ({ userRole = 'co
           </div>
         )}
       </div>
+
+      {/* Cross-Link Notice: Food & Meal Plate Scanner */}
+      {onNavigate && (
+        <div className="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white border border-emerald-200 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+              <BowlFood size={20} weight="bold" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-950">
+                Looking to Log Cooked Dishes, Thalis, or Fresh Whole Foods?
+              </h4>
+              <p className="text-2xs text-slate-600 mt-0.5">
+                Switch to Food &amp; Meal Intelligence to snap plate photos with AI vision, calculate custom serving grams, and track Indian staples against ICMR-NIN plate rules.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate("food")}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-slate-900 border border-emerald-300 transition-colors shadow-2xs cursor-pointer shrink-0 self-start sm:self-auto"
+          >
+            <span>Food &amp; Meal Scanner</span>
+            <ArrowRight size={13} weight="bold" />
+          </button>
+        </div>
+      )}
 
       {/* Dual Photo Upload Section (Front Panel + Nutrition Facts Panel) */}
       <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-2xs space-y-5">

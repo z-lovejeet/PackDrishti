@@ -12,6 +12,7 @@ import { PWAInstallPrompt } from "./components/common/PWAInstallPrompt";
 import { LandingPage } from "./pages/consumer/LandingPage";
 import { DashboardPage } from "./pages/consumer/DashboardPage";
 import { DiaryPage } from "./pages/consumer/DiaryPage";
+import { FoodPage } from "./pages/consumer/FoodPage";
 import { PackagedAuditResultPage } from "./pages/consumer/PackagedAuditResultPage";
 import { ProfileSettingsPage } from "./pages/consumer/ProfileSettingsPage";
 import { HealthCheckPage } from "./pages/consumer/HealthCheckPage";
@@ -28,6 +29,7 @@ const VALID_PAGES = [
   "landing",
   "dashboard",
   "diary",
+  "food",
   "packaged",
   "packaged-result",
   "profile",
@@ -191,8 +193,15 @@ export function App() {
             />
           )}
 
+          {activePage === "food" && (
+            <FoodPage
+              onNavigate={navigateTo}
+              onSuccessToast={(title, msg) => addToast("success", title, msg)}
+            />
+          )}
+
           {(activePage === "packaged" || activePage === "health") && (
-            <HealthCheckPage userRole={userRole} />
+            <HealthCheckPage userRole={userRole} onNavigate={navigateTo} />
           )}
 
           {activePage === "packaged-result" && (

@@ -560,7 +560,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           <div
-            onClick={() => onOpenLogger()}
+            onClick={() => onNavigate("food")}
             className="p-5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200/80 shadow-xs cursor-pointer transition-all group flex items-center justify-between"
           >
             <div className="flex items-center gap-3.5">
