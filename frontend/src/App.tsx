@@ -21,6 +21,7 @@ import { ProductHistoryPage } from "./pages/consumer/ProductHistoryPage";
 // Interactive Modals
 import { FoodLoggerModal } from "./components/diary/FoodLoggerModal";
 import { PlateReviewModal } from "./components/meals/PlateReviewModal";
+import { BiometricOnboardingModal } from "./components/profile/BiometricOnboardingModal";
 
 // Types
 import { PlateAnalysisData, PackagedAuditResultData } from "./types/models";
@@ -49,9 +50,17 @@ const parseHashPage = (): PageKey => {
 };
 
 export function App() {
-  const [activePage, setActivePage] = useState<string>(() => parseHashPage());
-  const { role: userRole } = useAuthStore();
+  const { role: userRole, isAuthenticated, user } = useAuthStore();
+  const [activePage, setActivePage] = useState<string>(() => {
+    const hash = parseHashPage();
+    const token = typeof window !== "undefined" ? localStorage.getItem("biteiq_access_token") : null;
+    const isAuth = Boolean(token);
+    if (!isAuth) return "landing";
+    if (hash === "landing") return "dashboard";
+    return hash;
+  });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Food Logger & Review Modals State
@@ -79,33 +88,105 @@ export function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const navigateTo = useCallback((page: string) => {
-    if (VALID_PAGES.includes(page as PageKey)) {
+  const navigateTo = useCallback(
+    (page: string) => {
+      if (!VALID_PAGES.includes(page as PageKey)) return;
+
+      // Strict Authentication Guard:
+      // If unauthenticated, only 'landing' is accessible.
+      if (!isAuthenticated && page !== "landing") {
+        setActivePage("landing");
+        if (window.location.hash !== "#landing") {
+          window.location.hash = "landing";
+        }
+        setIsAuthModalOpen(true);
+        addToast(
+          "info",
+          "Sign In Required",
+          "Please sign in or create an account to access BiteIQ."
+        );
+        return;
+      }
+
+      // If authenticated, landing is never shown - stay on / go to dashboard.
+      if (isAuthenticated && page === "landing") {
+        setActivePage("dashboard");
+        if (window.location.hash !== "#dashboard") {
+          window.location.hash = "dashboard";
+        }
+        return;
+      }
+
       setActivePage(page);
       if (window.location.hash !== `#${page}`) {
         window.location.hash = page;
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, []);
+    },
+    [isAuthenticated]
+  );
 
   // Synchronize with URL hash changes (browser back/forward, direct bookmarked links)
   useEffect(() => {
     const handleHashChange = () => {
       const pageFromHash = parseHashPage();
+
+      if (!isAuthenticated && pageFromHash !== "landing") {
+        setActivePage("landing");
+        window.location.hash = "landing";
+        setIsAuthModalOpen(true);
+        addToast(
+          "info",
+          "Sign In Required",
+          "Please sign in or create an account to access BiteIQ."
+        );
+        return;
+      }
+
+      if (isAuthenticated && pageFromHash === "landing") {
+        setActivePage("dashboard");
+        window.location.hash = "dashboard";
+        return;
+      }
+
       setActivePage(pageFromHash);
     };
-
-    const initialHash = window.location.hash.replace(/^#\/?/, "").trim().toLowerCase();
-    if (!VALID_PAGES.includes(initialHash as PageKey)) {
-      window.location.hash = activePage;
-    }
 
     window.addEventListener("hashchange", handleHashChange);
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
     };
-  }, [activePage]);
+  }, [isAuthenticated]);
+
+  // Auth State Watcher & Auto-Onboarding Trigger
+  useEffect(() => {
+    if (!isAuthenticated) {
+      if (activePage !== "landing") {
+        setActivePage("landing");
+        window.location.hash = "landing";
+      }
+    } else {
+      if (activePage === "landing") {
+        setActivePage("dashboard");
+        window.location.hash = "dashboard";
+      }
+
+      // Check if user has completed onboarding assessment
+      const userKey = user?.id ? `biteiq_onboarding_${user.id}` : null;
+      const hasUserCompleted = userKey
+        ? localStorage.getItem(userKey) === "true"
+        : false;
+      const hasGlobalCompleted =
+        localStorage.getItem("biteiq_onboarding_completed") === "true";
+
+      if (!hasUserCompleted && !hasGlobalCompleted) {
+        const timer = setTimeout(() => {
+          setIsOnboardingOpen(true);
+        }, 450);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isAuthenticated, activePage, user?.id]);
 
   // Modal Handlers
   const handleOpenLogger = (slot?: "breakfast" | "lunch" | "dinner" | "snack") => {
@@ -145,6 +226,20 @@ export function App() {
         onSuccess={(msg) => addToast("success", "Authentication", msg)}
       />
 
+      {/* Clinical Biometric Onboarding Wizard */}
+      <BiometricOnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        onComplete={() => {
+          setIsOnboardingOpen(false);
+          addToast(
+            "success",
+            "Clinical Nutrition Plan Ready",
+            "Your personalized daily caloric budget and macronutrient split have been configured."
+          );
+        }}
+      />
+
       {/* Unified Food Logger Modal */}
       <FoodLoggerModal
         isOpen={isLoggerOpen}
@@ -176,13 +271,17 @@ export function App() {
       <main className="flex-1">
         <ErrorBoundary>
           {activePage === "landing" && (
-            <LandingPage onNavigate={navigateTo} />
+            <LandingPage
+              onNavigate={navigateTo}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            />
           )}
 
           {activePage === "dashboard" && (
             <DashboardPage
               onNavigate={navigateTo}
               onOpenLogger={handleOpenLogger}
+              onOpenOnboarding={() => setIsOnboardingOpen(true)}
             />
           )}
 

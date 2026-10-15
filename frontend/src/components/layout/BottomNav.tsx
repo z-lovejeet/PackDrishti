@@ -1,5 +1,6 @@
 import React from "react";
 import { House, Calendar, Plus, Barcode, BowlFood } from "@phosphor-icons/react";
+import { useAuthStore } from "../../store/authStore";
 
 interface BottomNavProps {
   activePage: string;
@@ -12,6 +13,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onNavigate,
   onOpenLogger,
 }) => {
+  const { isAuthenticated } = useAuthStore();
+  if (!isAuthenticated) return null;
+
   return (
     <nav
       aria-label="Mobile Navigation"

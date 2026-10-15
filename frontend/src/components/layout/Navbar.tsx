@@ -62,14 +62,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Lockup */}
         <div
-          onClick={() => handleNavClick("landing")}
+          onClick={() => handleNavClick(isAuthenticated ? "dashboard" : "landing")}
           className="flex items-center gap-3 cursor-pointer select-none shrink-0 group"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              handleNavClick("landing");
+              handleNavClick(isAuthenticated ? "dashboard" : "landing");
             }
           }}
           aria-label="BiteIQ Home"
@@ -95,77 +95,81 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => handleNavClick("landing")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "landing"
-                ? "bg-slate-900 text-white font-semibold shadow-xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            Overview
-          </button>
+          {isAuthenticated ? (
+            <>
+              <button
+                type="button"
+                onClick={() => handleNavClick("dashboard")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "dashboard"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Dashboard
+              </button>
 
-          <button
-            type="button"
-            onClick={() => handleNavClick("food")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "food"
-                ? "bg-slate-900 text-white font-semibold shadow-xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            Food
-          </button>
+              <button
+                type="button"
+                onClick={() => handleNavClick("food")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "food"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Food
+              </button>
 
-          <button
-            type="button"
-            onClick={() => handleNavClick("packaged")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "packaged" || activePage === "health"
-                ? "bg-slate-900 text-white font-semibold shadow-xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            Packaged Food
-          </button>
+              <button
+                type="button"
+                onClick={() => handleNavClick("packaged")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "packaged" || activePage === "health"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Packaged Food
+              </button>
 
-          <button
-            type="button"
-            onClick={() => handleNavClick("diary")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "diary"
-                ? "bg-slate-900 text-white font-semibold shadow-xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            Food Diary
-          </button>
+              <button
+                type="button"
+                onClick={() => handleNavClick("diary")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "diary"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Food Diary
+              </button>
 
-          <button
-            type="button"
-            onClick={() => handleNavClick("dashboard")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "dashboard"
-                ? "bg-slate-900 text-white font-semibold shadow-xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            Dashboard
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleNavClick("profile")}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              activePage === "profile"
-                ? "bg-slate-900 text-white font-semibold shadow-xs"
-                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-            }`}
-          >
-            Profile
-          </button>
+              <button
+                type="button"
+                onClick={() => handleNavClick("profile")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "profile"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Profile
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleNavClick("landing")}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                activePage === "landing"
+                  ? "bg-slate-900 text-white font-semibold shadow-xs"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+              }`}
+            >
+              Overview
+            </button>
+          )}
         </nav>
 
         {/* Right Section: Calorie Pill, Quick Log CTA, Auth Controls */}
@@ -226,14 +230,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={onOpenAuthModal}
-              className="px-3 py-1 rounded-md text-xs font-medium border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 transition-colors shadow-2xs cursor-pointer"
-              title="Sign in to save diary history"
-            >
-              Sign In
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onOpenAuthModal}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Sign in to your account"
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={onOpenAuthModal}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-950 hover:bg-slate-800 text-white transition-all shadow-xs cursor-pointer"
+                title="Get started with BiteIQ"
+              >
+                Get Started
+              </button>
+            </div>
           )}
 
           {/* Mobile Menu Hamburger Button */}
@@ -261,90 +275,94 @@ export const Navbar: React.FC<NavbarProps> = ({
               Navigation
             </span>
 
-            <button
-              type="button"
-              onClick={() => handleNavClick("dashboard")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "dashboard"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>Dashboard</span>
-              {activePage === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("dashboard")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "dashboard"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Dashboard</span>
+                  {activePage === "dashboard" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
 
-            <button
-              type="button"
-              onClick={() => handleNavClick("food")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "food"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>Food (Meals &amp; Fresh)</span>
-              {activePage === "food" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-            </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("food")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "food"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Food (Meals &amp; Fresh)</span>
+                  {activePage === "food" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
 
-            <button
-              type="button"
-              onClick={() => handleNavClick("packaged")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "packaged" || activePage === "health"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>Packaged Food Audit</span>
-              {(activePage === "packaged" || activePage === "health") && (
-                <span className="w-1.5 h-1.5 rounded-full bg-white" />
-              )}
-            </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("packaged")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "packaged" || activePage === "health"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Packaged Food Audit</span>
+                  {(activePage === "packaged" || activePage === "health") && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  )}
+                </button>
 
-            <button
-              type="button"
-              onClick={() => handleNavClick("diary")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "diary"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>Food Diary</span>
-              {activePage === "diary" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-            </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("diary")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "diary"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Food Diary</span>
+                  {activePage === "diary" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
 
-            <button
-              type="button"
-              onClick={() => handleNavClick("profile")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "profile"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>Profile Settings</span>
-              {activePage === "profile" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleNavClick("landing")}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                activePage === "landing"
-                  ? "bg-slate-900 text-white font-semibold"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>Overview &amp; Features</span>
-              {activePage === "landing" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-            </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("profile")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "profile"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Profile Settings</span>
+                  {activePage === "profile" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleNavClick("landing")}
+                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                  activePage === "landing"
+                    ? "bg-slate-900 text-white font-semibold"
+                    : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span>Overview &amp; Features</span>
+                {activePage === "landing" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+              </button>
+            )}
           </nav>
 
           {/* Mobile Auth and Action */}
           <div className="pt-3 border-t border-slate-100 space-y-2">
-            {onOpenLogger && (
+            {isAuthenticated && onOpenLogger && (
               <Button
                 variant="primary"
                 size="sm"
@@ -359,16 +377,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             {!isAuthenticated ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  if (onOpenAuthModal) onOpenAuthModal();
-                }}
-                className="w-full text-center py-2 text-xs font-medium text-slate-700 hover:text-slate-950 border border-slate-200 rounded-lg bg-slate-50 transition-colors"
-              >
-                Sign In to Save History
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (onOpenAuthModal) onOpenAuthModal();
+                  }}
+                  className="w-full text-center py-2 text-xs font-semibold text-slate-700 hover:text-slate-950 border border-slate-200 rounded-lg bg-slate-50 transition-colors"
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (onOpenAuthModal) onOpenAuthModal();
+                  }}
+                  className="w-full text-center py-2 text-xs font-bold bg-slate-950 text-white rounded-lg transition-colors"
+                >
+                  Get Started
+                </button>
+              </div>
             ) : (
               <button
                 type="button"

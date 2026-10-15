@@ -3,10 +3,12 @@ import { ArrowRight, Heartbeat, ShieldCheck, Plant, Sparkle, BowlFood, Barcode }
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
+  onOpenAuthModal?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onNavigate,
+  onOpenAuthModal,
 }) => {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-slate-100 selection:text-slate-900">
@@ -39,6 +41,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <p className="mt-6 text-lg text-slate-600 max-w-2xl font-normal leading-relaxed">
           BiteIQ brings clinical AI nutrition intelligence to your plate. Log fresh home-cooked dishes with AI plate vision, or audit commercial packaged food labels to detect hidden sugars, industrial palm oil, and synthetic additives.
         </p>
+
+        {/* Hero CTA Button Bar */}
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={onOpenAuthModal || (() => onNavigate("dashboard"))}
+            className="px-6 py-3 rounded-xl text-xs sm:text-sm font-bold bg-slate-950 hover:bg-slate-800 text-white shadow-sm transition-all cursor-pointer flex items-center gap-2"
+          >
+            <span>Get Started with BiteIQ</span>
+            <ArrowRight size={16} weight="bold" />
+          </button>
+          <button
+            type="button"
+            onClick={onOpenAuthModal || (() => onNavigate("dashboard"))}
+            className="px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-colors cursor-pointer"
+          >
+            Sign In to Existing Account
+          </button>
+        </div>
 
         {/* Consumer Action Cards: Dedicated Food vs Packaged Food */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
