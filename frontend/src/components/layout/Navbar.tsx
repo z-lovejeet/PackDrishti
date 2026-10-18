@@ -158,51 +158,93 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </>
           ) : (
-            <button
-              type="button"
-              onClick={() => handleNavClick("landing")}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-                activePage === "landing"
-                  ? "bg-slate-900 text-white font-semibold shadow-xs"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Overview
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => handleNavClick("landing")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "landing"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Overview
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleNavClick("about")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "about"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                About Us
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleNavClick("methodology")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "methodology"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Science
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleNavClick("standards")}
+                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  activePage === "standards"
+                    ? "bg-slate-900 text-white font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                }`}
+              >
+                Food Standards
+              </button>
+            </>
           )}
         </nav>
 
         {/* Right Section: Calorie Pill, Quick Log CTA, Auth Controls */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Live Calorie Budget Indicator (Desktop) */}
-          <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-lg text-2xs font-mono">
-            <Flame size={15} weight="fill" className="text-amber-500 shrink-0" />
-            <span className="font-semibold text-slate-800">
-              {consumedCalories.toLocaleString()}
-            </span>
-            <span className="text-slate-400">/</span>
-            <span className="text-slate-500">
-              {targetCalories.toLocaleString()} kcal
-            </span>
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full overflow-hidden ml-1">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
-                style={{ width: `${calPercent}%` }}
-              />
-            </div>
-          </div>
+          {/* Live Calorie Budget Indicator (Desktop) - Only when Authenticated */}
+          {isAuthenticated && (
+            <>
+              <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-lg text-2xs font-mono">
+                <Flame size={15} weight="fill" className="text-amber-500 shrink-0" />
+                <span className="font-semibold text-slate-800">
+                  {consumedCalories.toLocaleString()}
+                </span>
+                <span className="text-slate-400">/</span>
+                <span className="text-slate-500">
+                  {targetCalories.toLocaleString()} kcal
+                </span>
+                <div className="w-12 h-1.5 bg-slate-200 rounded-full overflow-hidden ml-1">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                    style={{ width: `${calPercent}%` }}
+                  />
+                </div>
+              </div>
 
-          {/* Quick Log Button (Desktop) */}
-          {onOpenLogger && (
-            <button
-              type="button"
-              onClick={onOpenLogger}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-xs cursor-pointer"
-              title="Log food item"
-            >
-              <Plus size={14} weight="bold" />
-              <span>Log Food</span>
-            </button>
+              {/* Quick Log Button (Desktop) */}
+              {onOpenLogger && (
+                <button
+                  type="button"
+                  onClick={onOpenLogger}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-xs cursor-pointer"
+                  title="Log food item"
+                >
+                  <Plus size={14} weight="bold" />
+                  <span>Log Food</span>
+                </button>
+              )}
+            </>
           )}
 
           {/* Authentication Section */}
@@ -345,18 +387,59 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               </>
             ) : (
-              <button
-                type="button"
-                onClick={() => handleNavClick("landing")}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
-                  activePage === "landing"
-                    ? "bg-slate-900 text-white font-semibold"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Overview &amp; Features</span>
-                {activePage === "landing" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("landing")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "landing"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Overview &amp; Features</span>
+                  {activePage === "landing" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("about")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "about"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>About Us</span>
+                  {activePage === "about" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("methodology")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "methodology"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Science &amp; Clinical Methodology</span>
+                  {activePage === "methodology" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("standards")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium flex items-center justify-between transition-colors ${
+                    activePage === "standards"
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Packaged Food Standards</span>
+                  {activePage === "standards" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </button>
+              </>
             )}
           </nav>
 
