@@ -292,6 +292,67 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
+      {/* Public Transparency & Education Section */}
+      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-slate-100">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <span className="text-2xs font-mono font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+              Public Knowledge Base
+            </span>
+            <h2 className="text-2xl font-bold font-heading text-slate-950">
+              Open Science &amp; Consumer Education
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 max-w-md">
+            Freely accessible guides and scientific whitepapers to help every consumer make informed decisions.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div
+            onClick={() => onNavigate("about")}
+            className="p-5 rounded-2xl border border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all cursor-pointer space-y-2 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xs font-mono text-emerald-700 font-semibold uppercase">Mission</span>
+              <ArrowRight size={14} className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 font-heading">About BiteIQ</h3>
+            <p className="text-2xs text-slate-600 leading-relaxed">
+              Our 100% independent public health initiative to combat metabolic disease and deceptive food marketing.
+            </p>
+          </div>
+
+          <div
+            onClick={() => onNavigate("methodology")}
+            className="p-5 rounded-2xl border border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all cursor-pointer space-y-2 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xs font-mono text-indigo-700 font-semibold uppercase">Clinical Science</span>
+              <ArrowRight size={14} className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 font-heading">Science &amp; Methodology</h3>
+            <p className="text-2xs text-slate-600 leading-relaxed">
+              ICMR-NIN 2024 benchmarks, computer vision plate estimation, and our 4-tier chemical additive scoring engine.
+            </p>
+          </div>
+
+          <div
+            onClick={() => onNavigate("standards")}
+            className="p-5 rounded-2xl border border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all cursor-pointer space-y-2 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xs font-mono text-amber-700 font-semibold uppercase">Consumer Guide</span>
+              <ArrowRight size={14} className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 font-heading">Food Standards &amp; Safety</h3>
+            <p className="text-2xs text-slate-600 leading-relaxed">
+              How to decode nutrition labels, detect hidden sugars, avoid harmful food dyes, and understand FSSAI regulations.
+            </p>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 };
