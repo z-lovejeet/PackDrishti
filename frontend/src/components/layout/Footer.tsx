@@ -1,7 +1,11 @@
 import React from "react";
 import { ShieldCheck, Heartbeat, Plant, Sparkle } from "@phosphor-icons/react";
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigate?: (page: string) => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="bg-slate-950 text-slate-300 border-t border-slate-900 mt-auto text-xs py-10 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -9,7 +13,7 @@ export const Footer: React.FC = () => {
         {/* Main Two-Column Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 pb-8 border-b border-slate-900">
           
-          {/* Column 1: Platform Identity */}
+          {/* Column 1: Platform Identity & Public Links */}
           <div className="space-y-4">
             <div className="flex items-start gap-3.5">
               <img
@@ -35,6 +39,41 @@ export const Footer: React.FC = () => {
             <p className="text-slate-400 text-xs leading-relaxed">
               Designed for everyday shoppers and families to decode packaged food labels in seconds. Evaluates nutrition tables and ingredient lists against <strong className="text-white">ICMR-NIN 2024 Dietary Guidelines for Indians</strong> and <strong className="text-white">WHO</strong> safe intake thresholds.
             </p>
+
+            {/* Quick Navigation Links */}
+            <div className="flex flex-wrap items-center gap-3 text-2xs font-mono pt-1 text-slate-400">
+              <button
+                type="button"
+                onClick={() => onNavigate?.("landing")}
+                className="hover:text-emerald-400 transition-colors cursor-pointer"
+              >
+                Overview
+              </button>
+              <span className="text-slate-700">•</span>
+              <button
+                type="button"
+                onClick={() => onNavigate?.("about")}
+                className="hover:text-emerald-400 transition-colors cursor-pointer"
+              >
+                About Us
+              </button>
+              <span className="text-slate-700">•</span>
+              <button
+                type="button"
+                onClick={() => onNavigate?.("methodology")}
+                className="hover:text-emerald-400 transition-colors cursor-pointer"
+              >
+                Science &amp; Methodology
+              </button>
+              <span className="text-slate-700">•</span>
+              <button
+                type="button"
+                onClick={() => onNavigate?.("standards")}
+                className="hover:text-emerald-400 transition-colors cursor-pointer"
+              >
+                Food Standards
+              </button>
+            </div>
 
             <div className="flex flex-wrap gap-2 pt-1">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 border border-slate-800 text-2xs font-medium">
