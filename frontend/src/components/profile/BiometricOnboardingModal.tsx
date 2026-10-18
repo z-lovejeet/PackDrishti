@@ -1,8 +1,5 @@
 import React, { useState, useMemo } from "react";
 import {
-  X,
-  User,
-  Heartbeat,
   Sparkle,
   CheckCircle,
   ArrowRight,
