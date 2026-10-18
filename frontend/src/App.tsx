@@ -10,6 +10,9 @@ import { PWAInstallPrompt } from "./components/common/PWAInstallPrompt";
 
 // Consumer Pages
 import { LandingPage } from "./pages/consumer/LandingPage";
+import { AboutUsPage } from "./pages/consumer/AboutUsPage";
+import { ScienceMethodologyPage } from "./pages/consumer/ScienceMethodologyPage";
+import { FoodStandardsPage } from "./pages/consumer/FoodStandardsPage";
 import { DashboardPage } from "./pages/consumer/DashboardPage";
 import { DiaryPage } from "./pages/consumer/DiaryPage";
 import { FoodPage } from "./pages/consumer/FoodPage";
@@ -28,6 +31,9 @@ import { PlateAnalysisData, PackagedAuditResultData } from "./types/models";
 
 const VALID_PAGES = [
   "landing",
+  "about",
+  "methodology",
+  "standards",
   "dashboard",
   "diary",
   "food",
@@ -37,6 +43,13 @@ const VALID_PAGES = [
   "health",
   "history",
 ] as const;
+
+const PUBLIC_PAGES: readonly string[] = [
+  "landing",
+  "about",
+  "methodology",
+  "standards",
+];
 
 type PageKey = typeof VALID_PAGES[number];
 
@@ -55,7 +68,9 @@ export function App() {
     const hash = parseHashPage();
     const token = typeof window !== "undefined" ? localStorage.getItem("biteiq_access_token") : null;
     const isAuth = Boolean(token);
-    if (!isAuth) return "landing";
+    if (!isAuth) {
+      return PUBLIC_PAGES.includes(hash) ? hash : "landing";
+    }
     if (hash === "landing") return "dashboard";
     return hash;
   });
@@ -93,8 +108,8 @@ export function App() {
       if (!VALID_PAGES.includes(page as PageKey)) return;
 
       // Strict Authentication Guard:
-      // If unauthenticated, only 'landing' is accessible.
-      if (!isAuthenticated && page !== "landing") {
+      // If unauthenticated, only public pages are accessible.
+      if (!isAuthenticated && !PUBLIC_PAGES.includes(page)) {
         setActivePage("landing");
         if (window.location.hash !== "#landing") {
           window.location.hash = "landing";
@@ -131,7 +146,7 @@ export function App() {
     const handleHashChange = () => {
       const pageFromHash = parseHashPage();
 
-      if (!isAuthenticated && pageFromHash !== "landing") {
+      if (!isAuthenticated && !PUBLIC_PAGES.includes(pageFromHash)) {
         setActivePage("landing");
         window.location.hash = "landing";
         setIsAuthModalOpen(true);
@@ -161,7 +176,7 @@ export function App() {
   // Auth State Watcher & Auto-Onboarding Trigger
   useEffect(() => {
     if (!isAuthenticated) {
-      if (activePage !== "landing") {
+      if (!PUBLIC_PAGES.includes(activePage)) {
         setActivePage("landing");
         window.location.hash = "landing";
       }
@@ -277,6 +292,27 @@ export function App() {
             />
           )}
 
+          {activePage === "about" && (
+            <AboutUsPage
+              onNavigate={navigateTo}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            />
+          )}
+
+          {activePage === "methodology" && (
+            <ScienceMethodologyPage
+              onNavigate={navigateTo}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            />
+          )}
+
+          {activePage === "standards" && (
+            <FoodStandardsPage
+              onNavigate={navigateTo}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            />
+          )}
+
           {activePage === "dashboard" && (
             <DashboardPage
               onNavigate={navigateTo}
@@ -337,7 +373,7 @@ export function App() {
       <PWAInstallPrompt />
 
       {/* Consumer Platform Footer */}
-      <Footer />
+      <Footer onNavigate={navigateTo} />
     </div>
   );
 }
