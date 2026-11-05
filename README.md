@@ -35,6 +35,7 @@
   - [Pillar III: Packaged Food Scanner & ICMR-NIN 2024 Profiling](#pillar-iii-packaged-food-scanner--icmr-nin-2024-profiling)
   - [Pillar IV: Multi-Modal Daily Food Diary & Hydration Bridge](#pillar-iv-multi-modal-daily-food-diary--hydration-bridge)
   - [Pillar V: Enterprise Security, RBAC & Multi-Tenant Isolation](#pillar-v-enterprise-security-rbac--multi-tenant-isolation)
+  - [Pillar VI: Public Transparency, Consumer Education & Biometric Onboarding](#pillar-vi-public-transparency-consumer-education--biometric-onboarding)
 - [4. AI Vision & Dual-LLM Fallback Pipeline](#4-ai-vision--dual-llm-fallback-pipeline)
 - [5. Mathematical & Physical Conservation Invariants](#5-mathematical--physical-conservation-invariants)
 - [6. Complete End-to-End User Journeys](#6-complete-end-to-end-user-journeys)
@@ -67,6 +68,8 @@ The following diagram illustrates the topological structure of BiteIQ across its
 ```mermaid
 graph TB
     subgraph CLIENT["Client Tier (React 19 + TypeScript + Vite)"]
+        PUBLIC["Public Transparency Hub<br/>Landing · About · Science · Standards"]
+        ONBOARD["Biometric Wizard<br/>3-Step MSJ/KMA Dynamic Calibration"]
         DASH["Dashboard View<br/>Calorie Ring & Macro Bars"]
         DIARY["Diary Page<br/>4 Slots & Swipe Controls"]
         MODAL["Food Logger Drawer<br/>Search · Plate · Packaged"]
@@ -115,7 +118,7 @@ graph TB
     classDef engineStyle fill:#311042,stroke:#C084FC,stroke-width:1.5px,color:#F8FAFC;
     classDef dataStyle fill:#18181B,stroke:#F59E0B,stroke-width:1.5px,color:#F8FAFC;
 
-    class DASH,DIARY,MODAL,REVIEW,SETTINGS clientStyle;
+    class PUBLIC,ONBOARD,DASH,DIARY,MODAL,REVIEW,SETTINGS clientStyle;
     class CORS,SEC_HEADERS,RATE,AUTH_GUARD gatewayStyle;
     class GEMINI,GROQ,GROUND_TRUTH aiStyle;
     class INVARIANT,METABOLIC,CLINICAL_ENG,ICMR engineStyle;
@@ -277,6 +280,30 @@ The food diary unifies three distinct logging channels into an integrated ledger
 
 ---
 
+### Pillar VI: Public Transparency, Consumer Education & Biometric Onboarding
+
+To make food science freely accessible to all consumers prior to account registration, BiteIQ maintains a zero-barrier public educational and transparency layer:
+
+1. **Open Public Knowledge Layer (`PUBLIC_PAGES`)**:
+   - **About Us (`#about`)**: Highlights our 100% independent public health mission combating chronic metabolic disease (101M diabetic, 136M pre-diabetic in India). Documents our refusal of ultra-processed food advertising and commitment to privacy with zero third-party data broker monetization.
+   - **Science & Clinical Methodology (`#methodology`)**: Publicly publishes our complete computational methodology: the 4-stage computer vision plate segmentation pipeline, volumetric depth multipliers, the 0–100 ICMR-NIN deduction formulas, and the 4-tier Chemical Additive Toxicity Scoring (CATS) framework (Tier 1 Severe Hazard, Tier 2 Gut Disruptor, Tier 3 Allergenic, Tier 4 GRAS/Natural).
+   - **Food Standards & Safety Guide (`#standards`)**: An everyday consumer guide to decoding packaged labels. Breaks down the front-of-pack marketing claims vs. back-of-pack ingredients descending order rules, exposes the 5 major supermarket traps (hidden maltodextrin, stealth palm olein, pseudo-multigrain maida, synthetic azo dyes, chemical preservatives), outlines FSSAI 2% trans-fat limits, and provides a 5-rule shopping quick-card.
+
+2. **Strict Route Protection & Authentication Gating**:
+   - Visitors who are not signed in have uninhibited access to all public informational guides (`landing`, `about`, `methodology`, `standards`) without distracting popups.
+   - Access to protected clinical tools (`dashboard`, `food`, `packaged`, `diary`, `profile`) requires authentication via Supabase Auth.
+   - Live daily calorie gauges (`consumed / budget kcal`) and logging buttons remain hidden for unauthenticated guests, preserving pristine visual hierarchy.
+   - Authenticated users automatically bypass the landing page directly into the personalized Clinical Dashboard.
+
+3. **3-Step Clinical Biometric Onboarding Wizard**:
+   - New or unconfigured users are guided through an interactive 3-step biometric assessment:
+     - *Step 1: Physical Biometrics* (Age, biological sex, height, current weight, target weight).
+     - *Step 2: Activity & Nutrition Objectives* (Sedentary through Extra Active PAL multipliers; Fat Loss, Hypertrophy, Maintenance, or Metabolic Stabilization).
+     - *Step 3: Dietary Patterns & Medical Safeguards* (Omnivore, Vegetarian, Vegan, Jain, Keto; Type 2 Diabetes, Hypertension, Dyslipidemia, NAFLD, PCOS, CKD).
+   - Live metabolic recalculation dynamically computes BMR, TDEE, custom macro splits, fiber targets, sodium caps, and hydration targets before committing them to the dashboard.
+
+---
+
 ## 4. AI Vision & Dual-LLM Fallback Pipeline
 
 To ensure $99.9\%$ operational uptime under third-party LLM rate limits or network disruptions, BiteIQ implements a 3-tier resilient perceptual pipeline:
@@ -342,6 +369,16 @@ $$|\text{Declared Calories} - \text{Energy}_{\text{Atwater}}| \le \max\left(20.0
 ---
 
 ## 6. Complete End-to-End User Journeys
+
+### Journey 0: Public Education, Label Decoding & Frictionless Onboarding
+```
+[Public Visitor] ──> [Browse Standards & Science] ──> [Sign Up] ──> [Biometric Wizard] ──> [Personalized Dashboard]
+```
+1. Unauthenticated citizen visits BiteIQ to decode supermarket labeling claims.
+2. Explores the **Science & Methodology** whitepaper and the **Food Standards Guide** to verify chemical additives and hidden sugars.
+3. Signs up or logs in via Supabase Auth.
+4. Completes the **3-Step Biometric Onboarding Wizard**, instantly establishing personal caloric budgets and clinical safeguards.
+5. Lands directly on the tailored **Clinical Energy Command Center** with zero landing page friction.
 
 ### Journey A: Clinical Biometric Onboarding & Calibration
 ```
@@ -465,16 +502,18 @@ BiteIQ/
 │   │   └── user_journeys.spec.ts      # Core user journey automated specs
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── common/                # Button, Badge, Card, Modal, Toast
+│   │   │   ├── common/                # Button, Badge, Card, Modal, Toast, AuthModal
 │   │   │   ├── diary/                 # FoodLoggerModal, MealSlotCard, WaterTracker
 │   │   │   ├── health/                # HealthBadgeGroup, NutrientRow, ColorsAudit
-│   │   │   ├── layout/                # Navbar, BottomNav, PageContainer
+│   │   │   ├── layout/                # Navbar, BottomNav, Footer
 │   │   │   ├── meals/                 # PlateReviewModal, BoundingBoxOverlay
+│   │   │   ├── profile/               # BiometricOnboardingModal (3-step clinical wizard)
 │   │   │   └── scanner/               # Camera capture and downsampling modal
-│   │   ├── pages/consumer/            # Dashboard, Diary, Settings, Audit Result
-│   │   ├── store/                     # useProfileStore, useDiaryStore (Zustand)
+│   │   ├── pages/consumer/            # Landing, AboutUs, ScienceMethodology, FoodStandards,
+│   │   │                              # Dashboard, Diary, Food, HealthCheck, PackagedAuditResult, Profile
+│   │   ├── store/                     # useProfileStore, useDiaryStore, useAuthStore (Zustand)
 │   │   ├── types/                     # TypeScript clinical & API data models
-│   │   └── utils/                     # Axios API client, formatting utilities
+│   │   └── utils/                     # Axios API client, formatting utilities, Supabase client
 │   ├── nginx.conf                     # Production container Nginx SPA routing
 │   ├── vercel.json                    # Vercel SPA rewrites & security headers
 │   └── package.json
